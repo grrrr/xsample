@@ -112,8 +112,8 @@ xrecord::xrecord(I argc,t_atom *argv):
 {
 	I argi = 0;
 #ifdef MAXMSP
-	if(argc > argi && IsFlint(argv[argi])) {
-		inchns = GetAFlint(argv[argi]);
+	if(argc > argi && CanbeInt(argv[argi])) {
+		inchns = GetAInt(argv[argi]);
 		argi++;
 	}
 #endif
@@ -124,8 +124,8 @@ xrecord::xrecord(I argc,t_atom *argv):
 
 #ifdef MAXMSP		
 		// oldstyle command line?
-		if(argi == 1 && argc == 2 && IsFlint(argv[argi])) {
-			inchns = GetAFlint(argv[argi]);
+		if(argi == 1 && argc == 2 && CanbeInt(argv[argi])) {
+			inchns = GetAInt(argv[argi]);
 			argi++;
 			post("%s: old style command line detected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
 		}
@@ -236,7 +236,7 @@ BL xrecord::m_reset()
 V xrecord::m_draw(I argc,t_atom *argv)
 {
 	if(argc >= 1) {
-		drintv = GetAFlint(argv[0]);
+		drintv = GetInt(argv[0]);
 		if(dorec) buf->SetRefrIntv(drintv);
 	}
 	else

@@ -137,8 +137,8 @@ xgroove::xgroove(I argc,t_atom *argv):
 {
 	I argi = 0;
 #ifdef MAXMSP
-	if(argc > argi && IsFlint(argv[argi])) {
-		outchns = GetAFlint(argv[argi]);
+	if(argc > argi && CanbeInt(argv[argi])) {
+		outchns = GetAInt(argv[argi]);
 		argi++;
 	}
 #endif
@@ -149,8 +149,8 @@ xgroove::xgroove(I argc,t_atom *argv):
 		
 #ifdef MAXMSP
 		// oldstyle command line?
-		if(argi == 1 && argc == 2 && IsFlint(argv[argi])) {
-			outchns = GetAFlint(argv[argi]);
+		if(argi == 1 && argc == 2 && CanbeInt(argv[argi])) {
+			outchns = GetAInt(argv[argi]);
 			argi++;
 			post("%s: old style command line detected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
 		}
