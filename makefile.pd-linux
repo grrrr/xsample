@@ -20,6 +20,14 @@ FLAGS=-DFLEXT_SYS=2
 CFLAGS=${UFLAGS} -O6 -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions -fno-rtti -fno-exceptions
 LIBS=m
 
+ifdef FLEXT_SHARED
+CFLAGS+=-DFLEXT_SHARED
+LDFLAGS+=-Bdynamic
+LINKFLEXT=-lflext
+else
+LINKFLEXT=$(FLEXTLIB)
+endif
+
 # ----------------------------------------------
 # the rest can stay untouched
 # ----------------------------------------------
@@ -43,8 +51,8 @@ $(TARGDIR):
 $(TARGDIR)/%.o : $(SRCDIR)/%.cpp 
 	$(CXX) -c $(CFLAGS) $(FLAGS) $(patsubst %,-I%,$(INCLUDES) $(FLEXTPATH)) $< -o $@
 
-$(TARGET) : $(patsubst %.cpp,$(TARGDIR)/%.o,$(SRCS)) $(FLEXTLIB) 
-	$(CXX) $(LDFLAGS) -shared $^ $(patsubst %,-l%,$(LIBS)) -o $@ 
+$(TARGET) : $(patsubst %.cpp,$(TARGDIR)/%.o,$(SRCS))  
+	$(CXX) $(LDFLAGS) -shared $^ $(patsubst %,-l%,$(LIBS)) -L$(FLEXTPATH) $(LINKFLEXT) -o $@ 
 	strip --strip-unneeded $@
 	chmod 755 $@
 
