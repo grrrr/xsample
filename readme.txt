@@ -1,4 +1,4 @@
-xsample - extended sample objects for Max/MSP and pd (pure data)
+xsample - extended sample objects for Max/MSP and PD (pure data)
 
 Copyright (c)2001-2005 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
@@ -9,11 +9,11 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 Maximum care has been taken to prepare a delightful experience for you electronic artists.
 Donations for further development of the package are HIGHLY APPRECIATED.
 
-Visit https://www.paypal.com/xclick/business=t.grill%40gmx.net&item_name=xsample&no_note=1&tax=0&currency_code=EUR
+Visit https://www.paypal.com/xclick/business=gr%40grrrr.org&item_name=xsample&no_note=1&tax=0&currency_code=EUR
 
 ----------------------------------------------------------------------------
 
-IMPORTANT INFORMATION for all MaxMSP users:
+IMPORTANT INFORMATION for all Max/MSP users:
 
 1) 
 For Mac OSX it is best to put the max-osx/xsample.mxd file into the folder 
@@ -42,65 +42,43 @@ by adding "-lib xsample" to the PD command line.
 
 ----------------------------------------------------------------------------
 
-You will need the flext C++ layer for PD and Max/MSP externals to compile this.
-see http://www.parasitaere-kapazitaeten.net/ext
-
-
 Package files:
 - readme.txt: this one
 - gpl.txt,license.txt: GPL license stuff
-- main.h,main.cpp,inter.cpp,inter.h: base class definition for all the other objects
-- record.cpp: xrecord~
-- play.cpp: xplay~
-- groove.cpp: xgroove~
+- package.txt: Definitions for building the package
+- some source code files
 
 ----------------------------------------------------------------------------
 
 BUILDING XSAMPLE from source
 ----------------------------
 
-The package should at least compile (and is tested) with the following compilers:
+You will need the flext C++ layer for PD and Max/MSP externals to compile this.
+See http://grrrr.org/ext/flext
+Download, install and compile the package.
+Afterwards you can proceed with building xsample.
 
-pd - Windows:
--------------
-o Microsoft Visual C++ 6 or .NET command line: edit "config-pd-msvc.txt" and run "build-pd-msvc.bat"
 
-o BCC: edit "config-pd-bcc.txt" and run "build-pd-bcc.bat"
+pd/Max - Windows - Microsoft Visual C, Borland C++, MinGW:
+----------------------------------------------------------
+Start a command shell with your eventual build environment
+(e.g. run vcvars32.bat for Microsoft Visual Studio)
 
-o Cygwin GCC: edit "config-pd-cygwin.txt" and run "sh ./build-pd-cygwin.sh"
-> various versions of GCC die during compile with template optimization turned on 
+then run
+ ..\flext\build.bat
+(you would have to substitute ..\flext with the respective path to the flext package)
 
-o MinGW: edit "config-pd-mingw.txt" and run "build-pd-mingw.bat"
-> MinGW binary folder must be included in the system path!
 
-pd - linux:
------------
-o GCC: edit "config-pd-linux.txt" and run "sh ./build-pd-linux.sh"
-> various versions of GCC die during compile with template optimization turned on 
+pd/Max - OSX/Linux - GCC:
+-------------------------
+From a shell run
+bash ../flext/build.sh
+(you would have to substitute ../flext with the respective path to the flext package)
 
-pd - OSX:
------------
-o GCC: edit "config-pd-darwin.txt" and run "sh ./build-pd-darwin.sh"
-> various versions of GCC die during compile with template optimization turned on 
 
-o XCode: use "xsample.xcode" project
-
-Max/MSP - MacOS9:
-----------------
-o Metrowerks CodeWarrior: "xsample.cw" project file
-
-o Apple MPW-PR: edit & use the "flext.mpw" makefile
-
-Max/MSP - MacOSX:
-----------------
-o Metrowerks CodeWarrior: "xsample.cw" project file
-
-o XCode: use "xsample.xcode" project
-
-Max/MSP - Windows:
-----------------
-o Microsoft Visual C++ 6 or .NET command line: edit "config-max-msvc.txt" and run "build-max-msvc.bat"
-
+Max - OS9 - Metrowerks CodeWarrior:
+-----------------------------------
+use the "xsample.cw" project file
 
 ----------------------------------------------------------------------------
 

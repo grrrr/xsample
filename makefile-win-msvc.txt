@@ -1,8 +1,0 @@
-# xsample - extended sample objects for Max/MSP and pd (pure data)
-# Copyright (c) 2001-2004 Thomas Grill (gr@grrrr.org)
-#
-# Makefile for MSVC++ 6 and .NET
-#
-# usage:
-# to build run "build-win-max-msvc.bat" or "build-win-pd-msvc.bat"
-#

@@ -1,4 +1,0 @@
-# Your settings are defined in the file
-# ..\flext\build\config-win-pd-mingw.txt
-#
-# You can override them here.
