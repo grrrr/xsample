@@ -25,7 +25,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 // in other words: can't handle all C++ features
 
 #if defined(_MSC_VER)
-// MS VC 6.0 can't handle <int,int> templates?!
+// MS VC 6.0 can't handle <int,int> templates?! -> no optimization
 //	#define TMPLOPT
 #elif defined(__BORLANDC__) || defined(__MRC__)
 // handles all optimizations
@@ -41,9 +41,9 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	#define SIGSTATIC
 #else
 // another compiler
-	#define TMPLOPT  // template optimation for much more speed
+	#define TMPLOPT  // template optimation for more speed
 	#define TMPLINT	 // if <int,int> templates are correctly handled 
-	//#define SIGSTATIC  // another redirection to avoid addresses of member functions
+	//#define SIGSTATIC  // another redirection to avoid addresses of class member functions
 #endif
 
 
