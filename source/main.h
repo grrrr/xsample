@@ -174,12 +174,18 @@ private:
 
 	#define DEFSIGFUN(NAME)	V NAME(I n,S *const *in,S *const *out)
 	#define TMPLSIGFUN(NAME) TMPLDEF V NAME(I n,S *const *in,S *const *out)
+	#define TMPLSTFUN(NAME) TMPLDEF static V NAME(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
 
 	#define DEFSIGCALL(NAME) \
 	inline V NAME(I n,S *const *in,S *const *out) { (this->*v_##NAME)(n,in,out); } \
-	V (thisType::*v_##NAME)(I n,S *const *in,S *const *out)
+	V (thisType::*v_##NAME)(I n,S *const *invecs,S *const *outvecs)
+
+	#define SETSTFUN(VAR,FUN) VAR = FUN
+
+	#define DEFSTCALL(NAME) \
+	V (*NAME)(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 #endif
 
 
@@ -235,6 +241,11 @@ protected:
 	TMPLSIGFUN(s_play2);
 	TMPLSIGFUN(s_play4);
 
+	TMPLSTFUN(st_play0);
+	TMPLSTFUN(st_play1);
+	TMPLSTFUN(st_play2);
+	TMPLSTFUN(st_play4);
+
 	DEFSIGCALL(playfun);
 
 	virtual V s_dsp();
@@ -244,6 +255,9 @@ private:
 	FLEXT_CALLBACK_1(m_interp,xs_intp)
 };
 
+#ifdef TMPLOPT
+#include "inter.ci"
+#endif
 
 #endif
 

@@ -16,6 +16,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 
+#define XZONE_TABLE 512
+
 class xgroove:
 	public xinter
 {
@@ -43,7 +45,9 @@ public:
 	virtual V m_max(F mx);
 	
 	V m_xzone(F xz);
-	V m_xshape(I argc,t_atom *argv);
+	V m_xsymm(F xz);
+	V m_xshape(I argc = 0,t_atom *argv = NULL);
+	V m_xkeep(BL k);
 
 	enum xs_loop {
 		xsl__ = -1,  // don't change
@@ -57,18 +61,19 @@ protected:
 	xs_loop loopmode;
 	D curpos;  // in samples
 	I bidir;
-	I _xzone,xzone;
+
+	F _xzone,xzone,xsymm;
+	F znmin,znmax;
+	I xkeep;
 	S **znbuf;
-	S *znpos,*znmul;
-	I *znidx;
+	S *znpos,*znmul,*znidx;
+	I pblksz;
 
 	outlet *outmin,*outmax; // float outlets	
 	
 	V outputmin() { ToOutFloat(outmin,curmin*s2u); }
 	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
 	
-	V do_xzone(I xz = -1);
-
 	inline V setpos(F pos)
 	{
 		if(pos < curmin) pos = curmin;
@@ -88,6 +93,11 @@ private:
 	DEFSIGFUN(s_pos_bidir);
 
 	DEFSIGCALL(posfun);
+
+	DEFSTCALL(zonefun);
+
+	V do_xzone();
+
 	virtual V m_signal(I n,S *const *in,S *const *out) 
 	{ 
 		bufchk();
@@ -100,7 +110,9 @@ private:
 	FLEXT_CALLBACK_F(m_max)
 	
 	FLEXT_CALLBACK_F(m_xzone)
+	FLEXT_CALLBACK_F(m_xsymm)
 	FLEXT_CALLBACK_V(m_xshape)
+	FLEXT_CALLBACK_B(m_xkeep)
 
 	FLEXT_CALLBACK_1(m_loop,xs_loop)
 };
@@ -119,7 +131,7 @@ V xgroove::setup(t_class *)
 
 xgroove::xgroove(I argc,t_atom *argv):
 	loopmode(xsl_loop),curpos(0),
-	_xzone(0),xzone(0),
+	_xzone(0),xzone(0),xsymm(0.5),xkeep(0),pblksz(0),
 	znbuf(NULL),znmul(NULL),znidx(NULL),znpos(NULL),
 	bidir(1)
 {
@@ -164,16 +176,18 @@ xgroove::xgroove(I argc,t_atom *argv):
 	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
 
 	FLEXT_ADDMETHOD_F(0,"xzone",m_xzone);
+	FLEXT_ADDMETHOD_F(0,"xsymm",m_xsymm);
 	FLEXT_ADDMETHOD_(0,"xshape",m_xshape);
+	FLEXT_ADDMETHOD_B(0,"xkeep",m_xkeep);
 
 	outmin = GetOut(outchns+1);
 	outmax = GetOut(outchns+2);
 
 	znbuf = new S *[outchns];
 	for(I i = 0; i < outchns; ++i) znbuf[i] = new S[0];
-	znmul = new S[0];
 	znpos = new S[0];
-	znidx = new I[0];
+	znidx = new S[0];
+	m_xshape();
 
 	m_reset();
 }
@@ -223,9 +237,9 @@ V xgroove::m_pos(F pos)
 V xgroove::m_all()
 {
 	xsample::m_all();
+	do_xzone();
 	outputmin();
 	outputmax();
-	do_xzone();
 }
 
 BL xgroove::m_reset()
@@ -236,36 +250,105 @@ BL xgroove::m_reset()
 }
 
 V xgroove::m_xzone(F xz) 
-{
+{ 
 	bufchk();
-	do_xzone(xz < 0?0:xz/s2u); 
+	_xzone = xz < 0?0:xz/s2u; 
+	do_xzone();
+	s_dsp(); 
 }
 
-V xgroove::do_xzone(I xz) 
+V xgroove::m_xsymm(F xs) 
 { 
-	// set nominal value
-	if(xz >= 0)	_xzone = xz;
-
-	// store old value
-	I xzo = xzone;
-	// play length
-	I curlen = curmax-curmin;
-
-	// set actual value
-	xzone = _xzone > curlen?curlen:_xzone;
-
-	if(xzo != xzone) {
-		delete[] znmul; znmul = new S[xzone];
-
-		for(I i = 0; i < xzone; ++i) 
-			znmul[i] = (F)(i+0.5)/xzone;
+	if(xs < 0) 
+		xsymm = -1;
+	else if(xs <= 1) 
+		xsymm = xs;
+	else {
+		post("%s - xsymm value out of range - set to center (0.5)",thisName());
+		xsymm = 0.5;
 	}
-
-	s_dsp(); 
+	do_xzone();
 }
 
 V xgroove::m_xshape(I argc,t_atom *argv) 
 { 
+	const F PI = 3.14159265358979F;
+	I i,sh = 0;
+	F param = 1;
+	if(argc >= 1 && CanbeInt(argv[0])) sh = GetAInt(argv[0]);
+	if(argc >= 2 && CanbeFloat(argv[1])) {
+		param = GetAFloat(argv[1]);
+		// clip to 0..1
+		if(param < 0) param = 0;
+		else if(param > 1) param = 1;
+	}
+
+	if(znmul) delete[] znmul; 
+	znmul = new S[XZONE_TABLE+1];
+
+	switch(sh) {
+	case 1:
+		for(i = 0; i <= XZONE_TABLE; ++i) 
+			znmul[i] = sin(i*(PI/2./XZONE_TABLE))*param+i*(1./XZONE_TABLE)*(1-param);
+		break;
+	case 0:
+	default:
+		for(i = 0; i <= XZONE_TABLE; ++i) 
+			znmul[i] = i*(1./XZONE_TABLE);
+	}
+}
+
+V xgroove::m_xkeep(BL k) 
+{ 
+	xkeep = k; 
+	do_xzone();
+}
+
+V xgroove::do_xzone()
+{
+	xzone = _xzone;
+	I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
+	if(xsymm < 0) {
+		// crossfade zone is inside the loop (-> loop is shorter than nominal!)
+		if(xzone >= plen) xzone = plen-1;
+		znmin = smin+xzone,znmax = smax-xzone;
+	}
+	else {
+		// desired crossfade points
+		znmin = smin+xzone*xsymm,znmax = smax+xzone*(xsymm-1);
+		// extra space at beginning and end
+		F o1 = znmin-xzone,o2 = buf->Frames()-(znmax+xzone);
+
+		if(o1 < 0 || o2 < 0) { // or (o1*o2 < 0)
+			if(o1+o2 < 0) {
+				// must reduce crossfade/loop length
+				if(!xkeep) {	
+					// prefer preservation of cross-fade length
+					if(xzone >= plen) // have to reduce cross-fade length
+						xzone = plen-1;
+					znmin = smin+xzone,znmax = smax-xzone;
+				}
+				else {	
+					// prefer preservation of loop length
+					znmin += o1,znmax -= o2;
+					xzone = (buf->Frames()-znmax+znmin)/2;
+				}
+				smin = 0,plen = smax = buf->Frames();
+			}
+			else if(o1 < 0) {
+				// min point is out of bounds (but enough space for mere shift)
+				I i1 = (I)o1;
+				smin -= o1,smax -= o1;
+				znmin = smin+xzone*xsymm,znmax = smax+xzone*(xsymm-1);
+			}
+			else /* o2 < 0 */ { 
+				// max point is out of bounds (but enough space for mere shift)
+				I i2 = (I)o2;
+				smin += o2,smax += o2;
+				znmin = smin+xzone*xsymm,znmax = smax+xzone*(xsymm-1);
+			}
+		}
+	}
 }
 
 V xgroove::m_loop(xs_loop lp) 
@@ -362,9 +445,8 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	BL lpbang = false;
 
 	const I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
-	I xz = xzone;
-	if(xz > plen) xz = plen;
-	const I lmin = smin+xz,lmax = smax-xz;
+	const F xz = xzone,lmin = znmin,lmax = znmax;
+	const F xf = (F)XZONE_TABLE/xz;
 
 	if(buf && plen > 0) {
 		BL inzn = false;
@@ -383,17 +465,18 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 				lpbang = true;
 			}
 
-			if(o >= lmax) 
+			if(o >= lmax) // in late cross-fade zone
 				o -= lmax-smin;
 
 			if(o < lmin) {
+				// in early cross-fade zone
 				register F inp = o-smin;
-				znidx[i] = (I)inp;
+				znidx[i] = inp*xf;
 				znpos[i] = scale(lmax+inp);
 				inzn = true;
 			}
 			else
-				znidx[i] = 0,znpos[i] = 0;
+				znidx[i] = XZONE_TABLE,znpos[i] = 0;
 
 			pos[i] = scale(o);
 			o += spd;
@@ -402,14 +485,20 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 		setpos(o);
 
 		playfun(n,&pos,outvecs); 
+
 		if(inzn) {
+			// only if we were in cross-fade zone
 			playfun(n,&znpos,znbuf); 
+			
+			for(I i = 0; i < n; ++i) znpos[i] = XZONE_TABLE-znidx[i];
+			zonefun(znmul,0,XZONE_TABLE+1,1,n,1,1,&znidx,&znidx);
+			zonefun(znmul,0,XZONE_TABLE+1,1,n,1,1,&znpos,&znpos);
 
-			//! \todo do some interpolation here!!
-
-			for(I o = 0; o < outchns; ++o)
-				for(I i = 0; i < n; ++i)
-					outvecs[o][i] = outvecs[o][i]*znmul[znidx[i]]+znbuf[o][i]*znmul[xzone-znidx[i]];
+			for(I o = 0; o < outchns; ++o) {
+				F *ov = outvecs[o],*ob = znbuf[o];
+				for(I i = 0; i < n; ++i,ov++,ob++)
+					*ov = (*ov)*znidx[i]+(*ob)*znpos[i];
+			}
 		}
 	} 
 	else 
@@ -468,7 +557,6 @@ V xgroove::s_dsp()
 		case xsl_once: SETSIGFUN(posfun,SIGFUN(s_pos_once)); break;
 		case xsl_loop: 
 			if(xzone > 0) {
-				static I pblksz = 0;
 				const I blksz = Blocksize();
 
 				if(pblksz != blksz) {
@@ -478,12 +566,34 @@ V xgroove::s_dsp()
 					}
 				
 					delete[] znpos; znpos = new S[blksz];
-					delete[] znidx;	znidx = new I[blksz];
+					delete[] znidx;	znidx = new S[blksz];
 
 					pblksz = blksz;
 				}
 
 				SETSIGFUN(posfun,SIGFUN(s_pos_loopzn)); 
+
+				if(interp == xsi_4p) 
+					switch(outchns) {
+						case 1:	SETSTFUN(zonefun,TMPLFUN(st_play4,1,1)); break;
+						case 2:	SETSTFUN(zonefun,TMPLFUN(st_play4,1,2)); break;
+						case 4:	SETSTFUN(zonefun,TMPLFUN(st_play4,1,4)); break;
+						default: SETSTFUN(zonefun,TMPLFUN(st_play4,1,-1));
+					}
+				else if(interp == xsi_lin) 
+					switch(outchns) {
+						case 1:	SETSTFUN(zonefun,TMPLFUN(st_play2,1,1)); break;
+						case 2:	SETSTFUN(zonefun,TMPLFUN(st_play2,1,2)); break;
+						case 4:	SETSTFUN(zonefun,TMPLFUN(st_play2,1,4)); break;
+						default: SETSTFUN(zonefun,TMPLFUN(st_play2,1,-1));
+					}
+				else 
+					switch(outchns) {
+						case 1:	SETSTFUN(zonefun,TMPLFUN(st_play1,1,1)); break;
+						case 2:	SETSTFUN(zonefun,TMPLFUN(st_play1,1,2)); break;
+						case 4:	SETSTFUN(zonefun,TMPLFUN(st_play1,1,4)); break;
+						default: SETSTFUN(zonefun,TMPLFUN(st_play1,1,-1));
+					}
 			}
 			else
 				SETSIGFUN(posfun,SIGFUN(s_pos_loop)); 
@@ -530,7 +640,8 @@ V xgroove::m_help()
 	post("\tunits 0/1/2/3: set units to frames/buffer size/ms/s");
 	post("\tsclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
 	post("\txzone {unit}: length of loop crossfade zone");
-//	post("\txshape -1...1: symmetry of crossfade zone");
+	post("\txsymm -1,0...1: symmetry of crossfade zone inside/outside point");
+	post("\txshape 0/1 [param 0...1]: shape of crossfading (linear/trig)");
 	post("");
 } 
 

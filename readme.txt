@@ -20,7 +20,7 @@ You will need the flext C++ layer for PD and Max/MSP externals to compile this.
 Package files:
 - readme.txt: this one
 - gpl.txt,license.txt: GPL license stuff
-- main.h,main.cpp,inter.cpp: base class definition for all the other objects
+- main.h,main.cpp,inter.cpp,inter.ci: base class definition for all the other objects
 - record.cpp: xrecord~
 - play.cpp: xplay~
 - groove.cpp: xgroove~
@@ -57,8 +57,9 @@ Goals/features of the package:
 - message- or signal-triggered recording object with mix-in capability
 - avoid the various bugs of the original MSP2 objects
 - multi-channel capability 
-- live update of respective buffer/array object
+- live update of respective buffer/array content
 - switchable 4-point or linear interpolation for xplay~/xgroove~ object
+- cross-fading loop zone (inside or outside to loop) for xgroove~
 
 ----------------------------------------------------------------------------
 
@@ -117,11 +118,12 @@ general:
 - do a smooth (line~) mixin in xrecord~ help patch
 
 features:
-- crossfading loop zone for xgroove~
 - multi-buffer handling (aka multi-channel for pd)
 - vasp handling
 - performance comparison to respective PD/Max objects
 - anti-alias filter? (possible?)
+
+- delay min/max changes when cur pos in cross-fade zone
 
 tests:
 - reconsider startup sequence of set buffer,set units,set sclmode,set pos/min/max
