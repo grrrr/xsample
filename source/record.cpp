@@ -52,6 +52,7 @@ protected:
 	I inchns;
 	BL sigmode,appmode;
 	BL dirty;
+	F **invecs; // pointers to input signal chunks
 
 	BL dorec,doloop,mixmode;
 	L curpos;  // in samples
@@ -61,19 +62,17 @@ protected:
 	V outputmin() const { outlet_float(outmin,curmin*s2u); }
 	V outputmax() const { outlet_float(outmax,curmax*s2u); }
 	
-	V signal(I n,const F *in,const F *on,F *pos);  // this is the dsp method
+	template<int _CHNS_>
+	V signal(I n,const F **in,const F *on,F *pos);  // this is the dsp method
 
 	virtual V setbuf(t_symbol *s = NULL);
 
 private:
 	virtual V m_dsp(t_signal **sp);
 
-	static t_int *dspmeth(t_int *w) 
-	{ 
-		((xrec_obj *)w[1])->signal((I)w[2],(const F *)w[3],(const F *)w[4],(F *)w[5]); 
-		return w+6;
-	}
-
+	template<int CHNS>
+	static t_int *dspmeth(t_int *w);
+	
 	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
 
@@ -162,6 +161,7 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 
 xrec_obj::~xrec_obj()
 {
+	if(invecs) delete[] invecs;
 #ifdef PD
 //	clock_free(clock);
 #endif
@@ -231,19 +231,32 @@ V xrec_obj::m_tick()
 #endif
 
 
+template<int CHNS>
+t_int *xrec_obj::dspmeth(t_int *w)
+{ 
+	((xrec_obj *)w[1])->signal<CHNS>((I)w[2],(const F **)w[3],(const F *)w[4],(F *)w[5]); 
+	return w+6;
+}
 
-V xrec_obj::signal(I n,const F *sig,const F *on,F *pos)
+
+template<int _CHNS_> // trust in loop unrolling!
+V xrec_obj::signal(I n,const F **sig,const F *on,F *pos)
 {
-	if(enable) {
-		register L o = curpos;
+	if(enable) {	
+		// optimizer should recognize whether constant or not
+		const I CHNS = _CHNS_ == 0?bufchns:_CHNS_;  
 
+		register const F pf = sclmul;
+		register L o = curpos;
+		register I si = 0;
+		
 		if(o < curmin) o = curmin;
 
 		if(buf && curlen > 0) {
 			while(n) {
-				L ncur = curmax-o; // maximal bis zum Bufferende bzw. Aufnahmeende
+				L ncur = curmax-o; // at max to buffer or recording end
 
-				if(ncur <= 0) {	// Ende des Buffers
+				if(ncur <= 0) {	// end of buffer
 					o = curmin;
 					if(doloop) 
 						ncur = curlen;
@@ -256,56 +269,65 @@ V xrec_obj::signal(I n,const F *sig,const F *on,F *pos)
 				if(ncur > n) ncur = n;
 				
 				register I i;
-				register F *bf = buf+o;
+				register F *bf = buf+o*CHNS;
+				register F p = scale(o);
 
 				if(sigmode) {
 					if(appmode) {
 						// append to current position
 					
 						if(!mixmode) {
-							for(i = 0; i < ncur; ++i) {	
+							for(i = 0; i < ncur; ++i,++si) {	
 								if(*(on++) >= 0) {
-									buf[o] = *(sig++);						
-									*(pos++) = scale(o++);
+									for(int ci = 0; ci < CHNS; ++ci)
+										*(bf++) = sig[ci][si];	
+									*(pos++) = p,p += pf,++o;
 								}
-								else
-									*(pos++) = scale(o);
+								else 
+									*(pos++) = p;
 							}
 						}
 						else {
-							for(i = 0; i < ncur; ++i) {	
-								register F g = *(on++);
+							for(i = 0; i < ncur; ++i,++si) {	
+								register const F g = *(on++);
 								if(g >= 0) {
-									buf[o] = buf[o]*(1.-g)+*(sig++)*g;
-									*(pos++) = scale(o++);
+									for(int ci = 0; ci < CHNS; ++ci,++bf)
+										*bf = *bf *(1.-g)+sig[ci][si]*g;
+									*(pos++) = p,p += pf,++o;
 								}
 								else 
-									*(pos++) = scale(o);
+									*(pos++) = p;
 							}
 						}
 					}
 					else {  
 						// don't append
 						if(!mixmode) {
-							for(i = 0; i < ncur; ++i) {	
+							for(i = 0; i < ncur; ++i,++si) {	
 								if(*(on++) >= 0)
 								{ 	
-									buf[o] = *(sig++);
-									*(pos++) = scale(o++);
+									for(int ci = 0; ci < CHNS; ++ci)
+										*(bf++) = sig[ci][si];	
+									*(pos++) = p,p += pf,++o;
 								}
-								else 
-									*(pos++) = scale(o = 0);
+								else {
+									*(pos++) = p = scale(o = 0);
+									bf = buf;
+								}
 							}
 						}
 						else {
-							for(i = 0; i < ncur; ++i) {	
-								register F g = *(on++);
+							for(i = 0; i < ncur; ++i,++si) {	
+								register const F g = *(on++);
 								if(g >= 0) {
-									buf[o] = buf[o]*(1.-g)+*(sig++)*g;
-									*(pos++) = scale(o++);
+									for(int ci = 0; ci < CHNS; ++ci,++bf)
+										*bf = *bf *(1.-g)+sig[ci][si]*g;
+									*(pos++) = p,p += pf,++o;
 								}
-								else
-									*(pos++) = scale(o = 0);
+								else {
+									*(pos++) = p = scale(o = 0);
+									bf = buf;
+								}
 							}
 						}
 					}
@@ -315,16 +337,22 @@ V xrec_obj::signal(I n,const F *sig,const F *on,F *pos)
 					
 					// Altivec optimization for that!
 					if(!mixmode) {
-						for(i = 0; i < ncur; ++i) {	
-							buf[o] = *(sig++);
-							*(pos++) = scale(o++);
+						for(int ci = 0; ci < CHNS; ++ci) {	
+							register F *b = bf+ci;
+							register const F *s = sig[ci];
+							for(i = 0; i < ncur; ++i,b += CHNS,++s) *b = *s;	
 						}
+						si += ncur;
 					}
 					else {
-						for(i = 0; i < ncur; ++i) {	
-							buf[o] = *(sig++)* *(on++);
-							*(pos++) = scale(o++);
+						for(i = 0; i < ncur; ++i,++si) {	
+							register const F w = *(on++);
+							for(int ci = 0; ci < CHNS; ++ci)
+								*(bf++) = sig[ci][si]*w;
 						}
+					}
+					for(i = 0; i < ncur; ++i) {
+						*(pos++) = p,p += pf,++o;
 					}
 				}
 
@@ -341,14 +369,36 @@ V xrec_obj::signal(I n,const F *sig,const F *on,F *pos)
 	#endif
 		}
 
-		while(n--) *(pos++) = scale(o);
+		if(n) {
+			register F p = scale(o);
+			while(n--) *(pos++) = p;
+		}
 	}
 }
 
 V xrec_obj::m_dsp(t_signal **sp)
 {
 	m_units();  // m_dsp hopefully called at change of sample rate ?!
-	dsp_add(dspmeth, 5,this,sp[0]->s_n,sp[0]->s_vec,sp[1]->s_vec,sp[2]->s_vec);
+
+	if(invecs) delete[] invecs;
+	invecs = new F *[bufchns];
+	for(I ci = 0; ci < bufchns; ++ci)
+		invecs[ci] = sp[0+ci%inchns]->s_vec;
+		
+	switch(bufchns) {
+		case 1:
+			dsp_add(dspmeth<1>, 6,this,sp[0]->s_n,invecs,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			break;
+		case 2:
+			dsp_add(dspmeth<2>, 6,this,sp[0]->s_n,invecs,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			break;
+		case 4:
+			dsp_add(dspmeth<4>, 6,this,sp[0]->s_n,invecs,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			break;
+		default:
+			dsp_add(dspmeth<0>, 6,this,sp[0]->s_n,invecs,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			break;
+	}
 }
 
 
