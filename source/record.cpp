@@ -46,7 +46,7 @@ public:
 	virtual V m_max(F mx);
 
 	virtual V m_mixmode(BL mx) { mixmode = mx; }
-	virtual V m_sigmode(BL mode) { dorec = sigmode = mode; }
+	virtual V m_sigmode(BL mode) { /*dorec =*/ sigmode = mode; }
 	virtual V m_loop(BL lp) { doloop = lp; }
 	virtual V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
 
