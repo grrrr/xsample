@@ -53,6 +53,13 @@ V xinter::m_stop()
 
 V xinter::s_dsp()
 {
+	switch(outchns) {
+		case 1:	SETSIGFUN(zerofun,TMPLFUN(s_play0,-1,1)); break;
+		case 2:	SETSIGFUN(zerofun,TMPLFUN(s_play0,-1,2)); break;
+		case 4:	SETSIGFUN(zerofun,TMPLFUN(s_play0,-1,4)); break;
+		default:	SETSIGFUN(zerofun,TMPLFUN(s_play0,-1,-1));
+	}
+
 	if(doplay) {
 		if(interp == xsi_4p) 
 			switch(buf->Channels()*1000+outchns) {

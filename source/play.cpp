@@ -32,11 +32,7 @@ public:
 private:
 	static V setup(t_classid c);
 
-	virtual V m_signal(I n,S *const *in,S *const *out) 
-	{ 
-		bufchk();
-		playfun(n,in,out); 
-	}
+	virtual V m_signal(I n,S *const *in,S *const *out);
 };
 
 FLEXT_LIB_DSP_V("xplay~",xplay)
@@ -91,7 +87,20 @@ BL xplay::Init()
 	else
 		return false;
 }
-		
+	
+V xplay::m_signal(I n,S *const *in,S *const *out) 
+{ 
+	// check whether buffer is invalid or changed
+	if(bufchk()) {
+		// convert position units to frames
+		arrmul(n,in[0],out[0]);
+		// call resample routine
+		playfun(n,out,out); 
+	}
+	else
+		zerofun(n,out,out);
+}
+	
 
 
 V xplay::m_help()
@@ -117,8 +126,8 @@ V xplay::m_help()
 	post("\tstop: stop playing");
 	post("\treset: checks buffer");
 	post("\trefresh: checks buffer and refreshes outlets");
-	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
-	post("\tinterp 0/1/2: set interpolation to off/4-point/linear");
+	post("\t@units 0/1/2/3: set units to samples/buffer size/ms/s");
+	post("\t@interp 0/1/2: set interpolation to off/4-point/linear");
 	post("");
 }
 

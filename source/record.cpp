@@ -69,8 +69,7 @@ private:
 	DEFSIGCALL(recfun);
 	virtual V m_signal(I n,S *const *in,S *const *out) 
 	{ 
-		bufchk();
-		recfun(n,in,out); 
+		if(bufchk()) recfun(n,in,out); 
 	}
 
 	FLEXT_CALLVAR_F(mg_pos,m_pos)

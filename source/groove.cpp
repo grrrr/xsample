@@ -103,8 +103,10 @@ private:
 
 	virtual V m_signal(I n,S *const *in,S *const *out) 
 	{ 
-		bufchk();
-		posfun(n,in,out); 
+		if(bufchk())
+			posfun(n,in,out); 
+		else
+			zerofun(n,in,out);
 	}
 
 	FLEXT_CALLBACK_F(m_pos)
@@ -304,8 +306,8 @@ V xgroove::m_xshape(I argc,const t_atom *argv)
 		else if(xshparam > 1) xshparam = 1;
 	}
 
-	if(znmul) delete[] znmul; 
-	znmul = new S[XZONE_TABLE+1];
+//	if(znmul) delete[] znmul; 
+	if(!znmul) znmul = new S[XZONE_TABLE+1];
 
 	I i;
 	switch(xshape) {
@@ -393,13 +395,11 @@ V xgroove::s_pos_off(I n,S *const *invecs,S *const *outvecs)
 {
 	S *pos = outvecs[outchns];
 
-	I si;
-	for(si = 0; si < n; ++si) pos[si] = curpos;
+	SetSamples(pos,n,curpos);
 	
 	playfun(n,&pos,outvecs); 
 
-	const F oscl = scale(curpos);
-	for(si = 0; si < n; ++si) pos[si] = oscl;
+	SetSamples(pos,n,scale(curpos));
 }
 
 V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
@@ -427,7 +427,7 @@ V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
 
 		playfun(n,&pos,outvecs); 
 
-		for(I i = 0; i < n; ++i) pos[i] = scale(pos[i]);
+		arrscale(n,pos,pos);
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);
@@ -467,7 +467,7 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 
 		playfun(n,&pos,outvecs); 
 
-		for(I i = 0; i < n; ++i) pos[i] = scale(pos[i]);
+		arrscale(n,pos,pos);
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);
@@ -523,15 +523,16 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 
 		playfun(n,&pos,outvecs); 
 
-		for(I i = 0; i < n; ++i) pos[i] = scale(pos[i]);
+		arrscale(n,pos,pos);
 
 		if(inzn) {
 			// only if we were in cross-fade zone
 			playfun(n,&znpos,znbuf); 
 			
-			for(I i = 0; i < n; ++i) znpos[i] = XZONE_TABLE-znidx[i];
-			zonefun(znmul,0,XZONE_TABLE+1,1,n,1,1,&znidx,&znidx);
-			zonefun(znmul,0,XZONE_TABLE+1,1,n,1,1,&znpos,&znpos);
+			arrscale(n,znidx,znpos,-XZONE_TABLE,-1);
+			
+			zonefun(znmul,0,XZONE_TABLE+1,1,1,1,&znidx,&znidx);
+			zonefun(znmul,0,XZONE_TABLE+1,1,1,1,&znpos,&znpos);
 
 			for(I o = 0; o < outchns; ++o) {
 				F *ov = outvecs[o],*ob = znbuf[o];
@@ -582,7 +583,7 @@ V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 		bidir = (I)bd;
 		playfun(n,&pos,outvecs); 
 
-		for(I i = 0; i < n; ++i) pos[i] = scale(pos[i]);
+		arrscale(n,pos,pos);
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);

@@ -72,6 +72,18 @@ xsample::~xsample()
 }
 
 
+BL xsample::bufchk() 
+{ 
+	if(buf->Valid()) {
+		if(buf->Update()) {
+//			post("%s - buffer updated",thisName()); 
+			m_refresh(); 
+		}
+		return true; 
+	}
+	else
+		return false; 
+}
 
 I xsample::m_set(I argc,const t_atom *argv)
 {
@@ -115,7 +127,7 @@ V xsample::m_loadbang()
 
 V xsample::m_units(xs_unit mode)
 {
-	bufchk();
+	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
 
 	if(mode != xsu__) unitmode = mode;
 	switch(unitmode) {
@@ -138,7 +150,7 @@ V xsample::m_units(xs_unit mode)
 
 V xsample::m_sclmode(xs_sclmd mode)
 {
-	bufchk();
+	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
 
 	if(mode != xss__) sclmode = mode;
 	switch(sclmode) {
@@ -162,7 +174,7 @@ V xsample::m_sclmode(xs_sclmd mode)
 
 V xsample::m_min(F mn)
 {
-	bufchk();
+	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
 
 	mn /= s2u;  // conversion to samples
 	if(mn < 0) mn = 0;
@@ -175,7 +187,7 @@ V xsample::m_min(F mn)
 
 V xsample::m_max(F mx)
 {
-	bufchk();
+	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
 
 	mx /= s2u;  // conversion to samples
 	if(mx > buf->Frames()) mx = (F)buf->Frames();
@@ -188,7 +200,7 @@ V xsample::m_max(F mx)
 
 V xsample::m_all()
 {
-	bufchk();
+	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
 
 //	curlen = (curmax = buf->Frames())-(curmin = 0);
 	curmin = 0; curmax = buf->Frames();
@@ -200,6 +212,45 @@ V xsample::m_dsp(I /*n*/,S *const * /*insigs*/,S *const * /*outsigs*/)
 	// this is hopefully called at change of sample rate ?!
 
 	if(!m_refresh()) s_dsp();
+}
+
+
+V xsample::arrscale(I n,const S *src,S *dst,S add,S mul)
+{
+	int n8 = n>>3;
+	n -= n8<<3;
+	while(n8--) {
+		dst[0] = (src[0]+add)*mul; 
+		dst[1] = (src[1]+add)*mul; 
+		dst[2] = (src[2]+add)*mul; 
+		dst[3] = (src[3]+add)*mul; 
+		dst[4] = (src[4]+add)*mul; 
+		dst[5] = (src[5]+add)*mul; 
+		dst[6] = (src[6]+add)*mul; 
+		dst[7] = (src[7]+add)*mul; 
+		src += 8,dst += 8;
+	}
+	
+	while(n--) *(dst++) = (*(src++)+add)*mul; 
+}
+
+V xsample::arrmul(I n,const S *src,S *dst,S mul)
+{
+	int n8 = n>>3;
+	n -= n8<<3;
+	while(n8--) {
+		dst[0] = src[0]*mul; 
+		dst[1] = src[1]*mul; 
+		dst[2] = src[2]*mul; 
+		dst[3] = src[3]*mul; 
+		dst[4] = src[4]*mul; 
+		dst[5] = src[5]*mul; 
+		dst[6] = src[6]*mul; 
+		dst[7] = src[7]*mul; 
+		src += 8,dst += 8;
+	}
+	
+	while(n--) *(dst++) = *(src++)*mul; 
 }
 
 

@@ -11,23 +11,18 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #ifndef __INTER_H
 #define __INTER_H
 
-TMPLDEF V xinter::st_play0(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+TMPLDEF V xinter::st_play0(const S *,const I ,const I ,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 {
-	// stopped
-	SIGCHNS(BCHNS,inchns,OCHNS,outchns);
-
-//	const S *pos = invecs[0];
-	S *const *sig = outvecs;
-	
-	for(I ci = 0; ci < outchns; ++ci) 
-		for(I si = 0; si < n; ++si) sig[ci][si] = 0;
+	// stopped/invalid buffer -> output zero
+	for(I ci = 0; ci < outchns; ++ci) ZeroSamples(outvecs[ci],n);
 }
 
-TMPLDEF V xinter::st_play1(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+TMPLDEF V xinter::st_play1(const S *bdt,const I smin,const I smax,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 {
 	SIGCHNS(BCHNS,inchns,OCHNS,outchns);
 
-	const S *pos = invecs[0];
+	// position info are frame units
+	const S *pos = invecs[0]; 
 	S *const *sig = outvecs;
 	register I si = 0;
 	
@@ -55,20 +50,20 @@ TMPLDEF V xinter::st_play1(const S *bdt,const I smin,const I smax,const F s2u,co
 	}
 
 	// clear rest of output channels (if buffer has less channels)
-	for(I ci = OCHNS; ci < outchns; ++ci) 
-		for(si = 0; si < n; ++si) sig[ci][si] = 0;
+	for(I ci = OCHNS; ci < outchns; ++ci) ZeroSamples(sig[ci],n);
 }
 
-TMPLDEF V xinter::st_play2(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+TMPLDEF V xinter::st_play2(const S *bdt,const I smin,const I smax,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 {
 	const I plen = smax-smin; //curlen;
 	if(plen < 2) {
-		st_play1 TMPLCALL (bdt,smin,smax,s2u,n,inchns,outchns,invecs,outvecs);
+		st_play1 TMPLCALL (bdt,smin,smax,n,inchns,outchns,invecs,outvecs);
 		return;
 	}
 
 	SIGCHNS(BCHNS,inchns,OCHNS,outchns);
 
+	// position info are frame units
 	const S *pos = invecs[0];
 	S *const *sig = outvecs;
 	register I si = 0;
@@ -105,21 +100,21 @@ TMPLDEF V xinter::st_play2(const S *bdt,const I smin,const I smax,const F s2u,co
 	}
 
 	// clear rest of output channels (if buffer has less channels)
-	for(I ci = OCHNS; ci < outchns; ++ci) 
-		for(si = 0; si < n; ++si) sig[ci][si] = 0;
+	for(I ci = OCHNS; ci < outchns; ++ci) ZeroSamples(sig[ci],n);
 }
 
-TMPLDEF V xinter::st_play4(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+TMPLDEF V xinter::st_play4(const S *bdt,const I smin,const I smax,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 {
 	const I plen = smax-smin; //curlen;
 	if(plen < 4) {
-		if(plen < 2) st_play1 TMPLCALL (bdt,smin,smax,s2u,n,inchns,outchns,invecs,outvecs);
-		else st_play2 TMPLCALL (bdt,smin,smax,s2u,n,inchns,outchns,invecs,outvecs);
+		if(plen < 2) st_play1 TMPLCALL (bdt,smin,smax,n,inchns,outchns,invecs,outvecs);
+		else st_play2 TMPLCALL (bdt,smin,smax,n,inchns,outchns,invecs,outvecs);
 		return;
 	}
 
 	SIGCHNS(BCHNS,inchns,OCHNS,outchns);
 
+	// position info are frame units
 	const S *pos = invecs[0];
 	S *const *sig = outvecs;
 	register I si = 0;
@@ -167,29 +162,28 @@ TMPLDEF V xinter::st_play4(const S *bdt,const I smin,const I smax,const F s2u,co
 	}
 
 	// clear rest of output channels (if buffer has less channels)
-	for(I ci = OCHNS; ci < outchns; ++ci) 
-		for(si = 0; si < n; ++si) sig[ci][si] = 0;
+	for(I ci = OCHNS; ci < outchns; ++ci) ZeroSamples(sig[ci],n);
 }
 
 
-TMPLDEF V xinter::s_play0(I n,S *const *invecs,S *const *outvecs)
+TMPLDEF inline V xinter::s_play0(I n,S *const *invecs,S *const *outvecs)
 {
-	st_play0 TMPLCALL (buf->Data(),curmin,curmax,s2u,n,buf->Channels(),outchns,invecs,outvecs);
+	st_play0 TMPLCALL (buf->Data(),curmin,curmax,n,buf->Channels(),outchns,invecs,outvecs);
 }
 
-TMPLDEF V xinter::s_play1(I n,S *const *invecs,S *const *outvecs)
+TMPLDEF inline V xinter::s_play1(I n,S *const *invecs,S *const *outvecs)
 {
-	st_play1 TMPLCALL (buf->Data(),curmin,curmax,s2u,n,buf->Channels(),outchns,invecs,outvecs);
+	st_play1 TMPLCALL (buf->Data(),curmin,curmax,n,buf->Channels(),outchns,invecs,outvecs);
 }
 
-TMPLDEF V xinter::s_play2(I n,S *const *invecs,S *const *outvecs)
+TMPLDEF inline V xinter::s_play2(I n,S *const *invecs,S *const *outvecs)
 {
-	st_play2 TMPLCALL (buf->Data(),curmin,curmax,s2u,n,buf->Channels(),outchns,invecs,outvecs);
+	st_play2 TMPLCALL (buf->Data(),curmin,curmax,n,buf->Channels(),outchns,invecs,outvecs);
 }
 
-TMPLDEF V xinter::s_play4(I n,S *const *invecs,S *const *outvecs)
+TMPLDEF inline V xinter::s_play4(I n,S *const *invecs,S *const *outvecs)
 {
-	st_play4 TMPLCALL (buf->Data(),curmin,curmax,s2u,n,buf->Channels(),outchns,invecs,outvecs);
+	st_play4 TMPLCALL (buf->Data(),curmin,curmax,n,buf->Channels(),outchns,invecs,outvecs);
 }
 
 

@@ -11,19 +11,18 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #ifndef __XSAMPLE_H
 #define __XSAMPLE_H
 
-#define XSAMPLE_VERSION "0.2.5pre3"
+#define XSAMPLE_VERSION "0.3.0pre4"
 
 #define FLEXT_ATTRIBUTES 1 
 
 #include <flext.h>
 
-#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 401)
-#error You need at least flext version 0.4.1
+#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 402)
+#error You need at least flext version 0.4.2
 #endif
 
 
-// most compilers are somehow broken.....
-// in other words: can't handle all C++ features
+// most compilers are somehow broken - in other words - can't handle all C++ features
 
 #if defined(_MSC_VER)
 // MS VC 6.0 can't handle <int,int> templates?! -> no optimization
@@ -123,8 +122,14 @@ protected:
 	F s2u;  // sample to unit conversion factor
 
 	inline F scale(F smp) const { return (smp-sclmin)*sclmul; }
+	
+	static V arrscale(I n,const S *in,S *out,S add,S mul);
+	inline V arrscale(I n,const S *in,S *out) const { arrscale(n,in,out,-sclmin,sclmul); }
+	
+	static V arrmul(I n,const S *in,S *out,S mul);
+	inline V arrmul(I n,const S *in,S *out) const { arrmul(n,in,out,1./s2u); }
 
-	BL bufchk() { if(buf->Update()) { m_refresh(); return true; } return false; }
+	BL bufchk();
 
 	V mg_buffer(AtomList &l) { if(buf) { l(1); SetSymbol(l[0],buf->Symbol()); } else l(); }
 	inline V ms_buffer(const AtomList &l) { m_set(l.Count(),l.Atoms()); }
@@ -182,7 +187,7 @@ protected:
 	TMPLDEF static V st_##NAME(thisType *obj,I n,S *const *in,S *const *out)  { obj->NAME TMPLCALL (n,in,out); } \
 	TMPLDEF V NAME(I n,S *const *in,S *const *out)
 
-	#define TMPLSTFUN(NAME) TMPLDEF static V NAME(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+	#define TMPLSTFUN(NAME) TMPLDEF static V NAME(const S *bdt,const I smin,const I smax,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
 
@@ -193,7 +198,7 @@ protected:
 	V (*v_##NAME)(thisType *obj,I n,S *const *in,S *const *out) 
 
 	#define DEFSTCALL(NAME) \
-	V (*NAME)(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+	V (*NAME)(const S *bdt,const I smin,const I smax,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 
 #else
 	#ifdef TMPLOPT
@@ -212,7 +217,7 @@ protected:
 
 	#define DEFSIGFUN(NAME)	V NAME(I n,S *const *in,S *const *out)
 	#define TMPLSIGFUN(NAME) TMPLDEF V NAME(I n,S *const *in,S *const *out)
-	#define TMPLSTFUN(NAME) TMPLDEF static V NAME(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+	#define TMPLSTFUN(NAME) TMPLDEF static V NAME(const S *bdt,const I smin,const I smax,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
 
@@ -223,7 +228,7 @@ protected:
 	#define SETSTFUN(VAR,FUN) VAR = FUN
 
 	#define DEFSTCALL(NAME) \
-	V (*NAME)(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+	V (*NAME)(const S *bdt,const I smin,const I smax,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 #endif
 
 
@@ -285,6 +290,7 @@ protected:
 	TMPLSTFUN(st_play4);
 
 	DEFSIGCALL(playfun);
+	DEFSIGCALL(zerofun);
 
 	virtual V s_dsp();
 
@@ -296,7 +302,7 @@ private:
 };
 
 #ifdef TMPLOPT
-#include "inter.ci"
+#include "inter.h"
 #endif
 
 #endif

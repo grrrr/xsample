@@ -10,13 +10,10 @@ Donations for further development of the package are highly appreciated.
 
 IMPORTANT INFORMATION for all MaxMSP users:
 
-It is advisable to put the xsample shared library file into the "startup" folder. Hence it will be
+It is advisable to put the xsample shared library file into the "max-startup" folder. Hence it will be
 loaded at Max startup.
 
-If you want to load the xsample library on demand, please run MakeAliases inside the MPW folder.
-This will create aliases to the several xsample objects contained in the library. 
-Move these into the "externals" folder.
-(This latter procedure is only tested for OS 9.2, you may experience problems with other MacOS versions)
+If you want to load the xsample library on demand, create a [xsample] object in Max/MSP.
 
 ----------------------------------------------------------------------------
 
@@ -44,14 +41,23 @@ o Microsoft Visual C++ 6: edit "xsample.dsp" project file
 
 pd - linux:
 -----------
-o GCC for linux: run "make -f makefile.pd-linux" and as root "make -f makefile.pd-linux install"
+o GCC: edit "config-pd-linux.txt" and run "sh ./build-pd-linux.sh"
 > various versions of GCC die during compile with template optimization turned on 
 
-Max/MSP - MacOS:
+pd - OSX:
+-----------
+o GCC: edit "config-pd-darwin.txt" and run "sh ./build-pd-darwin.sh"
+> various versions of GCC die during compile with template optimization turned on 
+
+Max/MSP - MacOS9:
 ----------------
-o Metrowerks CodeWarrior V6: edit "xsample.cw" project file functions
+o Metrowerks CodeWarrior: edit "xsample.cw" project file functions
 
 o Apple MPW-PR: edit & use the "flext.mpw" makefile
+
+Max/MSP - MacOSX:
+----------------
+o Metrowerks CodeWarrior: edit "xsample.cw" project file functions
 
 
 ----------------------------------------------------------------------------
@@ -71,7 +77,7 @@ Goals/features of the package:
 
 Version history:
 
-0.2.5:
+0.3.0:
 - added resources to MaxMSP build
 - xgroove~, xrecord~: introduced a loop/end bang outlet 
 - added MaxMSP buffer resize recognition
@@ -80,7 +86,8 @@ Version history:
 - introduced attributes
 - restructured make procedures
 - corrected names of PD makefile, set help names
-- fixed scale mode bug
+- fixed scale mode bug with xgroove~
+- added validity check for buffers
 
 0.2.4:
 - according to flext 0.2.3 changed sample type to t_sample (S)
@@ -125,7 +132,6 @@ Version history:
 TODO list:
 
 general:
-- Documentation and better example patches
 
 - do a smooth (line~) mixin in xrecord~ help patch
 
