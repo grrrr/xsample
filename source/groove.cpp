@@ -129,8 +129,8 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 	outmax = newout_float(x_obj); // play max
 #elif defined(MAX)
 	// set up inlets and outlets in reverse
-	floatin(&x_obj,2);  // max play pos
-	floatin(&x_obj,1);  // min play pos
+	floatin(x_obj,2);  // max play pos
+	floatin(x_obj,1);  // min play pos
 
 	dsp_setup(x_obj,1); // speed sig
 	outmax = newout_float(x_obj); // play max
@@ -347,7 +347,7 @@ V xgroove_obj::m_dsp(t_signal **sp)
 V xgroove_obj::m_help()
 {
 	post(OBJNAME " - part of xsample objects");
-	post("(C) Thomas Grill, 2001 - version " VERSION " compiled on " __DATE__ " " __TIME__);
+	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
 #ifdef MAX
 	post("Arguments: " OBJNAME " [buffer] [channels]");
 #else

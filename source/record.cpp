@@ -145,13 +145,13 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 //    clock = clock_new(x,(t_method)method_tick);
 #elif defined(MAX)
 	// inlets and outlets set up in reverse
-	floatin(&x_obj,3);  // max record pos
-	floatin(&x_obj,2);  // min record pos
+	floatin(x_obj,3);  // max record pos
+	floatin(x_obj,2);  // min record pos
 	dsp_setup(x_obj,inchns+1); // sound and on/off signal in
 
-	outmax = newout_float(&x_obj);  // max record out
-	outmin = newout_float(&x_obj);  // min record out
-	newout_signal(&x_obj);  // pos signal out
+	outmax = newout_float(x_obj);  // max record out
+	outmin = newout_float(x_obj);  // min record out
+	newout_signal(x_obj);  // pos signal out
 #endif
 
 	bufname = atom_getsymbolarg(0,argc,argv);
@@ -355,7 +355,7 @@ V xrec_obj::m_dsp(t_signal **sp)
 V xrec_obj::m_help()
 {
 	post(OBJNAME " - part of xsample objects");
-	post("(C) Thomas Grill, 2001 - version " VERSION " compiled on " __DATE__ " " __TIME__);
+	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
 #ifdef MAX
 	post("Arguments: " OBJNAME " [buffer] [channels]");
 #else
