@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  c:\programme\audio\pd\bin\pd.lib ..\flext\release\flext-pdwin.lib /nologo /dll /machine:I386
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib c:\programme\audio\pd\bin\pd.lib ..\flext\release\flext-pdwin.lib /nologo /dll /machine:I386
 
 !ELSEIF  "$(CFG)" == "xsample - Win32 Debug"
 
@@ -87,6 +87,14 @@ LINK32=link.exe
 
 # Name "xsample - Win32 Release"
 # Name "xsample - Win32 Debug"
+# Begin Group "doc"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\readme.txt
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\groove.cpp

@@ -110,7 +110,7 @@ V xrecord::cb_setup(t_class *c)
 	add_bang(c,cb_start);	
 	add_method0(c,cb_start, "start");	
 	add_method0(c,cb_stop, "stop");	
-	add_float(c,cb_pos);	
+//	add_float(c,cb_pos);	
 	add_method1(c,cb_pos, "pos", A_FLOAT);	
 
 	add_methodG(c,cb_draw,"draw");
@@ -430,7 +430,7 @@ V xrecord::m_help()
 	post("\tmin {unit}: set minimum recording point");
 	post("\tmax {unit}: set maximum recording point");
 	post("\tpos {unit}: set recording position (obeying the current scale mode)");
-	post("\tfloat {unit}: set recording position");
+//	post("\tfloat {unit}: set recording position");
 	post("\tbang/start: start recording");
 	post("\tstop: stop recording");
 	post("\trefresh: checks buffer and refreshes outlets");
