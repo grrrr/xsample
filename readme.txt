@@ -80,6 +80,7 @@ Version history:
 - introduced attributes
 - restructured make procedures
 - corrected names of PD makefile, set help names
+- fixed scale mode bug
 
 0.2.4:
 - according to flext 0.2.3 changed sample type to t_sample (S)
