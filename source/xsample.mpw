@@ -1,33 +1,34 @@
-#   File:       xsample.mpw
-#   Target:     xsample
-#   Created:    Friday, March 22, 2002 01:35:55 AM
-
+# xsample - extended sample objects for Max/MSP and pd (pure data)
+# Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+#
+# Makefile for Apple MPW-PR 
+#
+# usage: make -f xsample.mpw
+#
+# ---------------------------------------------
 
 MAKEFILE        = xsample.mpw
 ÄMondoBuildÄ    = {MAKEFILE}  # Make blank to avoid rebuilds when makefile is modified
 
+Name			= xsample
+
 ObjDir          = ::MPW:
 MaxSDK			= HD Daten:Prog Stuff:Max/MSP SDK:SDK Examples
-STLPort			= HD MacOS:Applications (Mac OS 9):dev:MPW-GM:Interfaces&Libraries:Interfaces:STLport-4.5.3:stlport
 flext			= :::flext:
-Includes        = -i :,"{flext}","{MaxSDK}:Max Includes","{MaxSDK}:MSP Includes","{STL}"
+Includes        = -i :,"{flext}","{MaxSDK}:Max Includes","{MaxSDK}:MSP Includes"
 Defines			= -d MAXMSP
 
 Sym-PPC         = -sym off
-Flags			= -includes unix -opt speed 
+Flags			= -bool on -includes unix -opt speed 
+WarnOff			= -w 35
 
-
-PPCCPlusOptions = {Includes} {Sym-PPC} {Defines} {Flags} 
+PPCCPlusOptions = {Includes} {Sym-PPC} {Defines} {Flags} {WarnOff}
 
 
 ### Source Files ###
 
-SrcFiles        =  è
-				  "groove.cpp" è
-				  "main.cpp" è
-				  "play.cpp" è
-				  "record.cpp"
-
+SrcFiles        =  main.cpp groove.cpp play.cpp record.cpp
+Headers			=  main.h
 
 ### Object Files ###
 
@@ -44,7 +45,6 @@ Obj-record    =  è
 				  "{ObjDir}record.cpp.x"
 
 LibFiles-Ext    =  è
-				  "{stl}:lib:STLportLib.PPC.o" è
 				  "{flext}MPW:flext.o" è
 				  "{MaxSDK}:Max Includes:MaxLib" è
 				  "{MaxSDK}:MSP Includes:MaxAudioLib"
@@ -52,105 +52,46 @@ LibFiles-Ext    =  è
 ### Libraries ###
 
 LibFiles-PPC    =  è
-				  "{SharedLibraries}AppearanceLib" è
-				  "{SharedLibraries}ATSUnicodeLib" è
-				  "{SharedLibraries}ControlsLib" è
-				  "{SharedLibraries}DialogsLib" è
-				  "{SharedLibraries}DragLib" è
-				  "{SharedLibraries}FontManager" è
-				  "{SharedLibraries}FontSyncLib" è
-				  "{SharedLibraries}IconServicesLib" è
-				  "{SharedLibraries}LocalesLib" è
-				  "{SharedLibraries}MenusLib" è
-				  "{SharedLibraries}NSLPPCLib" è
-				  "{SharedLibraries}PowerMgrLib" è
-				  "{SharedLibraries}QuickDrawText" è
-				  "{SharedLibraries}Textension" è
-				  "{SharedLibraries}UnicodeUtilitiesCoreLib" è
-				  "{SharedLibraries}UnicodeUtilitiesLib" è
-				  "{SharedLibraries}UTCUtils" è
-				  "{SharedLibraries}WindowsLib" è
-				  "{SharedLibraries}vecLib" è
-				  "{SharedLibraries}InterfaceLib" è
 				  "{SharedLibraries}StdCLib" è
 				  "{SharedLibraries}MathLib" è
-				  "{SharedLibraries}MrCExceptionsLib" è
 				  "{PPCLibraries}StdCRuntime.o" è
 				  "{PPCLibraries}PPCCRuntime.o" è
-				  "{PPCLibraries}PPCToolLibs.o" è
 				  "{PPCLibraries}MrCPlusLib.o" è
-				  "{PPCLibraries}MrCIOStreams.o"
 
 
 ### Default Rules ###
 
-.cpp.x  ü  .cpp  {ÄMondoBuildÄ}
+{ObjDir} ü :
+
+.cpp.x  ü  .cpp  {ÄMondoBuildÄ} {Headers}
 	{PPCCPlus} {depDir}{default}.cpp -o {targDir}{default}.cpp.x {PPCCPlusOptions}
 
 
 ### Build Rules ###
 
-xsample üü {ObjDir}xgroove~ {ObjDir}xplay~ {ObjDir}xrecord~
+{Name} ü Folder {ObjDir}xgroove~ {ObjDir}xplay~ {ObjDir}xrecord~
 
-{ObjDir}xgroove~  üü  {Obj-groove} {LibFiles-PPC} {ÄMondoBuildÄ}
+Folder ü
+	if !`Exists {ObjDir}` ; NewFolder {ObjDir} ; end
+
+{ObjDir}xgroove~  üü  {Obj-groove} {LibFiles-Ext} {LibFiles-PPC} 
 	PPCLink è
-		-o {Targ} è
-		-export main è
-		{Obj-groove} è
-		{LibFiles-PPC} è
-		{LibFiles-Ext} è
+		-o {Targ} -export main è
+		{Deps} è
 		{Sym-PPC} è
-		-mf -d è
-		-t 'iLaF' è
-		-c 'max2' è
-		-xm s
+		-mf -d -t 'iLaF' -c 'max2' -xm s
 
-{ObjDir}xplay~  üü  {Obj-play} {LibFiles-PPC} {ÄMondoBuildÄ}
+{ObjDir}xplay~  üü  {Obj-play} {LibFiles-Ext} {LibFiles-PPC} 
 	PPCLink è
-		-o {Targ} è
-		-export main è
-		{Obj-play} è
-		{LibFiles-PPC} è
-		{LibFiles-Ext} è
+		-o {Targ} -export main è
+		{Deps} è
 		{Sym-PPC} è
-		-mf -d è
-		-t 'iLaF' è
-		-c 'max2' è
-		-xm s
+		-mf -d -t 'iLaF' -c 'max2' -xm s
 
-{ObjDir}xrecord~  üü  {Obj-record} {LibFiles-PPC} {ÄMondoBuildÄ}
+{ObjDir}xrecord~  üü  {Obj-record} {LibFiles-Ext} {LibFiles-PPC} 
 	PPCLink è
-		-o {Targ} è
-		-export main è
-		{Obj-record} è
-		{LibFiles-PPC} è
-		{LibFiles-Ext} è
+		-o {Targ} -export main è
+		{Deps} è
 		{Sym-PPC} è
-		-mf -d è
-		-t 'iLaF' è
-		-c 'max2' è
-		-xm s
-
-
-
-### Required Dependencies ###
-
-"{ObjDir}groove.cpp.x"  ü  "groove.cpp"
-"{ObjDir}main.cpp.x"  ü  "main.cpp"
-"{ObjDir}play.cpp.x"  ü  "play.cpp"
-"{ObjDir}record.cpp.x"  ü  "record.cpp"
-
-
-### Optional Dependencies ###
-### Build this target to generate "include file" dependencies. ###
-
-Dependencies  ü  $OutOfDate
-	MakeDepend è
-		-append {MAKEFILE} è
-		-ignore "{CIncludes}" è
-		-objdir "{ObjDir}" è
-		-objext .x è
-		{Includes} è
-		{SrcFiles}
-
+		-mf -d -t 'iLaF' -c 'max2' -xm s
 

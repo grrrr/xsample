@@ -27,8 +27,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #if defined(_MSC_VER)
 // MS VC 6.0 can't handle <int,int> templates?!
 //	#define TMPLOPT
-#elif defined(__BORLANDC__)
-// BorlandC++ 5.5 works fine (recommendation: it's FREE!)
+#elif defined(__BORLANDC__) || defined(__MRC__)
+// handles all optimizations
 	#define TMPLOPT
 	#define TMPLINT
 #elif defined(__GNUC__)

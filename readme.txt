@@ -33,7 +33,7 @@ o GCC for linux: run "make -f makefile.pd-linux" - GCC 2.95.2 dies with template
 
 - Max/MSP - MacOS:
 o Metrowerks CodeWarrior V6: use "xsample.cw" project file - using dsp method redirection via static functions
-o Apple MPW-PR with STLPort: edit & use the "flext.mpw" makefile
+o Apple MPW-PR: edit & use the "flext.mpw" makefile
 
 
 ----------------------------------------------------------------------------
