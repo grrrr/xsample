@@ -12,7 +12,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 
 // Initialization function for xsample library
-V lib_setup()
+static V xsample_main()
 {
 	post("xsample objects, version " XSAMPLE_VERSION ", (C)2001-2003 Thomas Grill");
 	post("xsample: xrecord~, xplay~, xgroove~ - send objects a 'help' message to get assistance");
@@ -32,7 +32,7 @@ V lib_setup()
 }
 
 // setup the library
-FLEXT_LIB_SETUP(xsample,lib_setup)
+FLEXT_LIB_SETUP(xsample,xsample_main)
 
 // ------------------------------
 
