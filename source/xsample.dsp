@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib c:\programme\audio\pd\bin\pd.lib ..\..\flext\msvc\flext-pdwin.lib /nologo /dll /machine:I386 /out:"c:\programme\audio\pd-libs/xsample.dll"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib c:\programme\audio\pd\bin\pd.lib ..\..\flext\msvc\flext-pdwin.lib /nologo /dll /machine:I386
 
 !ELSEIF  "$(CFG)" == "xsample - Win32 Debug"
 
@@ -101,6 +101,10 @@ SOURCE=.\groove.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\inter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\main.cpp
 # End Source File
 # Begin Source File
@@ -114,10 +118,6 @@ SOURCE=.\play.cpp
 # Begin Source File
 
 SOURCE=.\record.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\speed.cpp
 # End Source File
 # End Target
 # End Project

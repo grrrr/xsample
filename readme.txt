@@ -63,7 +63,7 @@ Version history:
 - using flext 0.2.2 - xsample is now a library under MaxMSP
 - cleaner gcc makefile
 - xgroove~, xrecord~: added "all" message to select entire buffer length
-- xgroove~, xplay~: revisited dsp methods, restructured the code
+- xgroove~, xplay~: revisited dsp methods, restructured the code, fixed small interpolation bugs 
 - xgroove~, xplay~: added linear interpolation (message "interp 2") 
 - enabled 0 output channels -> xgroove~: position output only
 - xgroove~: added bidirectional looping (message "loop 2")
@@ -98,8 +98,6 @@ TODO list:
 
 general:
 - Documentation and better example patches
-- cleaner makefile PD/Borland C++
-- example patches and MPW builds for MaxMSP@MacOS
 
 features:
 - crossfading loop zone for xplay~ and xgroove~
@@ -107,7 +105,6 @@ features:
 - vasp handling
 - performance comparison to respective PD/Max objects
 - anti-alias filter? (possible?)
-- linear interpolation!
 
 tests:
 - reconsider startup sequence of set buffer,set units,set sclmode,set pos/min/max
@@ -115,5 +112,4 @@ tests:
 bugs:
 - PD: problems with timed buffer redrawing (takes a lot of cpu time) - flext bug?
 - Apple MPW doesn't correctly compile template optimization 
-- there seem to be problems with template-optimized DSP code (sample 0) - better turn off optimization
 - MaxMSP: check for max. 4 channels per buffer!
