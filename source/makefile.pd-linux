@@ -22,7 +22,7 @@ FLEXTLIB=$(FLEXTPATH)/flext.a
 # compiler+linker stuff  ### EDIT! ###
 INCLUDES=/usr/lib/pd/include
 FLAGS=-DPD
-CFLAGS=-O6 -mpentium -g -funroll-loops
+CFLAGS=-O6 -mpentium -funroll-loops
 LIBS=m
 
 
@@ -64,6 +64,7 @@ install:: $(TARGET)
 clean:
 	rm -f $(TARGDIR)/*.o $(TARGET)
 	
+
 
 
 

@@ -1,6 +1,6 @@
-#N canvas 350 272 614 298 12;
+#N canvas 297 114 614 298 12;
 #X obj 69 252 dac~;
-#X obj 19 54 bng 15 250 50 0 empty empty empty 20 8 0 8 -262144 -1
+#X obj 19 54 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1
 -1;
 #X msg 18 74 stop;
 #X msg 16 141 reset;
@@ -41,7 +41,7 @@
 0.423333 0.41 0.39 0.37 0.3525 0.335 0.3175 0.3 0.282 0.264 0.26 0.23
 0.22 0.21 0.19 0.17 0.16 0.15 0.11;
 #X pop;
-#X obj 117 82 hsl 128 15 1 100 1 1 empty empty empty 20 8 0 8 -262144
+#X obj 117 82 hsl 128 15 1 100 1 1 empty empty empty 20 8 0 8 -225271
 -1 -1 3400 1;
 #X obj 77 203 xplay~ buf;
 #X msg 17 168 print;
