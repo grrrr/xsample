@@ -1,11 +1,11 @@
-#N canvas 134 12 857 610 12;
+#N canvas 134 12 859 612 12;
 #X obj 14 15 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1
 -1;
 #X msg 13 35 stop;
-#X floatatom 165 248 5 0 0;
-#X floatatom 219 248 5 0 0;
-#X floatatom 190 170 5 0 0;
-#X floatatom 239 171 5 0 0;
+#X floatatom 165 248 5 0 0 0 - - -;
+#X floatatom 219 248 5 0 0 0 - - -;
+#X floatatom 190 170 5 0 0 0 - - -;
+#X floatatom 239 171 5 0 0 0 - - -;
 #N canvas 0 0 450 300 graph7 0;
 #X array buf 10000 float 0;
 #X coords 0 1 9999 -1 200 140 1;
@@ -13,7 +13,7 @@
 #X obj 91 212 xrecord~ buf;
 #X msg 11 69 reset;
 #X obj 70 287 snapshot~;
-#X floatatom 72 312 7 0 0;
+#X floatatom 72 312 7 0 0 0 - - -;
 #X obj 18 220 loadbang;
 #X msg 10 99 help;
 #X obj 175 96 tgl 15 1 empty empty empty 20 8 0 8 -225271 -1 -1 1 1
@@ -25,16 +25,16 @@
 #X obj 411 275 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1
 -1;
 #X msg 410 295 stop;
-#X floatatom 565 485 5 0 0;
-#X floatatom 619 485 5 0 0;
-#X floatatom 568 427 5 0 0;
-#X floatatom 617 428 5 0 0;
+#X floatatom 565 485 5 0 0 0 - - -;
+#X floatatom 619 485 5 0 0 0 - - -;
+#X floatatom 568 427 5 0 0 0 - - -;
+#X floatatom 617 428 5 0 0 0 - - -;
 #X obj 500 458 xrecord~ buf;
 #X msg 409 334 reset;
 #X obj 500 518 snapshot~;
-#X floatatom 500 548 7 0 0;
+#X floatatom 500 548 7 0 0 0 - - -;
 #X obj 411 446 loadbang;
-#X obj 537 242 tgl 15 1 empty empty empty 20 8 0 8 -225271 -1 -1 0
+#X obj 537 242 tgl 15 1 empty empty empty 20 8 0 8 -225271 -1 -1 1
 1;
 #X msg 556 239 loop \$1;
 #X msg 452 206 0;
@@ -44,17 +44,17 @@
 #X msg 556 263 sigmode \$1;
 #X msg 409 360 print;
 #X obj 581 353 hsl 128 15 -0.001 1 0 1 empty empty empty 20 8 0 8 -225271
--1 -1 12700 1;
-#X obj 537 291 tgl 15 0 empty empty empty 20 8 0 8 -225271 -1 -1 0
+-1 -1 3200 1;
+#X obj 537 291 tgl 15 0 empty empty empty 20 8 0 8 -225271 -1 -1 1
 1;
 #X msg 557 288 mixmode \$1;
-#X floatatom 629 381 8 0 0;
+#X floatatom 629 381 8 0 0 0 - - -;
 #X obj 411 473 metro 30;
 #X obj 18 247 metro 30;
 #X obj 640 21 osc~ 10;
 #X obj 86 78 r~ rec;
 #X obj 482 339 r~ rec;
-#X obj 678 95 s~ rec;
+#X obj 626 84 s~ rec;
 #X obj 623 48 *~ 1;
 #X obj 622 25 tgl 15 1 empty empty empty 20 8 0 8 -225271 -1 -1 1 1
 ;
@@ -85,6 +85,10 @@
 #X msg 9 135 getattributes;
 #X obj 208 211 print A;
 #X msg 10 163 getbuffer;
+#X obj 542 51 *~ 1;
+#X obj 541 28 tgl 15 1 empty empty empty 20 8 0 8 -225271 -1 -1 0 1
+;
+#X obj 561 24 noise~;
 #X connect 0 0 7 0;
 #X connect 1 0 7 0;
 #X connect 4 0 7 2;
@@ -140,3 +144,6 @@
 #X connect 70 0 69 0;
 #X connect 71 0 7 0;
 #X connect 73 0 7 0;
+#X connect 74 0 45 0;
+#X connect 75 0 74 1;
+#X connect 76 0 74 0;
