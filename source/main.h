@@ -61,6 +61,13 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #define S t_sample
 
 
+#ifdef __MWERKS__
+	#define STD std
+#else
+	#define STD
+#endif
+
+
 class xsample:
 	public flext_dsp
 {
@@ -120,10 +127,10 @@ protected:
 	BL bufchk() { if(buf->Update()) { m_refresh(); return true; } return false; }
 
 	V mg_buffer(AtomList &l) { if(buf) { l(1); SetSymbol(l[0],buf->Symbol()); } else l(); }
-	V ms_buffer(const AtomList &l) { m_set(l.Count(),l.Atoms()); }
+	inline V ms_buffer(const AtomList &l) { m_set(l.Count(),l.Atoms()); }
 
-	V mg_min(F &v) const { v = curmin*s2u; }
-	V mg_max(F &v) const { v = curmax*s2u; }
+	inline V mg_min(F &v) const { v = curmin*s2u; }
+	inline V mg_max(F &v) const { v = curmax*s2u; }
 
 private:
 	static V setup(t_classid c);
@@ -250,7 +257,7 @@ protected:
 class xinter:
 	public xsample
 {
-	FLEXT_HEADER(xinter,xsample)
+	FLEXT_HEADER_S(xinter,xsample,setup)
 	
 public:
 	xinter();
@@ -261,7 +268,7 @@ protected:
 	virtual V m_start();
 	virtual V m_stop();
 
-	V m_interp(xs_intp mode = xsi__) { interp = mode; s_dsp(); }
+	inline V m_interp(xs_intp mode = xsi__) { interp = mode; s_dsp(); }
 
 	I outchns;
 	BL doplay;	
@@ -282,8 +289,10 @@ protected:
 	virtual V s_dsp();
 
 private:
+	static V setup(t_classid c);
 
-	FLEXT_CALLBACK_1(m_interp,xs_intp)
+	FLEXT_CALLSET_E(m_interp,xs_intp)
+	FLEXT_ATTRGET_E(interp,xs_intp)
 };
 
 #ifdef TMPLOPT

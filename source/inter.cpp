@@ -19,12 +19,15 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #include "inter.ci"
 #endif
 
+void xinter::setup(t_classid c)
+{
+	FLEXT_CADDATTR_VAR_E(c,"interp",interp,m_interp);
+}
 
 xinter::xinter():
 	doplay(false),outchns(1),
 	interp(xsi_4p)
 {
-	FLEXT_ADDMETHOD_E(0,"interp",m_interp);
 }
 
 I xinter::m_set(I argc,const t_atom *argv) 

@@ -42,10 +42,7 @@ public:
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
 
-//	V m_mixmode(BL mx) { mixmode = mx; }
-//	V m_sigmode(BL mode) { sigmode = mode; }
-//	V m_loop(BL lp) { doloop = lp; }
-	V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
+	inline V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
 
 	virtual V m_draw(I argc,const t_atom *argv);	
 
@@ -59,8 +56,10 @@ protected:
 
 	outlet *outmin,*outmax; // float outlets	
 	
-	V outputmin() { ToOutFloat(outmin,curmin*s2u); }
-	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
+	inline V outputmin() { ToOutFloat(outmin,curmin*s2u); }
+	inline V outputmax() { ToOutFloat(outmax,curmax*s2u); }
+
+	inline V mg_pos(F &v) const { v = curpos*s2u; }
 	
 private:
 	static V setup(t_classid c);
@@ -76,8 +75,10 @@ private:
 		recfun(n,in,out); 
 	}
 
-	FLEXT_CALLBACK_F(m_pos)
+	FLEXT_CALLVAR_F(mg_pos,m_pos)
 	FLEXT_CALLBACK(m_all)
+	FLEXT_CALLSET_F(m_min)
+	FLEXT_CALLSET_F(m_max)
 	FLEXT_CALLBACK_F(m_min)
 	FLEXT_CALLBACK_F(m_max)
 
@@ -98,9 +99,9 @@ V xrecord::setup(t_classid c)
 {
 	DefineHelp(c,"xrecord~");
 
-	FLEXT_CADDMETHOD_F(c,0,"pos",m_pos);
-	FLEXT_CADDMETHOD_F(c,0,"min",m_min);
-	FLEXT_CADDMETHOD_F(c,0,"max",m_max);
+	FLEXT_CADDATTR_VAR(c,"pos",mg_pos,m_pos);
+	FLEXT_CADDATTR_VAR(c,"min",mg_min,m_min);
+	FLEXT_CADDATTR_VAR(c,"max",mg_max,m_max);
 	FLEXT_CADDMETHOD_(c,0,"all",m_all);
 	
 	FLEXT_CADDMETHOD_(c,0,"draw",m_draw);
@@ -143,8 +144,8 @@ xrecord::xrecord(I argc,const t_atom *argv):
 		buf = new buffer(NULL,true);
 
 	for(I ci = 0; ci < inchns; ++ci) {
-		C tmp[30];
-		sprintf(tmp,"Audio channel %i",ci+1);
+		C tmp[40];
+		STD::sprintf(tmp,ci == 0?"Messages/audio channel %i":"Audio channel %i",ci+1);
 		AddInSignal(tmp);  // audio signals
 	}
 	AddInSignal("On/Off/Fade/Mix signal (0..1)"); // on/off signal
@@ -422,7 +423,7 @@ V xrecord::m_help()
 #ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2002");
+	post("(C) Thomas Grill, 2001-2003");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else

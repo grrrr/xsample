@@ -46,6 +46,8 @@ public:
 	V m_xzone(F xz);
 	V m_xsymm(F xz);
 	V m_xshape(I argc = 0,const t_atom *argv = NULL);
+	inline V ms_xshape(const AtomList &ret) { m_xshape(ret.Count(),ret.Atoms()); }
+	V mg_xshape(AtomList &ret) const;
 	V m_xkeep(BL k);
 
 	enum xs_loop {
@@ -62,6 +64,8 @@ protected:
 	I bidir;
 
 	F _xzone,xzone,xsymm;
+	I xshape;
+	F xshparam;
 	F znmin,znmax;
 	I xkeep;
 	S **znbuf;
@@ -70,8 +74,8 @@ protected:
 
 	outlet *outmin,*outmax; // float outlets	
 	
-	V outputmin() { ToOutFloat(outmin,curmin*s2u); }
-	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
+	inline V outputmin() { ToOutFloat(outmin,curmin*s2u); }
+	inline V outputmax() { ToOutFloat(outmax,curmax*s2u); }
 	
 	inline V setpos(F pos)
 	{
@@ -80,7 +84,7 @@ protected:
 		curpos = pos;
 	}
 
-	V mg_pos(F &v) const { v = curpos*s2u; }
+	inline V mg_pos(F &v) const { v = curpos*s2u; }
 
 private:
 	static V setup(t_classid c);
@@ -110,10 +114,13 @@ private:
 	FLEXT_CALLBACK_F(m_max)
 	FLEXT_CALLBACK(m_all)
 
-	FLEXT_CALLBACK_F(m_xzone)
-	FLEXT_CALLBACK_F(m_xsymm)
-	FLEXT_CALLBACK_V(m_xshape)
-	FLEXT_CALLBACK_B(m_xkeep)
+	FLEXT_CALLSET_F(m_xzone)
+	FLEXT_ATTRGET_F(_xzone)
+	FLEXT_CALLSET_F(m_xsymm)
+	FLEXT_ATTRGET_F(xsymm)
+	FLEXT_CALLVAR_V(mg_xshape,ms_xshape)
+	FLEXT_CALLSET_B(m_xkeep)
+	FLEXT_ATTRGET_B(xkeep)
 
 	FLEXT_CALLVAR_F(mg_pos,m_pos)
 	FLEXT_CALLSET_F(m_min)
@@ -128,7 +135,7 @@ FLEXT_LIB_DSP_V("xgroove~",xgroove)
 
 V xgroove::setup(t_classid c)
 {
-//	DefineHelp(c,"xgroove~");
+	DefineHelp(c,"xgroove~");
 
 	FLEXT_CADDMETHOD_(c,0,"all",m_all);
 	FLEXT_CADDMETHOD(c,1,m_min);
@@ -140,15 +147,16 @@ V xgroove::setup(t_classid c)
 
 	FLEXT_CADDATTR_VAR_E(c,"loop",loopmode,m_loop);
 
-	FLEXT_CADDMETHOD_F(c,0,"xzone",m_xzone);
-	FLEXT_CADDMETHOD_F(c,0,"xsymm",m_xsymm);
-	FLEXT_CADDMETHOD_(c,0,"xshape",m_xshape);
-	FLEXT_CADDMETHOD_B(c,0,"xkeep",m_xkeep);
+	FLEXT_CADDATTR_VAR(c,"xzone",_xzone,m_xzone);
+	FLEXT_CADDATTR_VAR(c,"xsymm",xsymm,m_xsymm);
+	FLEXT_CADDATTR_VAR(c,"xshape",mg_xshape,ms_xshape);
+	FLEXT_CADDATTR_VAR(c,"xkeep",xkeep,m_xkeep);
 }
 
 xgroove::xgroove(I argc,const t_atom *argv):
 	loopmode(xsl_loop),curpos(0),
 	_xzone(0),xzone(0),xsymm(0.5),xkeep(0),pblksz(0),
+	xshape(0),xshparam(1),
 	znbuf(NULL),znmul(NULL),znidx(NULL),znpos(NULL),
 	bidir(1)
 {
@@ -181,7 +189,7 @@ xgroove::xgroove(I argc,const t_atom *argv):
 	AddInFloat("Ending point"); // max play pos
 	for(I ci = 0; ci < outchns; ++ci) {
 		C tmp[30];
-		sprintf(tmp,"Audio signal channel %i",ci+1); 
+		STD::sprintf(tmp,"Audio signal channel %i",ci+1); 
 		AddOutSignal(tmp); // output
 	}
 	AddOutSignal("Position currently played"); // position
@@ -270,7 +278,7 @@ BL xgroove::m_reset()
 V xgroove::m_xzone(F xz) 
 { 
 	bufchk();
-	_xzone = xz < 0?0:xz/s2u; 
+	_xzone = xz < 0?0:xz; 
 	do_xzone();
 	s_dsp(); 
 }
@@ -291,23 +299,24 @@ V xgroove::m_xsymm(F xs)
 V xgroove::m_xshape(I argc,const t_atom *argv) 
 { 
 	const F pi = 3.14159265358979f;
-	I i,sh = 0;
-	F param = 1;
-	if(argc >= 1 && CanbeInt(argv[0])) sh = GetAInt(argv[0]);
+	xshape = 0;
+	xshparam = 1;
+	if(argc >= 1 && CanbeInt(argv[0])) xshape = GetAInt(argv[0]);
 	if(argc >= 2 && CanbeFloat(argv[1])) {
-		param = GetAFloat(argv[1]);
+		xshparam = GetAFloat(argv[1]);
 		// clip to 0..1
-		if(param < 0) param = 0;
-		else if(param > 1) param = 1;
+		if(xshparam < 0) xshparam = 0;
+		else if(xshparam > 1) xshparam = 1;
 	}
 
 	if(znmul) delete[] znmul; 
 	znmul = new S[XZONE_TABLE+1];
 
-	switch(sh) {
+	I i;
+	switch(xshape) {
 	case 1:
 		for(i = 0; i <= XZONE_TABLE; ++i) 
-			znmul[i] = sin(i*(pi/2./XZONE_TABLE))*param+i*(1./XZONE_TABLE)*(1-param);
+			znmul[i] = sin(i*(pi/2./XZONE_TABLE))*xshparam+i*(1./XZONE_TABLE)*(1-xshparam);
 		break;
 	case 0:
 	default:
@@ -315,6 +324,14 @@ V xgroove::m_xshape(I argc,const t_atom *argv)
 			znmul[i] = i*(1./XZONE_TABLE);
 	}
 }
+
+V xgroove::mg_xshape(AtomList &ret) const
+{ 
+	ret(2);
+	SetInt(ret[0],xshape);
+	SetFloat(ret[1],xshparam);
+}
+
 
 V xgroove::m_xkeep(BL k) 
 { 
@@ -324,7 +341,7 @@ V xgroove::m_xkeep(BL k)
 
 V xgroove::do_xzone()
 {
-	xzone = _xzone;
+	xzone = _xzone/s2u;
 	I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
 	if(xsymm < 0) {
 		// crossfade zone is inside the loop (-> loop is shorter than nominal!)
@@ -632,7 +649,7 @@ V xgroove::m_help()
 #ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2002");
+	post("(C) Thomas Grill, 2001-2003");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else

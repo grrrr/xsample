@@ -75,7 +75,7 @@ xplay::xplay(I argc,const t_atom *argv)
 	AddInSignal("Messages and Signal of playing position");  // pos signal
 	for(I ci = 0; ci < outchns; ++ci) {
 		C tmp[30];
-		sprintf(tmp,"Audio signal channel %i",ci+1); 
+		STD::sprintf(tmp,"Audio signal channel %i",ci+1); 
 		AddOutSignal(tmp);
 	}
 	
@@ -100,7 +100,7 @@ V xplay::m_help()
 #ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2002");
+	post("(C) Thomas Grill, 2001-2003");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
