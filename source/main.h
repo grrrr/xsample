@@ -28,7 +28,9 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 #if defined(_MSC_VER)
 // MS VC 6.0 can't handle <int,int> templates?! -> no optimization
-//	#define TMPLOPT
+	#if _MSC_VER >= 1300
+		#define TMPLOPT
+	#endif
 #elif defined(__BORLANDC__) 
 // handles all optimizations
 	#define TMPLOPT 
