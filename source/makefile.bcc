@@ -1,0 +1,46 @@
+NAME=xsample
+
+TARGET=pdwin
+
+BCCPATH=c:\programme\prog\bcc55
+PDPATH=c:\programme\audio\pd
+FLEXTPATH=..\flext
+
+INCPATH=-I$(BCCPATH)\include -I$(PDPATH)\src -I$(FLEXTPATH)
+LIBPATH=-L$(BCCPATH)\lib -L$(PDPATH)\lib -L$(FLEXTPATH)
+LIBS=cw32.lib import32.lib C0D32.OBJ
+
+
+OUTPATH=.\bcc
+
+DEFS=-DPD -DNT 
+CFLAGS=-6 -O2 -OS -ff -tWD 
+
+
+
+main.cpp: main.h $(FLEXTPATH)\flext.h
+
+record.cpp: main.h $(FLEXTPATH)\flext.h
+
+play.cpp: main.h $(FLEXTPATH)\flext.h
+
+groove.cpp: main.h $(FLEXTPATH)\flext.h
+
+
+SRC= main.cpp record.cpp play.cpp groove.cpp
+OBJ= $(SRC:.cpp=.obj)
+
+.cpp.obj:
+	bcc32 -c $(CFLAGS) $(DEFS) $(INCPATH) -n$(OUTPATH) $<
+
+$(OUTPATH)\pd.lib: $(PDPATH)\bin\pd.dll
+	implib -a $@ $**
+
+$(NAME).dll:: $(OUTPATH)\pd.lib 
+
+$(NAME).dll:: $(OBJ) 
+	cd $(OUTPATH)
+	echo EXPORTS xsample_setup = _xsample_setup > xsample.def
+	ilink32 -Tpd $(LIBPATH) $** ,$.,,$(LIBS) $(OUTPATH)\pd.lib ..\$(FLEXTPATH)\bcc\flext-$(TARGET).lib,xsample.def
+
+all: $(NAME).dll
