@@ -9,6 +9,12 @@ Donations for further development of the package are highly appreciated.
 
 ----------------------------------------------------------------------------
 
+IMPORTANT INFORMATION for all MaxMSP users:
+To set up the ready-made xsample objects properly, please run MakeAliases inside the MPW folder.
+It will create the several xsample objects contained in the library.
+
+----------------------------------------------------------------------------
+
 You will need the flext C++ layer for PD and Max/MSP externals to compile this.
 
 
