@@ -21,14 +21,6 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 
-#ifdef PD
-extern "C" {
-FLEXT_EXT V xrecord_tilde_setup();
-FLEXT_EXT V xplay_tilde_setup();
-FLEXT_EXT V xgroove_tilde_setup();
-}
-#endif
-
 // most compilers are somehow broken.....
 // in other words: can't handle all C++ features
 

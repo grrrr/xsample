@@ -12,16 +12,25 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 
 #ifdef PD
-extern "C" FLEXT_EXT void xsample_setup()
+// Initialization for pd xsample library
+
+extern "C" {
+FLEXT_EXT V xrecord_tilde_setup();
+FLEXT_EXT V xplay_tilde_setup();
+FLEXT_EXT V xgroove_tilde_setup();
+
+FLEXT_EXT V xsample_setup()
 {
 	post("xsample objects, (C)2001,2002 Thomas Grill");
 	post("xsample: xrecord~, xplay~, xgroove~");
 	post("\tsend objects a 'help' message to get assistance");
 	post("");
 
+	// call the objects' setup routines
 	xrecord_tilde_setup();
 	xplay_tilde_setup();
 	xgroove_tilde_setup();
+}
 }
 #endif
 
@@ -41,9 +50,9 @@ V xsample::cb_setup(t_class *c)
 
 xsample::xsample():
 #ifdef PD
-	unitmode(xsu_sample),
+	unitmode(xsu_sample),  // PD defaults to samples
 #else
-	unitmode(xsu_ms),
+	unitmode(xsu_ms),	   // Max/MSP defaults to milliseconds
 #endif
 	interp(xsi_4p),
 	sclmode(xss_unitsinbuf),

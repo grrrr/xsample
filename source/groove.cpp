@@ -16,8 +16,6 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 
-//#define DEBUG 
-
 class xgroove:
 	public xsample
 {
@@ -102,7 +100,7 @@ xgroove::xgroove(I argc,t_atom *argv):
 	doplay(false),doloop(true),
 	curpos(0)
 {
-#ifdef DEBUG
+#ifdef _DEBUG
 	if(argc < 1) {
 		post("%s - Warning: no buffer defined",thisName());
 	} 
@@ -200,7 +198,6 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 	const F *speed = invecs[0];
 	F *const *sig = outvecs;
 	F *pos = outvecs[outchns];
-	register I si = 0;
 
 	const I smin = curmin,smax = curmax;
 	const I plen = curlen;
@@ -208,6 +205,7 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 
 	if(buf && doplay && plen > 0) {
 		const I maxo = smax-3;
+		register I si = 0;
 
 		if(interp && plen >= 4) {
 			for(I i = 0; i < n; ++i,++si) {	
@@ -338,13 +336,17 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 				}
 			}
 		}
+
+		// clear rest of output channels (if buffer has less channels)
+		for(I ci = OCHNS; ci < outchns; ++ci) 
+			for(I i = 0; i < n; ++i) 
+				sig[ci][i] = 0;
 	} 
 	else {
 		const F oscl = scale(o);
-		while(n--) {	
+		for(I si = 0; si < n; ++si) {	
 			*(pos++) = oscl;
-			for(I ci = 0; ci < OCHNS; ++ci)	sig[ci][si] = 0;
-			++si;
+			for(I ci = 0; ci < outchns; ++ci)	sig[ci][si] = 0;
 		}
 	}
 	

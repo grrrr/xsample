@@ -9,7 +9,7 @@ Donations for further development of the package are highly appreciated.
 
 ----------------------------------------------------------------------------
 
-You will need the flext C++ compatibility layer for PD and Max/MSP externals to compile this.
+You will need the flext C++ layer for PD and Max/MSP externals to compile this.
 
 
 Package files:
@@ -26,7 +26,7 @@ The package should at least compile (and is tested) with the following compilers
 
 - pd - Windows:
 o Borland C++ 5.5 (free): just ok! - makefile is no real make but works
-o Microsoft Visual C++ 6: due to a compiler bug the optimization using templates is not functional
+o Microsoft Visual C++ 6: ok - but due to a compiler bug the optimization using templates is not functional
 
 - pd - linux:
 o GCC for linux: the compiler (version 2.95.2) dies with template optimization turned on 
@@ -54,7 +54,7 @@ Version history:
 - no leftmost float inlet for position setting - use pos method
 - changed dsp handling for flext 0.1.1 conformance
 - workarounds for buggy/incomplete compilers
-- prevent buffer warning message at max patcher load (wait for loadbang)
+- prevent buffer warning message at patcher load (wait for loadbang)
 
 0.2.0: 
 - first version for flext

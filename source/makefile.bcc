@@ -4,14 +4,14 @@ TARGET=pdwin
 
 BCCPATH=c:\programme\prog\bcc55
 PDPATH=c:\programme\audio\pd
-FLEXTPATH=..\flext
+FLEXTPATH=..\..\flext
 
 INCPATH=-I$(BCCPATH)\include -I$(PDPATH)\src -I$(FLEXTPATH)
 LIBPATH=-L$(BCCPATH)\lib -L$(PDPATH)\lib -L$(FLEXTPATH)
 LIBS=cw32.lib import32.lib C0D32.OBJ
 
 
-OUTPATH=.\bcc
+OUTPATH=..\bcc
 
 DEFS=-DPD -DNT 
 CFLAGS=-6 -O2 -OS -ff -tWD 
@@ -41,6 +41,6 @@ $(NAME).dll:: $(OUTPATH)\pd.lib
 $(NAME).dll:: $(OBJ) 
 	@cd $(OUTPATH)
 	@echo EXPORTS xsample_setup = _xsample_setup > xsample.def
-	ilink32 -Tpd $(LIBPATH) $** ,$.,,$(LIBS) $(OUTPATH)\pd.lib ..\$(FLEXTPATH)\bcc\flext-$(TARGET).lib,xsample.def
+	ilink32 -Tpd $(LIBPATH) $** ,$.,,$(LIBS) $(OUTPATH)\pd.lib $(FLEXTPATH)\bcc\flext-$(TARGET).lib,xsample.def
 
 all: $(NAME).dll

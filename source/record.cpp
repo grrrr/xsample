@@ -115,9 +115,9 @@ xrecord::xrecord(I argc,t_atom *argv):
 	appmode(true),doloop(false),
 	drintv(0)
 {
-#ifdef DEBUG
+#ifdef _DEBUG
 	if(argc < 1) {
-		post(OBJNAME " - Warning: no buffer defined");
+		post("%s - Warning: no buffer defined",thisName());
 	} 
 #endif
 

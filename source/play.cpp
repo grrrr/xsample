@@ -15,9 +15,6 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 
-//#define DEBUG 
-
-
 class xplay:
 	public xsample
 {
@@ -27,7 +24,7 @@ public:
 	xplay(I argc, t_atom *argv);
 	~xplay();
 	
-	virtual V m_loadbang() { m_refresh(); }
+	virtual V m_loadbang() { m_reset(); }
 #ifdef MAXMSP
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
@@ -69,9 +66,9 @@ V xplay::cb_setup(t_class *c)
 xplay::xplay(I argc, t_atom *argv): 
 	doplay(false)
 {
-#ifdef DEBUG
+#ifdef _DEBUG
 	if(argc < 1) {
-		post(OBJNAME " - Warning: no buffer defined");
+		post("%s - Warning: no buffer defined",thisName());
 	} 
 #endif
 	
@@ -190,12 +187,14 @@ TMPLDEF V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 				}
 			}
 		}	
+
+		// clear rest of output channels (if buffer has less channels)
+		for(I ci = OCHNS; ci < outchns; ++ci) 
+			for(I i = 0; i < n; ++i) sig[ci][i] = 0;
 	}
 	else {
-		while(n--) { 
-			for(I ci = 0; ci < OCHNS; ++ci)	sig[ci][si] = 0;
-			++si;
-		}
+		for(I ci = 0; ci < outchns; ++ci) 
+			for(I si = 0; si < n; ++si) sig[ci][si] = 0;
 	}
 }
 
