@@ -13,14 +13,14 @@ CONFIG=config-pd-darwin.txt
 
 include ${CONFIG}
 
-FLEXTLIB=flext
+FLEXTLIB=$(FLEXTPATH)/libflext.a
 
 # compiler stuff
 INCLUDES=$(PDINC) 
 FLAGS=-DFLEXT_SYS=2
 CFLAGS=${UFLAGS} -dynamic -O6 -Wno-unused -Wno-parentheses -Wno-switch -Wstrict-prototypes -funroll-loops -fmove-all-movables -frerun-loop-opt -fno-rtti -fno-exceptions 
-LIBS=m gcc $(FLEXTLIB)
-LDFLAGS=-bundle -bundle_loader $(PDBIN)
+LIBS=m gcc
+LDFLAGS=$(FLEXTLIB) -bundle -bundle_loader $(PDBIN)
 FRAMEWORKS=Carbon
 
 # ----------------------------------------------
