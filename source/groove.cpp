@@ -17,7 +17,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 
-#define XZONE_TABLE 512
+#define XZONE_TABLE 64
 
 
 class xgroove:
@@ -45,13 +45,10 @@ public:
 	virtual V m_max(F mx);
 
 	V ms_xfade(I xf);
+	V ms_xshape(I sh);
 
 	V ms_xzone(F xz);
 	V mg_xzone(F &xz) { xz = _xzone*s2u; }
-
-	V m_xshape(I argc = 0,const t_atom *argv = NULL);
-	inline V ms_xshape(const AtomList &ret) { m_xshape(ret.Count(),ret.Atoms()); }
-	V mg_xshape(AtomList &ret) const;
 
 	enum xs_loop {
 		xsl__ = -1,  // don't change
@@ -61,6 +58,11 @@ public:
 	enum xs_fade {
 		xsf__ = -1,  // don't change
 		xsf_keeplooppos = 0,xsf_keeplooplen,xsf_keepfade,xsf_inside
+	};
+
+	enum xs_shape {
+		xss__ = -1,  // don't change
+		xss_lin = 0,xss_qsine,xss_hsine
 	};
 
 	V m_loop(xs_loop lp = xsl__);
@@ -75,8 +77,6 @@ protected:
     L znsmin,znsmax;
 	xs_fade xfade;
 	I xshape;
-	F xshparam;
-	D znmin,znmax;
 	S **znbuf;
 	S *znpos,*znmul,*znidx;
 	I pblksz;
@@ -129,6 +129,8 @@ private:
 			zerofun(n,in,out);
 	}
 
+	static S fade_lin[],fade_qsine[],fade_hsine[];
+
 	FLEXT_CALLBACK_F(m_pos)
 	FLEXT_CALLBACK_F(m_posmod)
 	FLEXT_CALLBACK_F(m_min)
@@ -137,9 +139,10 @@ private:
 
 	FLEXT_CALLSET_I(ms_xfade)
 	FLEXT_ATTRGET_I(xfade)
+	FLEXT_CALLSET_I(ms_xshape)
+	FLEXT_ATTRGET_I(xshape)
 	FLEXT_CALLSET_F(ms_xzone)
 	FLEXT_CALLGET_F(mg_xzone)
-	FLEXT_CALLVAR_V(mg_xshape,ms_xshape)
 
 	FLEXT_CALLVAR_F(mg_pos,m_pos)
 	FLEXT_CALLSET_F(m_min)
@@ -151,6 +154,12 @@ private:
 
 FLEXT_LIB_DSP_V("xgroove~",xgroove) 
 
+
+S xgroove::fade_lin[XZONE_TABLE+1];
+S xgroove::fade_qsine[XZONE_TABLE+1];
+S xgroove::fade_hsine[XZONE_TABLE+1];
+
+#define PI 3.14159265358979f
 
 V xgroove::setup(t_classid c)
 {
@@ -169,14 +178,27 @@ V xgroove::setup(t_classid c)
 
 	FLEXT_CADDATTR_VAR(c,"xfade",xfade,ms_xfade);
 	FLEXT_CADDATTR_VAR(c,"xzone",mg_xzone,ms_xzone);
-	FLEXT_CADDATTR_VAR(c,"xshape",mg_xshape,ms_xshape);
+	FLEXT_CADDATTR_VAR(c,"xshape",xshape,ms_xshape);
+
+	// initialize fade tables
+	for(int i = 0; i <= XZONE_TABLE; ++i) {
+		const float x = i*(1.f/XZONE_TABLE);
+		// linear
+		fade_lin[i] = x;
+
+		// quarter sine wave
+		fade_qsine[i] = sin(x*(PI/2));
+
+		// half sine wave
+		fade_hsine[i] = (sin(x*PI-PI/2)+1.f)*0.5f;
+	}
 }
 
 xgroove::xgroove(I argc,const t_atom *argv):
 	loopmode(xsl_loop),curpos(0),
 	_xzone(0),xzone(0),pblksz(0),
-	xfade(xsf_keeplooppos),xshape(0),xshparam(1),
-	znbuf(NULL),znmul(NULL),znidx(NULL),znpos(NULL),
+	xfade(xsf_keeplooppos),xshape(xss_lin),
+	znidx(NULL),znpos(NULL),
 	bidir(1)
 {
 	I argi = 0;
@@ -195,7 +217,7 @@ xgroove::xgroove(I argc,const t_atom *argv):
 		argi++;
 		
 #if FLEXT_SYS == FLEXT_SYS_MAX
-		// oldstyle command line?
+		// old-style command line?
 		if(argi == 1 && argc == 2 && CanbeInt(argv[argi])) {
 			outchns = GetAInt(argv[argi]);
 			argi++;
@@ -222,11 +244,8 @@ xgroove::xgroove(I argc,const t_atom *argv):
 	// don't know vector size yet -> wait for m_dsp
 	znbuf = new S *[outchns];
 	for(I i = 0; i < outchns; ++i) znbuf[i] = NULL;
-	znpos = NULL; 
-	znidx = NULL;
-	znmul = new S[XZONE_TABLE+1];
 
-	m_xshape();
+	ms_xshape(xshape);
 }
 
 xgroove::~xgroove()
@@ -238,7 +257,6 @@ xgroove::~xgroove()
 
 	if(znpos) delete[] znpos;
 	if(znidx) delete[] znidx;
-	delete[] znmul;
 }
 
 BL xgroove::Init()
@@ -314,48 +332,20 @@ V xgroove::ms_xzone(F xz)
 	s_dsp(); 
 }
 
-V xgroove::m_xshape(I argc,const t_atom *argv) 
+V xgroove::ms_xshape(I sh) 
 { 
-	const F pi = 3.14159265358979f;
-	xshape = 0;
-	xshparam = 1;
-	if(argc >= 1 && CanbeInt(argv[0])) xshape = GetAInt(argv[0]);
-	if(argc >= 2 && CanbeFloat(argv[1])) {
-		xshparam = GetAFloat(argv[1]);
-/*
-		// clip to 0..1
-		if(xshparam < 0) xshparam = 0;
-		else if(xshparam > 1) xshparam = 1;
-*/
-	}
-
-	I i;
+	xshape = (xs_shape)sh;
 	switch(xshape) {
-	case 1:
-		// sine half wave
-		for(i = 0; i <= XZONE_TABLE; ++i) 
-			znmul[i] = sin(i*pi/(XZONE_TABLE*2))*xshparam+i*(1.f/XZONE_TABLE)*(1.f-xshparam);
-		break;
-	case 2:
-		// sine full wave
-		for(i = 0; i <= XZONE_TABLE; ++i) 
-			znmul[i] = ((sin(i*(pi/XZONE_TABLE)-pi*0.5f)+1.f)*0.5f)*xshparam+i*(1.f/XZONE_TABLE)*(1.f-xshparam);
-		break;
-	case 0:
-	default:
-		// linear
-		for(i = 0; i <= XZONE_TABLE; ++i) 
-			znmul[i] = i*(1.f/XZONE_TABLE);
+		case xss_qsine: znmul = fade_qsine; break;
+		case xss_hsine: znmul = fade_hsine; break;
+		default:
+			post("%s - shape parameter invalid, set to linear",thisName());
+		case xss_lin: 
+			znmul = fade_lin; break;
 	}
-}
 
-V xgroove::mg_xshape(AtomList &ret) const
-{ 
-	ret(2);
-	SetInt(ret[0],xshape);
-	SetFloat(ret[1],xshparam);
+	// no need to recalc the fade zone here
 }
-
 
 V xgroove::do_xzone()
 {
@@ -363,7 +353,10 @@ V xgroove::do_xzone()
 
 	xzone = _xzone; // make a copy for changing it
 
-	if(xfade == xsf_inside) { // fade zone goes inside the loop -> loop gets shorter
+	if(xfade == xsf_inside) { 
+		// fade zone goes inside the loop -> loop becomes shorter
+
+		// \todo what about round-off?
 		const L maxfd = (curmax-curmin)/2;
 		if(xzone > maxfd) xzone = maxfd;
 
@@ -371,14 +364,20 @@ V xgroove::do_xzone()
 	}
 	else if(xfade == xsf_keepfade) { 
 		// try to keep fade zone
-		// shifting of loop bounds may happen
+		// change of loop bounds may happen
 
 		// restrict xzone to half of buffer
 		const L maxfd = buf->Frames()/2;
 		if(xzone > maxfd) xzone = maxfd;
 
+		// \todo what about round-off?
 		znsmin = curmin-xzone/2;
 		znsmax = curmax+xzone/2;
+
+		// widen loop if xzone doesn't fit into it
+		// \todo check formula
+		L lack = ceil((xzone*2-(znsmax-znsmin))/2);
+		if(lack > 0) znsmin -= lack,znsmax += lack;
 
 		// check buffer limits and shift bounds if necessary
 		if(znsmin < 0) {
@@ -392,9 +391,12 @@ V xgroove::do_xzone()
 		// try to keep loop length
 		// shifting of loop bounds may happen
 
-		const L maxfd = buf->Frames()-(curmax-curmin);
+		const L plen = curmax-curmin;
+		if(xzone > plen) xzone = plen;
+		const L maxfd = buf->Frames()-plen;
 		if(xzone > maxfd) xzone = maxfd;
 
+		// \todo what about round-off?
 		znsmin = curmin-xzone/2;
 		znsmax = curmax+xzone/2;
 
@@ -412,6 +414,11 @@ V xgroove::do_xzone()
 	else if(xfade == xsf_keeplooppos) { 
 		// try to keep loop position and length
 
+		// restrict fade zone to maximum length 
+		const L plen = curmax-curmin;
+		if(xzone > plen) xzone = plen;
+
+		// \todo what about round-off?
 		znsmin = curmin-xzone/2;
 		znsmax = curmax+xzone/2;
 
@@ -423,9 +430,6 @@ V xgroove::do_xzone()
 			xzone -= ovr*2;
 		}
 	}
-
-	znmin = znsmin+xzone;
-	znmax = znsmax-xzone;
 
 	FLEXT_ASSERT(znsmin <= znsmax && (znsmax-znsmin) >= xzone*2);
 }
@@ -631,10 +635,11 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	FLEXT_ASSERT(xzone);
 
 	const F xz = xzone,xf = (F)XZONE_TABLE/xz;
-	const D lmin = znmin,lmax = znmax,lsh = lmax-lmin+xz;
 
     // adapt the playing bounds to the current cross-fade zone
     const L smin = znsmin,smax = znsmax,plen = smax-smin;
+
+	const D lmin = smin+xz,lmax = smax-xz,lsh = lmax-lmin+xz;
 
 	if(buf && plen > 0) {
 		BL inzn = false;
@@ -656,6 +661,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
             if(o >= lmax) {
                 // in late cross-fade zone
 				o -= lsh;
+				lpbang = true;
 			}
 
             // now: smin <= o < smax
@@ -838,9 +844,8 @@ V xgroove::m_help()
 	post("\t@units 0/1/2/3: set units to frames/buffer size/ms/s");
 	post("\t@sclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
 	post("\t@xzone {unit}: length of loop crossfade zone");
-	post("\t@xsymm -1,0...1: symmetry of crossfade zone inside/outside point");
-	post("\t@xshape 0/1 [param 0...1]: shape of crossfading (linear/trig)");
-	post("\t@xkeep 0/1: try to preserve xzone/loop length");
+	post("\t@xfade 0/1/2/3: fade mode (keep loop/keep loop length/keep fade/inside loop)");
+	post("\t@xshape 0/1/2: shape of crossfade (linear/quarter sine/half sine)");
 	post("");
 } 
 
