@@ -21,7 +21,7 @@ FLEXT_EXT V xgroove_tilde_setup();
 
 FLEXT_EXT V xsample_setup()
 {
-	post("xsample objects, (C)2001,2002 Thomas Grill");
+	post("xsample objects, version " XSAMPLE_VERSION ", (C)2001,2002 Thomas Grill");
 	post("xsample: xrecord~, xplay~, xgroove~ - send objects a 'help' message to get assistance");
 	post("");
 

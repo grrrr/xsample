@@ -88,6 +88,10 @@ FLEXT_TILDE_GIMME("xrecord~",xrecord)
 
 V xrecord::cb_setup(t_class *c)
 {
+#ifndef PD
+	post("loaded xrecord~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");
+#endif
+
 	FLEXT_ADDBANG(c,m_start);
 	FLEXT_ADDMETHOD(c,"start",m_start);
 	FLEXT_ADDMETHOD(c,"stop",m_stop);
@@ -113,17 +117,22 @@ xrecord::xrecord(I argc,t_atom *argv):
 	appmode(true),doloop(false),
 	drintv(0)
 {
-#ifdef _DEBUG
-	if(argc < 1) {
-		post("%s - Warning: no buffer defined",thisName());
-	} 
-#endif
-
+	I argi = 0;
 #ifdef MAXMSP
-	inchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
-#else
-	inchns = 1;
+	if(argc > argi && ISFLINT(argv[argi])) {
+		inchns = atom_getflintarg(argi,argc,argv);
+		argi++;
+	}
+	else
 #endif
+	inchns = 1;
+
+	if(argc > argi && ISSYMBOL(argv[argi])) {
+		buf = new buffer(atom_getsymbolarg(argi,argc,argv),true);
+		argi++;
+	}
+	else
+		buf = new buffer(NULL,true);
 
 	add_in_signal(inchns);  // audio signals
 	add_in_signal(); // on/off signal
@@ -135,7 +144,6 @@ xrecord::xrecord(I argc,t_atom *argv):
 	outmin = get_out(1);
 	outmax = get_out(2);
 	
-	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL,true);
 #ifdef PD
 	m_loadbang();  // in PD loadbang is not called upon object creation
 #endif
@@ -382,10 +390,10 @@ V xrecord::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 V xrecord::m_help()
 {
-	post("%s - part of xsample objects",thisName());
-	post("(C) Thomas Grill, 2001-2002 - version " XSAMPLE_VERSION " compiled on " __DATE__ " " __TIME__);
+	post("%s - part of xsample objects, version " XSAMPLE_VERSION " compiled on " __DATE__ " " __TIME__,thisName());
+	post("(C) Thomas Grill, 2001-2002");
 #ifdef MAXMSP
-	post("Arguments: %s [buffer] [channels=1]",thisName());
+	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
 	post("Arguments: %s [buffer]",thisName());
 #endif
@@ -431,16 +439,21 @@ V xrecord::m_assist(L msg,L arg,C *s)
 {
 	switch(msg) {
 	case 1: //ASSIST_INLET:
-		switch(arg) {
-		case 0:
-			strcpy(s,"Messages and Audio signal to record"); break;
-		case 1:
-			strcpy(s,"On/Off/Fade/Mix signal (0..1)"); break;
-		case 2:
-			strcpy(s,"Starting point of recording"); break;
-		case 3:
-			strcpy(s,"Ending point of recording"); break;
+		if(arg < inchns) {
+			if(arg) 
+				strcpy(s,"Messages and Audio channel 1"); 
+			else
+				sprintf(s,"Audio channel %li",arg+1); 
 		}
+		else
+			switch(arg-inchns) {
+			case 0:
+				strcpy(s,"On/Off/Fade/Mix signal (0..1)"); break;
+			case 1:
+				strcpy(s,"Starting point of recording"); break;
+			case 2:
+				strcpy(s,"Ending point of recording"); break;
+			}
 		break;
 	case 2: //ASSIST_OUTLET:
 		switch(arg) {

@@ -55,6 +55,10 @@ FLEXT_TILDE_GIMME("xplay~",xplay)
 
 V xplay::cb_setup(t_class *c)
 {
+#ifndef PD
+	post("loaded xplay~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");
+#endif
+
 	FLEXT_ADDBANG(c,m_start);
 	FLEXT_ADDMETHOD(c,"start",m_start);
 	FLEXT_ADDMETHOD(c,"stop",m_stop);
@@ -64,23 +68,27 @@ V xplay::cb_setup(t_class *c)
 xplay::xplay(I argc, t_atom *argv): 
 	doplay(false)
 {
-#ifdef _DEBUG
-	if(argc < 1) {
-		post("%s - Warning: no buffer defined",thisName());
-	} 
-#endif
-	
+	I argi = 0;
 #ifdef MAXMSP
-	outchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
-#else
-	outchns = 1;
+	if(argc > argi && ISFLINT(argv[argi])) {
+		outchns = atom_getflintarg(argi,argc,argv);
+		argi++;
+	}
+	else
 #endif
+	outchns = 1;
+
+	if(argc > argi && ISSYMBOL(argv[argi])) {
+		buf = new buffer(atom_getsymbolarg(argi,argc,argv),true);
+		argi++;
+	}
+	else
+		buf = new buffer(NULL,true);
 
 	add_in_signal();  // pos signal
 	add_out_signal(outchns);
 	setup_inout();
 
-	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL,true);	
 #ifdef PD
 	m_loadbang();  // in PD loadbang is not called upon object creation
 #endif
@@ -222,10 +230,10 @@ V xplay::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 V xplay::m_help()
 {
-	post("%s - part of xsample objects",thisName());
-	post("(C) Thomas Grill, 2001-2002 - version " XSAMPLE_VERSION " compiled on " __DATE__ " " __TIME__);
+	post("%s - part of xsample objects, version " XSAMPLE_VERSION " compiled on " __DATE__ " " __TIME__,thisName());
+	post("(C) Thomas Grill, 2001-2002");
 #ifdef MAXMSP
-	post("Arguments: %s [out channels=1] [buffer] [channel(s)] ...",thisName());
+	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
 	post("Arguments: %s [buffer]",thisName());
 #endif
@@ -266,10 +274,8 @@ V xplay::m_assist(L msg,L arg,C *s)
 		}
 		break;
 	case 2: //ASSIST_OUTLET:
-		switch(arg) {
-		case 0:
-			strcpy(s,"Audio signal played"); break;
-		}
+		if(arg < outchns) 
+			sprintf(s,"Audio signal channel %li",arg+1); 
 		break;
 	}
 }

@@ -81,6 +81,10 @@ FLEXT_TILDE_GIMME("xgroove~",xgroove)
 
 V xgroove::cb_setup(t_class *c)
 {
+#ifndef PD
+	post("loaded xgroove~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");
+#endif
+
 	FLEXT_ADDFLOAT_N(c,1,m_min);
 	FLEXT_ADDFLOAT_N(c,2,m_max);
 	FLEXT_ADDMETHOD_1(c,"min",m_min,F); 
@@ -98,17 +102,22 @@ xgroove::xgroove(I argc,t_atom *argv):
 	doplay(false),doloop(true),
 	curpos(0)
 {
-#ifdef _DEBUG
-	if(argc < 1) {
-		post("%s - Warning: no buffer defined",thisName());
-	} 
-#endif
-	
+	I argi = 0;
 #ifdef MAXMSP
-	outchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
-#else
-	outchns = 1;
+	if(argc > argi && ISFLINT(argv[argi])) {
+		outchns = atom_getflintarg(argi,argc,argv);
+		argi++;
+	}
+	else
 #endif
+	outchns = 1;
+
+	if(argc > argi && ISSYMBOL(argv[argi])) {
+		buf = new buffer(atom_getsymbolarg(argi,argc,argv),true);
+		argi++;
+	}
+	else
+		buf = new buffer(NULL,true);
 
 	add_in_signal(); // speed signal
 	add_in_float(2); // min & max play pos
@@ -120,7 +129,6 @@ xgroove::xgroove(I argc,t_atom *argv):
 	outmin = get_out(outchns+1);
 	outmax = get_out(outchns+2);
 	
-	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL,true);	
 #ifdef PD
 	m_loadbang();  // in PD loadbang is not called upon object creation
 #endif
@@ -375,10 +383,10 @@ V xgroove::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 V xgroove::m_help()
 {
-	post("%s - part of xsample objects",thisName());
-	post("(C) Thomas Grill, 2001-2002 - version " XSAMPLE_VERSION " compiled on " __DATE__ " " __TIME__);
+	post("%s - part of xsample objects, version " XSAMPLE_VERSION " compiled on " __DATE__ " " __TIME__,thisName());
+	post("(C) Thomas Grill, 2001-2002");
 #ifdef MAXMSP
-	post("Arguments: %s [buffer] [channels=1]",thisName());
+	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
 	post("Arguments: %s [buffer]",thisName());
 #endif
@@ -430,16 +438,17 @@ V xgroove::m_assist(long msg, long arg, char *s)
 		}
 		break;
 	case 2: //ASSIST_OUTLET:
-		switch(arg) {
-		case 0:
-			strcpy(s,"Audio signal played"); break;
-		case 1:
-			strcpy(s,"Position currently played"); break;
-		case 2:
-			strcpy(s,"Starting point (rounded to sample)"); break;
-		case 3:
-			strcpy(s,"Ending point (rounded to sample)"); break;
-		}
+		if(arg < outchns)
+			sprintf(s,"Audio signal channel %li",arg+1); 
+		else
+			switch(arg-outchns) {
+			case 0:
+				strcpy(s,"Position currently played"); break;
+			case 1:
+				strcpy(s,"Starting point (rounded to sample)"); break;
+			case 2:
+				strcpy(s,"Ending point (rounded to sample)"); break;
+			}
 		break;
 	}
 }

@@ -57,6 +57,9 @@ Version history:
 - fixed bug with refresh message (min/max reset)
 - xgroove~: position (by pos message) isn't sample rounded anymore
 - reset/refresh messages readjust dsp routines to current buffer format (e.g. channel count)
+- corrected Max/MSP assist method for multi-channel
+- fixed xplay~ help method 
+- changed syntax to x*~ [channels=1] [buffer] 
 
 0.2.1:
 - no leftmost float inlet for position setting - use pos method
@@ -78,7 +81,6 @@ general:
 - cleaner makefile PD/Borland C++
 - makefile and build for PD/GCC
 - eventually make use of resource files for text items
-- more copyright message at load time, less with help message
 
 features:
 - crossfading loop zone for xgroove~
@@ -88,7 +90,7 @@ features:
 - anti-alias filter? (possible?)
 
 tests:
-- test graphics update behavior in Max
+- test graphics update behavior in Max (all done automatically ?)
 
 bugs:
-none known
+no unfixed known
