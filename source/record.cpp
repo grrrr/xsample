@@ -135,6 +135,7 @@ xrecord::xrecord(I argc,t_atom *argv):
 	AddInFloat(2);  // min & max
 	AddOutSignal();  // pos signal
 	AddOutFloat(2); // min & max
+	AddOutBang();  // loop bang
 	SetupInOut();
 
 	FLEXT_ADDMETHOD_F(0,"pos",m_pos);
@@ -248,6 +249,7 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 	const S *on = invecs[inchns];
 	S *pos = outvecs[0];
 
+	BL lpbang = false;
 	register const F pf = sclmul;
 	register L o = curpos;
 	
@@ -264,6 +266,8 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 				}
 				else 
 					m_stop(); // loop expired;
+					
+				lpbang = true;
 			}
 
 			if(!dorec) break;
@@ -374,6 +378,8 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 		register F p = scale(o);
 		while(n--) *(pos++) = p;
 	}
+	
+	if(lpbang) ToOutBang(3);
 }
 
 V xrecord::s_dsp()

@@ -143,6 +143,7 @@ xgroove::xgroove(I argc,t_atom *argv):
 	AddOutSignal(outchns); // output
 	AddOutSignal(); // position
 	AddOutFloat(2); // play min & max	
+	AddOutBang();  // loop bang
 	SetupInOut();
 
 	FLEXT_ADDMETHOD(1,m_min);
@@ -232,6 +233,7 @@ V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
 {
 	const S *speed = invecs[0];
 	S *pos = outvecs[outchns];
+	BL lpbang = false;
 
 	const I smin = curmin,smax = curmax,plen = curlen;
 
@@ -241,8 +243,8 @@ V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
 		for(I i = 0; i < n; ++i) {	
 			const S spd = speed[i];  // must be first because the vector is reused for output!
 			
-			if(o >= smax) o = smax;
-			else if(o < smin) o = smin;
+			if(o >= smax) { o = smax; lpbang = true; }
+			else if(o < smin) { o = smin; lpbang = true; }
 			
 			pos[i] = scale(o);
 			o += spd;
@@ -254,12 +256,15 @@ V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);
+		
+	if(lpbang) ToOutBang(outchns+3);
 }
 
 V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 {
 	const S *speed = invecs[0];
 	S *pos = outvecs[outchns];
+	BL lpbang = false;
 
 	const I smin = curmin,smax = curmax,plen = curlen;
 
@@ -270,10 +275,14 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 			const S spd = speed[i];  // must be first because the vector is reused for output!
 
 			// normalize offset
-			if(o >= smax) 
+			if(o >= smax) {
 				o = fmod(o-smin,plen)+smin;
-			else if(o < smin) 
+				lpbang = true;
+			}
+			else if(o < smin) {
 				o = fmod(o-smin,plen)+smax; 
+				lpbang = true;
+			}
 
 			pos[i] = scale(o);
 			o += spd;
@@ -285,12 +294,15 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);
+		
+	if(lpbang) ToOutBang(outchns+3);
 }
 
 V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 {
 	const S *speed = invecs[0];
 	S *pos = outvecs[outchns];
+	BL lpbang = false;
 
 	const I smin = curmin,smax = curmax,plen = curlen;
 
@@ -302,10 +314,14 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 			const S spd = speed[i];  // must be first because the vector is reused for output!
 
 			// normalize offset
-			if(o >= smax) 
+			if(o >= smax) {
 				o = fmod(o-smin,plen)+smin;
-			else if(o < smin) 
+				lpbang = true;
+			}
+			else if(o < smin) {
 				o = fmod(o-smin,plen)+smax; 
+				lpbang = true;
+			}
 
 			F o = scale(o);
 			pos[i] = offs;
@@ -319,12 +335,15 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);
+		
+	if(lpbang) ToOutBang(outchns+3);
 }
 
 V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 {
 	const S *speed = invecs[0];
 	S *pos = outvecs[outchns];
+	BL lpbang = false;
 
 	const I smin = curmin,smax = curmax,plen = curlen;
 
@@ -339,10 +358,12 @@ V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 			if(o >= smax) {
 				o = smax-fmod(o-smin,plen); // mirror the position at smax
 				bd = -bd;
+				lpbang = true;
 			}
 			else if(o < smin) {
 				o = smin-fmod(o-smin,plen); // mirror the position at smin
 				bd = -bd;
+				lpbang = true;
 			}
 
 			pos[i] = scale(o);
@@ -356,6 +377,8 @@ V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);
+		
+	if(lpbang) ToOutBang(outchns+3);
 }
 
 
