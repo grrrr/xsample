@@ -42,7 +42,7 @@ xs_obj::xs_obj():
 #endif
 	interp(xsi_4p),
 	sclmode(xss_unitsinbuf),
-	curmin(0),curmax(BIGLONG)
+	curmin(0),curmax(0)
 {}
 	
 

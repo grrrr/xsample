@@ -37,6 +37,7 @@ public:
 	
 	virtual V m_start() { doplay = true; }
 	virtual V m_stop() { doplay = false; }
+	virtual V m_reset() { xs_obj::setbuf(); }
 
 	virtual V setbuf(t_symbol *s = NULL) 
 	{
@@ -55,6 +56,7 @@ private:
 
 	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
+	static V cb_reset(t_class *c) { thisClass(c)->m_reset(); }
 
 	static t_int *dspmeth(t_int *w) 
 	{ 
@@ -195,6 +197,7 @@ V xplay_obj::m_help()
 	post("\tprint: print current settings");
 	post("\tbang/start: begin playing");
 	post("\tstop: stop playing");
+	post("\treset: recognizes new buffer");
 	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
 	post("\tinterp 0/1: turn interpolation off/on");
 	post("");

@@ -177,6 +177,7 @@ V xgroove_obj::m_pos(F pos)
 
 V xgroove_obj::m_reset() 
 {
+	xs_obj::setbuf();
 	curpos = 0;
 	m_min(0);
     m_max(buflen*s2u);
@@ -410,6 +411,12 @@ V xgroove_obj::m_assist(long msg, long arg, char *s)
 			break;
 		case 1:
 			strcpy(s,"Position currently played");
+			break;
+		case 2:
+			strcpy(s,"Starting point (rounded to sample)");
+			break;
+		case 3:
+			strcpy(s,"Ending point (rounded to sample)");
 			break;
 		}
 		break;

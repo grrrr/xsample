@@ -34,6 +34,11 @@ public:
 	virtual V m_help();
 	virtual V m_print();
 	
+	virtual V m_pos(F pos);
+	virtual V m_start() { dorec = true; }
+	virtual V m_stop() { dorec = false; if(!sigmode && !appmode) m_pos(0); }
+	virtual V m_reset();
+
 	virtual V m_units(xs_unit md = xsu__);
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
@@ -43,13 +48,6 @@ public:
 	virtual V m_loop(BL lp) { doloop = lp; }
 	virtual V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
 	
-	virtual V m_pos(F pos);
-	virtual V m_start() { dorec = true; }
-	virtual V m_stop() { dorec = false; if(!sigmode && !appmode) m_pos(0); }
-	virtual V m_reset();
-
-	virtual V setbuf(t_symbol *s = NULL);
-
 protected:
 	I inchns;
 	BL sigmode,appmode;
@@ -65,17 +63,19 @@ protected:
 	
 	V signal(I n,const F *in,const F *on,F *pos);  // this is the dsp method
 
+	virtual V setbuf(t_symbol *s = NULL);
+
 private:
 	virtual V m_dsp(t_signal **sp);
-
-	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
-	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
 
 	static t_int *dspmeth(t_int *w) 
 	{ 
 		thisClass(w+1)->signal((I)w[2],(const F *)w[3],(const F *)w[4],(F *)w[5]); 
 		return w+6;
 	}
+
+	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
+	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
 
 	static V cb_pos(V *c,F pos) { thisClass(c)->m_pos(pos); }
 	static V cb_min(V *c,F mn) { thisClass(c)->m_min(mn); }
@@ -199,6 +199,7 @@ V xrec_obj::m_pos(F pos)
 
 V xrec_obj::m_reset()
 {
+	xs_obj::setbuf();
 	curpos = 0;
 	m_min(0);
     m_max(buflen*s2u);
@@ -207,8 +208,9 @@ V xrec_obj::m_reset()
 
 V xrec_obj::setbuf(t_symbol *s)
 {
+	const I bufl1 = buflen;
 	xs_obj::setbuf(s);
-	m_reset(); // calls recmin,recmax,rescale
+	if(bufl1 != buflen) m_reset(); // calls recmin,recmax,rescale
     m_units();
 }
 
@@ -345,7 +347,7 @@ V xrec_obj::signal(I n,const F *sig,const F *on,F *pos)
 
 V xrec_obj::m_dsp(t_signal **sp)
 {
-	m_units();  // method_dsp hopefully called at change of sample rate ?!
+	m_units();  // m_dsp hopefully called at change of sample rate ?!
 	dsp_add(dspmeth, 5,x_obj,sp[0]->s_n,sp[0]->s_vec,sp[1]->s_vec,sp[2]->s_vec);
 }
 
@@ -423,10 +425,10 @@ V xrec_obj::m_assist(L msg,L arg,C *s)
 			strcpy(s,"Current position of recording");
 			break;
 		case 1:
-			strcpy(s,"Starting point of recording");
+			strcpy(s,"Starting point (rounded to sample)");
 			break;
 		case 2:
-			strcpy(s,"Ending point of recording");
+			strcpy(s,"Ending point (rounded to sample)");
 			break;
 		}
 		break;
