@@ -16,353 +16,221 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 #define OBJNAME "xgroove~"
-#define extobject groove_object
 
-static t_class *extclass;
 
 //#define DEBUG 
 
-// defaults
-#define DEF_LOOPMODE 1
-#define DEF_SIGMODE 0
-#define DEF_SCLMODE 0
-
-#ifdef PD
-#define DEF_UNITS 0
-#else
-#define DEF_UNITS 2
-#endif
-
-class extobject
+class xgroove_obj:
+	public xp_obj
 {
+	CPPEXTERN_HEADER(xgroove_obj,xp_obj)
+
 public:
+	xgroove_obj(I argc,t_atom *argv);
+
 #ifdef MAX
-    t_pxobject obj;
-#else
-	t_object obj;
+	virtual V m_loadbang() { setbuf(); }
+	virtual V m_assist(L msg,L arg,C *s);
 #endif
 
-	t_symbol *bufname;
-	F *buf;
-	I bchns;
-	I sclmode,unitmode;
+	virtual V m_help();
+	virtual V m_print();
 	
-	BL enable,doplay,interp,doloop;
-	I buflen;
-	D curpos;  // in samples
-	I playmin,playmax,playlen;  // in samples
+	virtual V m_start() { doplay = true; }
+	virtual V m_stop() { doplay = false; }
 
-	I sclmin; // in samples
-	F sclmul;
-	F s2u; // sample to unit conversion factor
+	virtual V m_units(xs_unit mode = xsu__);
+
+	virtual V m_pos(F pos);
+	virtual V m_min(F mn);
+	virtual V m_max(F mx);
+	
+	virtual V m_loop(BL lp) { doloop = lp; }
+	
+	virtual V m_reset();
+
+protected:
+
+	I outchns;
+	BL doplay,doloop;
+	D curpos;  // in samples
 
 	_outlet *outmin,*outmax; // float outlets	
 	
 	V outputmin() { outlet_float(outmin,playmin*s2u); }
 	V outputmax() { outlet_float(outmax,playmax*s2u); }
 	
-	V set_min(F mn);
-	V set_max(F mx);
-	
-	inline F scale(F smp) const { return (smp-sclmin)*sclmul; }
-	V setscale(I mode = -1);
-	V setunits(I mode = -1);
+	V signal(I n,const F *speed,F *sig,F *pos);  // this is the dsp method
 	V setbuf(t_symbol *s = NULL);
 
-#ifdef PD   
-    F defsig;
-#endif
+private:
+	virtual V m_dsp(t_signal **sp);
+
+	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
+	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
+
+	static t_int *dspmeth(t_int *w) 
+	{ 
+		thisClass(w+1)->signal((I)w[2],(const F *)w[3],(F *)w[4],(F *)w[5]); 
+		return w+6;
+	}
+
+	static V cb_pos(V *c,F pos) { thisClass(c)->m_pos(pos); }
+	static V cb_min(V *c,F mn) { thisClass(c)->m_min(mn); }
+	static V cb_max(V *c,F mx) { thisClass(c)->m_max(mx); }
+
+	static V cb_reset(V *c) { thisClass(c)->m_reset(); }
+	static V cb_loop(V *c,FI lp) { thisClass(c)->m_loop(lp != 0); }
 };
 
-V extobject::setscale(I mode)
+CPPEXTERN_NEW_WITH_GIMME(xgroove_obj)
+
+V xgroove_obj::cb_setup(t_class *c)
 {
-	if(mode >= 0) sclmode = mode;
-	switch(sclmode) {
-		case 0: // samples/units
-			sclmin = 0; sclmul = s2u;
-			break;
-		case 1: // samples/units from recmin to recmax
-			sclmin = playmin; sclmul = s2u;
-			break;
-		case 2: // unity between 0 and buffer size
-			sclmin = 0; sclmul = buflen?1.f/buflen:0;
-			break;
-		case 3:	// unity between recmin and recmax
-			sclmin = playmin; sclmul = playlen?1.f/playlen:0;
-			break;
-		default:
-			post("Unknown scale mode");
-	}
+	add_float1(c,cb_min);
+	add_float2(c,cb_max);
+
+	add_method0(c,cb_reset, "reset");	
+	add_method1(c,cb_loop, "loop", A_FLINT);	
+	add_method1(c,cb_min, "min", A_FLOAT);	
+	add_method1(c,cb_max, "max", A_FLOAT);	
+
+	add_bang(c,cb_start);	
+	add_method0(c,cb_start, "start");	
+	add_method0(c,cb_stop, "stop");	
+	add_float(c,cb_pos);	
+	add_method1(c,cb_pos, "pos", A_FLOAT);	
 }
 
-V extobject::setunits(I mode)
+xgroove_obj::xgroove_obj(I argc,t_atom *argv):
+	doplay(false),doloop(true)
 {
-	if(mode >= 0) unitmode = mode;
-	switch(unitmode) {
-		case 0: // samples
-			s2u = 1;
-			break;
-		case 1: // buffer size
-			s2u = 1.f/buflen;
-			break;
-		case 2: // ms
-			s2u = 1000.f/sys_getsr();
-			break;
-		case 3: // s
-			s2u = 1.f/sys_getsr();
-			break;
-		default:
-			post("Unknown unit mode");
-	}
-	setscale();
+#ifdef DEBUG
+	if(argc < 1) {
+		post(OBJNAME " - Warning: no buffer defined");
+	} 
+#endif
+	
+	outchns = argc >= 2?atom_getflintarg(1,argc,argv):0;
+
+#ifdef PD	
+    inlet_new(&x_obj, &x_obj.ob_pd, &s_float, gensym("ft1"));  // min play pos
+    inlet_new(&x_obj, &x_obj.ob_pd, &s_float, gensym("ft2"));  // max play pos
+    
+	int ci;
+	for(ci = 0; ci < outchns; ++ci) newout_signal(x_obj); // output
+	outlet_signal(&x_obj); // position
+	x->outmin = newout_float(&x_obj); // play min
+	x->outmax = newout_float(&x_obj); // play max
+#elif defined(MAX)
+	// set up inlets and outlets in reverse
+	floatin(&x_obj,2);  // max play pos
+	floatin(&x_obj,1);  // min play pos
+
+	dsp_setup(x_obj,1); // speed sig
+	outmax = newout_float(&x_obj); // play max
+	outmin = newout_float(&x_obj); // play min
+	newout_signal(&x_obj); // position signal
+	int ci;
+	for(ci = 0; ci < outchns; ++ci) newout_signal(x_obj); // output
+#endif
+
+	bufname = argc >= 1?atom_getsymbolarg(0,argc,argv):NULL;
+#ifdef PD  // in max it is called by loadbang
+	setbuf(bufname);  // calls reset
+#endif
+}
+
+V xgroove_obj::m_units(xs_unit mode)
+{
+	xp_obj::m_units(mode);
+	
+	m_sclmode();
 	outputmin();
 	outputmax();
 }
 
-V extobject::set_min(F mn)
+V xgroove_obj::m_min(F mn)
 {
 	mn /= s2u;  // conversion to samples
 	if(mn < 0) mn = 0;
 	else if(mn > playmax) mn = playmax;
 	playmin = (I)(mn+.5);
 	playlen = playmax-playmin;
-	setscale();
+	m_sclmode();
 
 	outputmin();
 }
 
-V extobject::set_max(F mx)
+V xgroove_obj::m_max(F mx)
 {
 	mx /= s2u;  // conversion to samples
 	if(mx > buflen) mx = buflen;
 	else if(mx < playmin) mx = playmin;
 	playmax = (I)(mx+.5);
 	playlen = playmax-playmin;
-	setscale();
+	m_sclmode();
 	
 	outputmax();
 }
 
-static V method_sclmode(extobject *x, t_flint scl)
+
+V xgroove_obj::m_pos(F pos)
 {
-	x->setscale((I)scl);
+	curpos = pos/s2u;
+	if(curpos < playmin) curpos = playmin;
+	else if(curpos > playmax) curpos = playmax;
 }
 
-static V method_units(extobject *x, t_flint cnv)
+V xgroove_obj::m_reset() 
 {
-	x->setunits((I)cnv);
-}
-
-
-static V method_min(extobject *x,t_float mn)
-{
-	x->set_min(mn);
-}
-
-static V method_max(extobject *x,t_float mx)
-{
-	x->set_max(mx);
+	curpos = 0;
+	m_min(0);
+    m_max(buflen*s2u);
 }
 
 
-static V method_pos(extobject *x,t_float pos)
+V xgroove_obj::setbuf(t_symbol *s)
 {
-	x->curpos = pos/x->s2u;
-	if(x->curpos < x->playmin) x->curpos = x->playmin;
-	else if(x->curpos > x->playmax) x->curpos = x->playmax;
-}
-
-static V method_loop(extobject *x, t_flint mode)
-{
-	x->doloop = mode != 0;	
-}
-
-static V method_interp(extobject *x, t_flint in)
-{
-	x->interp = in != 0;	
-}
-
-static V method_reset(extobject *x) 
-{
-	x->curpos = 0;
-	x->set_min(0);
-    x->set_max(x->buflen*x->s2u);
-}
-
-static V method_enable(extobject *x,t_flint en)
-{
-	x->enable = en != 0;
-}
-
-static V method_start(extobject *x)
-{ 
-	x->doplay = true;
-}
-
-static V method_stop(extobject *x)
-{
-	x->doplay = false;
-}
-
-V extobject::setbuf(t_symbol *s)
-{
-	if(s && *s->s_name)	bufname = s;
-	
 	const I bufl1 = buflen;
-
-	buf = NULL; 
-	bchns = 0;
-	buflen = 0; 
-
-	if(bufname) {
-#ifdef PD
-		t_garray *a;
-    
-		if (!(a = (t_garray *)pd_findbyclass(bufname, garray_class)))
-		{
-    		if (*bufname->s_name)
-    			error(OBJNAME ": no such array '%s'", bufname->s_name);
-    		bufname = 0;
-		}
-		else if (!garray_getfloatarray(a, &buflen, &buf))
-		{
-    		error(OBJNAME ": bad template '%s'", bufname->s_name);
-    		buf = 0;
-			buflen = 0;
-		}
-		else {
-			garray_usedindsp(a);
-			bchns = 1;
-		}
-#elif defined(MAX)
-		if(bufname->s_thing) {
-			const _buffer *p = (const _buffer *)bufname->s_thing;
-			
-			if(NOGOOD(p)) {
-				post(OBJNAME ": buffer object '%s' no good",bufname->s_name);
-			}
-			else {
-#ifdef DEBUG
-				post(OBJNAME ": buffer object '%s' - ???:%i samples:%i channels:%i buflen:%i",bufname->s_name,p->b_valid,p->b_frames,p->b_nchans,p->b_size);
-#endif
-				buf = p->b_samples;
-				bchns = p->b_nchans;
-				buflen = p->b_size;
-			}
-		}
-		else {
-    		error(OBJNAME ": symbol '%s' not defined", bufname->s_name);
-		}
-#endif
-	}
-
-	if(bufl1 != buflen) method_reset(this); // calls recmin,recmax,rescale
-    setunits();
-}
-
-static V method_set(extobject *x,t_symbol *s, I argc, t_atom *argv)
-{
-	x->setbuf(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
+	xp_obj::setbuf(s);
+	if(bufl1 != buflen) m_reset(); // calls recmin,recmax,rescale
+    m_units();
 }
 
 
-
-static V *method_new(t_symbol *s, I argc, t_atom *argv)
+V xgroove_obj::signal(I n,const F *speed,F *sig,F *pos)
 {
-	if(argc < 1) {
-		post("Arg error: " OBJNAME " [buffer] [units = %i] [sclmode = %i] [loop = 0] [interp = 1]",(I)DEF_UNITS,(I)DEF_SCLMODE);
-		return NULL;
-	} 
+	if(enable) {    
+		const I smin = playmin,smax = playmax;
+		const I plen = playlen;
+		D o = curpos;
 
-#ifdef PD	
-    extobject *x = (extobject *)pd_new(extclass);
-
-    inlet_new(&x->obj, &x->obj.ob_pd, &s_float, gensym("ft1"));  // min play pos
-    inlet_new(&x->obj, &x->obj.ob_pd, &s_float, gensym("ft2"));  // max play pos
-	outlet_new(&x->obj, &s_signal); // output
-	outlet_new(&x->obj, &s_signal); // position
-	x->outmin = outlet_new(&x->obj, &s_float); // play min
-	x->outmax = outlet_new(&x->obj, &s_float); // play max
-
-    x->defsig = 0;
-#elif defined(MAX)
-	extobject *x = (extobject *)newobject(extclass);
-
-	// set up inlets and outlets in reverse
-	floatin(&x->obj,2);  // max play pos
-	floatin(&x->obj,1);  // min play pos
-	dsp_setup(&x->obj,1); // speed sig
-
-	x->outmax = outlet_new(&x->obj,"float"); // play max
-	x->outmin = outlet_new(&x->obj,"float"); // play min
-	outlet_new(&x->obj,"signal"); // position signal
-	outlet_new(&x->obj,"signal"); // output signal
-#endif
-
-	x->playmin = 0;
-	x->playmax = BIGLONG;
-
-	method_sclmode(x,argc >= 3?atom_getflintarg(2,argc,argv):DEF_SCLMODE);
-	method_units(x,argc >= 2?atom_getflintarg(1,argc,argv):DEF_UNITS);
-	method_loop(x,argc >= 4?atom_getflintarg(3,argc,argv):0);
-	method_interp(x,argc >= 5?atom_getflintarg(4,argc,argv):1);
-
-	x->bufname = atom_getsymbolarg(0,argc,argv);
-#ifdef PD  // in max it is called by loadbang
-	x->setbuf(x->bufname);  // calls reset
-#endif
-
-	x->enable = true;
-	x->doplay = false;
-	
-    return x;
-}
-
-static V method_free(extobject *x)
-{
-}
-
-
-
-static t_int *method_perform(t_int *w)
-{
-    extobject *const x = (extobject *)(w[1]);
-
-	if(x->enable) {    
-	    I n = (int)(w[5]);    
-	    const t_float *speed = (const t_float *)(w[2]);
-	    t_float *sig = (t_float *)(w[3]);
-	    t_float *pos = (t_float *)(w[4]);
-
-		const I smin = x->playmin,smax = x->playmax;
-		const I playlen = x->playlen;
-		D o = x->curpos;
-
-		if(x->buf && x->doplay && playlen > 0) {
+		if(buf && doplay && plen > 0) {
 			const I maxo = smax-3;
 
-			if(x->interp && playlen >= 4) {
+			if(interp && plen >= 4) {
 				for(I i = 0; i < n; ++i) {	
 					const F spd = *(speed++);
 
 					// Offset normalisieren
 					if(o >= smax) 
-						o = x->doloop?fmod(o-smin,playlen)+smin:(D)smax-0.001;
+						o = doloop?fmod(o-smin,playlen)+smin:(D)smax-0.001;
 					else if(o < smin) 
-						o = x->doloop?fmod(o+(playlen-smin),playlen)+smin:smin;
+						o = doloop?fmod(o+(playlen-smin),playlen)+smin:smin;
 
-					*(pos++) = x->scale(o);
+					*(pos++) = scale(o);
 
 					const I oint = o;
 					F a,b,c,d;
 
-					const F *fp = x->buf+oint;
+					const F *fp = buf+oint;
 					F frac = o-oint;
 
 					if (oint <= smin) {
-						if(x->doloop) {
+						if(doloop) {
 							// oint ist immer == smin
-							a = x->buf[smax-1];
+							a = buf[smax-1];
 							b = fp[0];
 							c = fp[1];
 							d = fp[2];
@@ -375,21 +243,21 @@ static t_int *method_perform(t_int *w)
 								d = fp[2];
 							}
 							else {
-								a = b = c = d = x->buf[smin];
+								a = b = c = d = buf[smin];
 							}
 						}
 					}
 					else if(oint > maxo) {
-						if(x->doloop) {
+						if(doloop) {
 							a = fp[-1];
 							b = fp[0];
 							if(oint == maxo+1) {
 								c = fp[1];
-								d = x->buf[smin];
+								d = buf[smin];
 							}
 							else {
-								c = x->buf[smin];
-								d = x->buf[smin+1];
+								c = buf[smin];
+								d = buf[smin+1];
 							}
 						}
 						else {
@@ -406,7 +274,7 @@ static t_int *method_perform(t_int *w)
 							}
 							else { 
 								// >= (maxo+3 = smax-1)
-								a = b = c = d = x->buf[smax-1];
+								a = b = c = d = buf[smax-1];
 							}
 
 						}
@@ -427,18 +295,18 @@ static t_int *method_perform(t_int *w)
 				}
 			}
 			else {
-				if(x->doloop) {
+				if(doloop) {
 					for(I i = 0; i < n; ++i) {	
 						F spd = *(speed++);
 
 						// Offset normalisieren
 						if(o >= smax) 
-							o = fmod(o,playlen)+smin;
+							o = fmod(o,plen)+smin;
 						else if(o < smin) 
-							o = fmod(o+smax,playlen)+smin;
+							o = fmod(o+smax,plen)+smin;
 
-						*(pos++) = x->scale(o);
-						*(sig++) = x->buf[(I)o];
+						*(pos++) = scale(o);
+						*(sig++) = buf[(I)o];
 
 						o += spd;
 					}
@@ -447,15 +315,15 @@ static t_int *method_perform(t_int *w)
 					for(I i = 0; i < n; ++i) {	
 						const F spd = *(speed++);
 
-						*(pos++) = x->scale(o);
+						*(pos++) = scale(o);
 
 						const I oint = o;
 						if(oint < smin) 
-							*(sig++) = x->buf[smin];
+							*(sig++) = buf[smin];
 						else if(oint >= smax) 
-							*(sig++) = x->buf[smax];
+							*(sig++) = buf[smax];
 						else
-							*(sig++) = x->buf[oint];
+							*(sig++) = buf[oint];
 
 						o += spd;
 					}
@@ -464,32 +332,29 @@ static t_int *method_perform(t_int *w)
 		} 
 		else {
 			// interne Funktionen benutzen!
-			const F oscl = x->scale(o);
+			const F oscl = scale(o);
 			while(n--) {	
 				*(pos++) = oscl;
 				*(sig++) = 0;
 			}
 		}
 		
-		x->curpos = o;
+		curpos = o;
 	}   
-
-    return (w+6);
 }
 
-static V method_dsp(extobject *x, t_signal **sp)
+V xgroove_obj::m_dsp(t_signal **sp)
 {
-	x->setbuf();
-//	x->setunits();  // method_dsp hopefully called at change of sample rate ?!
-	dsp_add(method_perform, 5, x, sp[0]->s_vec,sp[1]->s_vec,sp[2]->s_vec,sp[0]->s_n);
+	setbuf();  // method_dsp hopefully called at change of sample rate ?!
+	dsp_add(dspmeth, 5,x_obj,sp[0]->s_n,sp[0]->s_vec,sp[1]->s_vec,sp[2]->s_vec);
 }
 
 
-static V method_help(extobject *x)
+V xgroove_obj::m_help()
 {
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001 - version " VERSION " compiled on " __DATE__ " " __TIME__);
-	post("Arguments: " OBJNAME " [buffer] [units = %i] [sclmode = %i] [loop = 0] [interp = 1]",(I)DEF_UNITS,(I)DEF_SCLMODE);
+	post("Arguments: " OBJNAME " [buffer] [channels]");
 	post("Inlets: 1:Messages/Speed signal, 2:Min position, 3:Max position");
 	post("Outlets: 1:Audio signal, 2:Position signal, 3:Min position (rounded), 4:Max position (rounded)");	
 	post("Methods:");
@@ -511,25 +376,20 @@ static V method_help(extobject *x)
 	post("");
 }
 
-static V method_print(extobject *x)
+V xgroove_obj::m_print()
 {
 	static const C sclmode_txt[][20] = {"units","units in loop","buffer","loop"};
 
 	// print all current settings
 	post(OBJNAME " - current settings:");
-	post("bufname = '%s',buflen = %.3f",x->bufname?x->bufname->s_name:"",(F)(x->buflen*x->s2u)); 
-	post("samples/unit = %.3f, scale mode = %s",(F)(1./x->s2u),sclmode_txt[x->sclmode]); 
-	post("loop = %s, interpolation = %s",x->doloop?"yes":"no",x->interp?"yes":"no"); 
+	post("bufname = '%s',buflen = %.3f",bufname?bufname->s_name:"",(F)(buflen*s2u)); 
+	post("samples/unit = %.3f, scale mode = %s",(F)(1./s2u),sclmode_txt[sclmode]); 
+	post("loop = %s, interpolation = %s",doloop?"yes":"no",interp?"yes":"no"); 
 	post("");
 }
 
 #ifdef MAX
-static V method_loadbang(extobject *x)
-{
-	x->setbuf();
-}
-
-static V method_assist(extobject *x, void *b, long msg, long arg, char *s)
+V xgroove_obj::m_assist(long msg, long arg, char *s)
 {
 	switch(msg) {
 	case 1: //ASSIST_INLET:
@@ -564,51 +424,14 @@ extern "C" {
 #endif
 
 #ifdef PD
-PD_EXTERN 
-V xgroove_tilde_setup()
+EXT_EXTERN V xgroove_tilde_setup()
 #elif defined(MAX)
 V main()
 #endif
 {
-#ifdef PD
-	extclass = class_new(gensym(OBJNAME),
-    	(t_newmethod)method_new, (t_method)method_free,
-    	sizeof(extobject), 0, A_GIMME, A_NULL);
-    CLASS_MAINSIGNALIN(extclass, extobject, defsig);
-#elif defined(MAX)
-	setup((t_messlist **)&extclass, (method)method_new, (method)method_free, (short)sizeof(extobject), 0L, A_GIMME, A_NULL);
-	dsp_initclass();
-
-	addmess((method)method_loadbang, "loadbang", A_CANT, A_NULL);
-	addmess((method)method_assist, "assist", A_CANT, A_NULL);
-#endif
-
-	add_dsp(extclass,method_dsp);
-	
-	add_float1(extclass,method_min);
-	add_float2(extclass,method_max);
-
-	add_methodG(extclass,method_set, "set");
-
-	add_method1(extclass,method_enable, "enable",A_FLINT);	
-	add_method0(extclass,method_help, "help");	
-	add_method0(extclass,method_print, "print");	
-		
-	add_method0(extclass,method_reset, "reset");	
-	add_method1(extclass,method_loop, "loop", A_FLINT);	
-	add_method1(extclass,method_interp, "interp", A_FLINT);	
-	add_method1(extclass,method_min, "min", A_FLOAT);	
-	add_method1(extclass,method_max, "max", A_FLOAT);	
-
-	add_bang(extclass,method_start);	
-	add_method0(extclass,method_start, "start");	
-	add_method0(extclass,method_stop, "stop");	
-	add_float(extclass,method_pos);	
-	add_method1(extclass,method_pos, "pos", A_FLOAT);	
-
-	add_method1(extclass,method_units, "units", A_FLINT);	
-	add_method1(extclass,method_sclmode, "sclmode", A_FLINT);	
+	xgroove_obj_setup();
 }
 #ifdef __cplusplus
 }
 #endif
+
