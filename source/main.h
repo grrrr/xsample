@@ -13,7 +13,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 #define XSAMPLE_VERSION "0.2.4"
 
-
+ 
 #include <flext.h>
 
 #if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 202)
