@@ -50,7 +50,6 @@ public:
 	V m_xshape(I argc = 0,const t_atom *argv = NULL);
 	inline V ms_xshape(const AtomList &ret) { m_xshape(ret.Count(),ret.Atoms()); }
 	V mg_xshape(AtomList &ret) const;
-	V m_xkeep(BL k);
 
 	enum xs_loop {
 		xsl__ = -1,  // don't change
@@ -70,7 +69,6 @@ protected:
 	I xshape;
 	F xshparam;
 	D znmin,znmax;
-	BL xkeep;
 	S **znbuf;
 	S *znpos,*znmul,*znidx;
 	I pblksz;
@@ -134,8 +132,6 @@ private:
 	FLEXT_CALLSET_F(m_xsymm)
 	FLEXT_ATTRGET_F(xsymm)
 	FLEXT_CALLVAR_V(mg_xshape,ms_xshape)
-	FLEXT_CALLSET_B(m_xkeep)
-	FLEXT_ATTRGET_B(xkeep)
 
 	FLEXT_CALLVAR_F(mg_pos,m_pos)
 	FLEXT_CALLSET_F(m_min)
@@ -166,12 +162,11 @@ V xgroove::setup(t_classid c)
 	FLEXT_CADDATTR_VAR(c,"xzone",mg_xzone,ms_xzone);
 	FLEXT_CADDATTR_VAR(c,"xsymm",xsymm,m_xsymm);
 	FLEXT_CADDATTR_VAR(c,"xshape",mg_xshape,ms_xshape);
-	FLEXT_CADDATTR_VAR(c,"xkeep",xkeep,m_xkeep);
 }
 
 xgroove::xgroove(I argc,const t_atom *argv):
 	loopmode(xsl_loop),curpos(0),
-	_xzone(0),xzone(0),xsymm(0.5),xkeep(false),pblksz(0),
+	_xzone(0),xzone(0),xsymm(0.5),pblksz(0),
 	xshape(0),xshparam(1),
 	znbuf(NULL),znmul(NULL),znidx(NULL),znpos(NULL),
 	bidir(1)
@@ -216,24 +211,26 @@ xgroove::xgroove(I argc,const t_atom *argv):
 	AddOutFloat("Ending point (rounded to frame)"); // play max
 	AddOutBang("Bang on loop end/rollover");  // loop bang
 	
+	// don't know vector size yet -> wait for m_dsp
 	znbuf = new S *[outchns];
-	for(I i = 0; i < outchns; ++i) znbuf[i] = new S[0];
-	znpos = new S[0]; // don't know vector size yet -> wait for m_dsp
-	znidx = new S[0];
+	for(I i = 0; i < outchns; ++i) znbuf[i] = NULL;
+	znpos = NULL; 
+	znidx = NULL;
 	znmul = new S[XZONE_TABLE+1];
+
 	m_xshape();
 }
 
 xgroove::~xgroove()
 {
 	if(znbuf) {
-		for(I i = 0; i < outchns; ++i) delete[] znbuf[i]; 
+		for(I i = 0; i < outchns; ++i) if(znbuf[i]) delete[] znbuf[i]; 
 		delete[] znbuf;
 	}
 
-	if(znmul) delete[] znmul;
 	if(znpos) delete[] znpos;
 	if(znidx) delete[] znidx;
+	delete[] znmul;
 }
 
 BL xgroove::Init()
@@ -259,7 +256,8 @@ V xgroove::m_min(F mn)
 {
 	xsample::m_min(mn);
 	m_pos(curpos*s2u);
-	do_xzone();
+//	do_xzone();
+	s_dsp();
 	outputmin();
 }
 
@@ -267,7 +265,8 @@ V xgroove::m_max(F mx)
 {
 	xsample::m_max(mx);
 	m_pos(curpos*s2u);
-	do_xzone();
+//	do_xzone();
+	s_dsp();
 	outputmax();
 }
 
@@ -279,7 +278,8 @@ V xgroove::m_pos(F pos)
 V xgroove::m_all()
 {
 	xsample::m_all();
-	do_xzone();
+//	do_xzone();
+	s_dsp();
 	outputmin();
 	outputmax();
 }
@@ -307,14 +307,14 @@ V xgroove::mg_xzone(F &xz)
 V xgroove::m_xsymm(F xs) 
 { 
 	if(xs < 0) 
-		xsymm = -1;
-	else if(xs <= 1) 
+		xsymm = 0;
+	else if(xs > 1) 
+		xsymm = 1;
+	else 
 		xsymm = xs;
-	else {
-		post("%s - xsymm value out of range - set to center (0.5)",thisName());
-		xsymm = 0.5;
-	}
-	do_xzone();
+
+	//	do_xzone();
+	s_dsp();
 }
 
 V xgroove::m_xshape(I argc,const t_atom *argv) 
@@ -360,61 +360,18 @@ V xgroove::mg_xshape(AtomList &ret) const
 }
 
 
-V xgroove::m_xkeep(BL k) 
-{ 
-	xkeep = k; 
-	do_xzone();
-}
-
 V xgroove::do_xzone()
 {
 	if(!s2u) return; // this can happen if DSP is off
 
 	xzone = _xzone; // make a copy for changing it
 	znsmin = curmin,znsmax = curmax;
-    I plen = znsmax-znsmin; //curlen;
+    L plen = znsmax-znsmin; //curlen;
 
-	if(xsymm < 0) {
-		// crossfade zone is inside the loop (-> loop is shorter than nominal!)
-		if(xzone >= plen) xzone = plen-1;
-		znmin = znsmin+xzone,znmax = znsmax-xzone;
-	}
-	else {
-		// desired crossfade points
-		znmin = znsmin+xzone*xsymm,znmax = znsmax+xzone*(xsymm-1);
-		// extra space at beginning and end
-		D o1 = znmin-xzone,o2 = buf->Frames()-(znmax+xzone); 
+	if(xzone > plen-1) xzone = plen?plen-1:0;
 
-		if(o1 < 0 || o2 < 0) { // or (o1*o2 < 0)
-			if(o1+o2 < 0) {
-				// must reduce crossfade/loop length
-				if(!xkeep) {	
-					// prefer preservation of cross-fade length
-					if(xzone*2 >= plen) // have to reduce cross-fade length
-						xzone = plen/2;
-					znmin = xzone,znmax = buf->Frames()-xzone;
-				}
-				else {	
-					// prefer preservation of loop length
-					znmin += o1,znmax -= o2;
-					xzone = (buf->Frames()-(znmax-znmin))/2;
-				}
-				znsmin = 0,znsmax = buf->Frames();
-			}
-			else if(o1 < 0) {
-				// min point is out of bounds (but enough space for mere shift)
-				I i1 = (I)o1;
-				znsmin -= i1,znsmax -= i1;
-				znmin = znsmin+xzone*xsymm,znmax = znsmax+xzone*(xsymm-1);
-			}
-			else /* o2 < 0 */ { 
-				// max point is out of bounds (but enough space for mere shift)
-				I i2 = (I)o2;
-				znsmin += i2,znsmax += i2;
-				znmin = znsmin+xzone*xsymm,znmax = znsmax+xzone*(xsymm-1);
-			}
-		}
-	}
+	znmin = znsmin+xzone*xsymm;
+	znmax = znsmax+xzone*(xsymm-1);
 }
 
 V xgroove::m_loop(xs_loop lp) 
@@ -615,11 +572,13 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
+	FLEXT_ASSERT(xzone);
+
 	const F xz = xzone,xf = (F)XZONE_TABLE/xz;
 	const D lmin = znmin,lmax = znmax,lsh = lmax+xz-lmin;
 
     // adapt the playing bounds to the current cross-fade zone
-    const I smin = znsmin,smax = znsmax,plen = smax-smin; //curlen;
+    const L smin = znsmin,smax = znsmax,plen = smax-smin; //curlen;
 
 	if(buf && plen > 0) {
 		BL inzn = false;
@@ -754,22 +713,25 @@ V xgroove::s_dsp()
 		case xsl_loop: 
 			if(_xzone > 0) {
                 // xzone might not be set yet (is done in do_xzone() )
+				do_xzone(); // recalculate (s2u may have been 0 before)
+			}
 
+			if(xzone > 0) {
 				const I blksz = Blocksize();
 
 				if(pblksz != blksz) {
 					for(I o = 0; o < outchns; ++o) {
-						delete[] znbuf[o]; 
+						if(znbuf[o]) delete[] znbuf[o]; 
 						znbuf[o] = new S[blksz]; 
 					}
 				
-					delete[] znpos; znpos = new S[blksz];
-					delete[] znidx;	znidx = new S[blksz];
+					if(znpos) delete[] znpos; 
+					znpos = new S[blksz];
+					if(znidx) delete[] znidx;
+					znidx = new S[blksz];
 
 					pblksz = blksz;
 				}
-
-				do_xzone(); // recalculate (s2u may have been 0 before)
 
 				SETSIGFUN(posfun,SIGFUN(s_pos_loopzn)); 
 
