@@ -1,7 +1,7 @@
-#N canvas 297 89 697 388 12;
-#X obj 136 86 hsl 128 15 0.001 3 1 1 empty empty empty 20 8 0 8 -225271
--1 -1 2800 1;
-#X floatatom 135 107 8 0 0;
+#N canvas 291 135 701 392 12;
+#X obj 109 88 hsl 128 15 0.001 3 1 1 empty empty empty 20 8 0 8 -225271
+-1 -1 11000 1;
+#X floatatom 108 109 8 0 0;
 #X floatatom 141 162 8 0 0;
 #X floatatom 216 162 8 0 0;
 #X floatatom 139 222 8 0 0;
@@ -62,7 +62,7 @@
 #X text 201 43 interpolation on/off;
 #X msg 8 95 help;
 #X text 267 82 speed;
-#X text 215 100 (float or signal);
+#X text 188 102 (float or signal);
 #X obj 510 322 table buf2;
 #X floatatom 373 337 8 0 0;
 #X obj 373 310 soundfiler;
@@ -70,28 +70,30 @@
 #X msg 9 126 set buf;
 #X msg 123 42 interp \$1;
 #X msg 374 283 read -resize d:/snd/frank0.wav buf2;
-#X obj 107 192 xgroove~ buf;
+#X obj 64 191 xgroove~ buf;
+#X msg 106 162 all;
 #X connect 0 0 1 0;
-#X connect 0 0 35 0;
+#X connect 1 0 35 0;
 #X connect 2 0 35 1;
 #X connect 3 0 35 2;
 #X connect 6 0 7 0;
 #X connect 7 0 8 0;
 #X connect 8 0 9 0;
 #X connect 10 0 11 0;
-#X connect 11 0 35 0;
+#X connect 10 0 35 0;
 #X connect 12 0 35 0;
 #X connect 13 0 35 0;
 #X connect 16 0 35 0;
 #X connect 23 0 33 0;
+#X connect 23 0 35 0;
 #X connect 25 0 35 0;
 #X connect 30 0 29 0;
 #X connect 31 0 35 0;
 #X connect 32 0 35 0;
-#X connect 33 0 35 0;
 #X connect 34 0 30 0;
-#X connect 35 0 15 1;
 #X connect 35 0 15 0;
+#X connect 35 0 15 1;
 #X connect 35 1 8 0;
 #X connect 35 2 4 0;
 #X connect 35 3 5 0;
+#X connect 36 0 35 0;

@@ -11,7 +11,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #include "main.h"
 
 // Initialization function for xsample library
-V libsetup()
+V lib_setup()
 {
 	post("xsample objects, version " XSAMPLE_VERSION ", (C)2001,2002 Thomas Grill");
 	post("xsample: xrecord~, xplay~, xgroove~ - send objects a 'help' message to get assistance");
@@ -24,7 +24,7 @@ V libsetup()
 }
 
 // setup the library
-FLEXT_LIB_SETUP(xsample,libsetup)
+FLEXT_LIB_SETUP(xsample,lib_setup)
 
 // ------------------------------
 
