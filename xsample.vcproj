@@ -272,7 +272,7 @@
 				Optimization="0"
 				InlineFunctionExpansion="0"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="F:\prog\audio\MaxWinSDK\c74support\max-includes,F:\prog\audio\MaxWinSDK\c74support\msp-includes,f:\prog\packs\pthreads;..\flext\source"
+				AdditionalIncludeDirectories="&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\max-includes&quot;;&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\msp-includes&quot;;..\flext\source"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1"
 				StringPooling="TRUE"
 				RuntimeLibrary="1"
@@ -290,7 +290,7 @@
 				OutputFile="max-msvc\d\xsample.mxe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="&quot;F:\prog\audio\MaxWinSDK\c74support\max-includes&quot;;&quot;F:\prog\audio\MaxWinSDK\c74support\msp-includes&quot;;..\flext\max-msvc"
+				AdditionalLibraryDirectories="&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\max-includes&quot;;&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\msp-includes&quot;;&quot;..\flext\max-msvc&quot;"
 				GenerateDebugInformation="TRUE"
 				TargetMachine="1"/>
 			<Tool
@@ -336,7 +336,7 @@
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="1"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="F:\prog\audio\MaxWinSDK\c74support\max-includes,F:\prog\audio\MaxWinSDK\c74support\msp-includes,f:\prog\packs\pthreads;..\flext\source"
+				AdditionalIncludeDirectories="&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\max-includes&quot;;&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\msp-includes&quot;;..\flext\source"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -353,7 +353,7 @@
 				OutputFile="max-msvc\xsample.mxe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="&quot;F:\prog\audio\MaxWinSDK\c74support\max-includes&quot;;&quot;F:\prog\audio\MaxWinSDK\c74support\msp-includes&quot;;&quot;..\flext\max-msvc&quot;"
+				AdditionalLibraryDirectories="&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\max-includes&quot;;&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\msp-includes&quot;;&quot;..\flext\max-msvc&quot;"
 				ImportLibrary=".\max-msvc\r/xsample.lib"
 				TargetMachine="1"/>
 			<Tool
