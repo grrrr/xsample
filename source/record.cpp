@@ -138,6 +138,7 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 	inchns = 1;
 #endif
 
+/*
 #ifdef PD
 	I ci;
 	for(ci = 0; ci < inchns; ++ci)
@@ -159,7 +160,17 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 	outmin = newout_float(x_obj);  // min record out
 	newout_signal(x_obj);  // pos signal out
 #endif
+*/
+	Inlet_signal(inchns);  // audio signals
+	Inlet_signal(); // on/off signal
+	Inlet_float(2);  // min & max
+	Outlet_signal();  // pos signal
+	Outlet_float(2); // min & max
+	SetupInOut();
 
+	outmin = Outlet(1);
+	outmax = Outlet(2);
+	
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
 	m_reset();
 }

@@ -124,6 +124,7 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 	outchns = 1;
 #endif
 
+/*
 #ifdef PD	
     inlet_new(x_obj, &x_obj->ob_pd, &s_float, gensym("ft1"));  // min play pos
     inlet_new(x_obj, &x_obj->ob_pd, &s_float, gensym("ft2"));  // max play pos
@@ -137,15 +138,25 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 	// set up inlets and outlets in reverse
 	floatin(x_obj,2);  // max play pos
 	floatin(x_obj,1);  // min play pos
-
 	dsp_setup(x_obj,1); // speed sig
+	
 	outmax = newout_float(x_obj); // play max
 	outmin = newout_float(x_obj); // play min
 	newout_signal(x_obj); // position signal
 	int ci;
 	for(ci = 0; ci < outchns; ++ci) newout_signal(x_obj); // output
 #endif
+*/
+	Inlet_signal(); // speed signal
+	Inlet_float(2); // min & max play pos
+	Outlet_signal(outchns); // output
+	Outlet_signal(); // position
+	Outlet_float(2); // play min & max	
+	SetupInOut();
 
+	outmin = Outlet(outchns+1);
+	outmax = Outlet(outchns+2);
+	
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
 	// in max loadbang does the init again
 	m_reset();

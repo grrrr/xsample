@@ -85,15 +85,21 @@ xplay_obj::xplay_obj(I argc, t_atom *argv):
 #endif
 	
 #ifdef MAXMSP
-	dsp_setup(x_obj,1); // pos signal in
+//	dsp_setup(x_obj,1); // pos signal in
 	outchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
 #else
 	outchns = 1;
 #endif
 
+/*
 	int ci;
 	for(ci = 0; ci < outchns; ++ci)
 		newout_signal(x_obj); // output
+*/
+
+	Inlet_signal();  // pos signal
+	Outlet_signal(outchns);
+	SetupInOut();
 
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);	
 	m_reset();
