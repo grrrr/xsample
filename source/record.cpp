@@ -58,8 +58,8 @@ protected:
 
 	outlet *outmin,*outmax; // float outlets	
 	
-	V outputmin() { to_out_float(outmin,curmin*s2u); }
-	V outputmax() { to_out_float(outmax,curmax*s2u); }
+	V outputmin() { ToOutFloat(outmin,curmin*s2u); }
+	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
 	
 private:
 	virtual V m_dsp(I n,F *const *in,F *const *out);
@@ -99,20 +99,20 @@ xrecord::xrecord(I argc,t_atom *argv):
 {
 	I argi = 0;
 #ifdef MAXMSP
-	if(argc > argi && is_flint(argv[argi])) {
-		inchns = geta_flint(argv[argi]);
+	if(argc > argi && IsFlint(argv[argi])) {
+		inchns = GetAFlint(argv[argi]);
 		argi++;
 	}
 #endif
 
-	if(argc > argi && is_symbol(argv[argi])) {
-		buf = new buffer(get_symbol(argv[argi]),true);
+	if(argc > argi && IsSymbol(argv[argi])) {
+		buf = new buffer(GetSymbol(argv[argi]),true);
 		argi++;
 
 #ifdef MAXMSP		
 		// oldstyle command line?
-		if(argi == 1 && argc == 2 && is_flint(argv[argi])) {
-			inchns = geta_flint(argv[argi]);
+		if(argi == 1 && argc == 2 && IsFlint(argv[argi])) {
+			inchns = GetAFlint(argv[argi]);
 			argi++;
 			post("%s: old style command line suspected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
 		}
@@ -121,12 +121,12 @@ xrecord::xrecord(I argc,t_atom *argv):
 	else
 		buf = new buffer(NULL,true);
 
-	add_in_signal(inchns);  // audio signals
-	add_in_signal(); // on/off signal
-	add_in_float(2);  // min & max
-	add_out_signal();  // pos signal
-	add_out_float(2); // min & max
-	setup_inout();
+	AddInSignal(inchns);  // audio signals
+	AddInSignal(); // on/off signal
+	AddInFloat(2);  // min & max
+	AddOutSignal();  // pos signal
+	AddOutFloat(2); // min & max
+	SetupInOut();
 
 	FLEXT_ADDMETHOD_F(0,"pos",m_pos);
 	FLEXT_ADDMETHOD(inchns+1,m_min);
@@ -141,8 +141,8 @@ xrecord::xrecord(I argc,t_atom *argv):
 	
 	FLEXT_ADDMETHOD_(0,"draw",m_draw);
 
-	outmin = get_out(1);
-	outmax = get_out(2);
+	outmin = GetOut(1);
+	outmax = GetOut(2);
 }
 
 
@@ -211,7 +211,7 @@ V xrecord::m_reset()
 V xrecord::m_draw(I argc,t_atom *argv)
 {
 	if(argc >= 1) {
-		drintv = geta_flint(argv[0]);
+		drintv = GetAFlint(argv[0]);
 		if(dorec) buf->SetRefrIntv(drintv);
 	}
 	else

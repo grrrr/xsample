@@ -69,7 +69,7 @@ xsample::~xsample()
 
 I xsample::m_set(I argc, t_atom *argv)
 {
-	return buf->Set(argc >= 1?geta_symbol(argv[0]):NULL);
+	return buf->Set(argc >= 1?GetASymbol(argv[0]):NULL);
 }
 
 V xsample::m_refresh()

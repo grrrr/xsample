@@ -54,8 +54,8 @@ protected:
 
 	outlet *outmin,*outmax; // float outlets	
 	
-	V outputmin() { to_out_float(outmin,curmin*s2u); }
-	V outputmax() { to_out_float(outmax,curmax*s2u); }
+	V outputmin() { ToOutFloat(outmin,curmin*s2u); }
+	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
 	
 	I bcnt,bframes;
 	F **bvecs;
@@ -90,20 +90,20 @@ xgroove::xgroove(I argc,t_atom *argv):
 {
 	I argi = 0;
 #ifdef MAXMSP
-	if(argc > argi && is_flint(argv[argi])) {
-		outchns = geta_flint(argv[argi]);
+	if(argc > argi && IsFlint(argv[argi])) {
+		outchns = GetAFlint(argv[argi]);
 		argi++;
 	}
 #endif
 
-	if(argc > argi && is_symbol(argv[argi])) {
-		buf = new buffer(get_symbol(argv[argi]),true);
+	if(argc > argi && IsSymbol(argv[argi])) {
+		buf = new buffer(GetSymbol(argv[argi]),true);
 		argi++;
 		
 #ifdef MAXMSP
 		// oldstyle command line?
-		if(argi == 1 && argc == 2 && is_flint(argv[argi])) {
-			outchns = geta_flint(argv[argi]);
+		if(argi == 1 && argc == 2 && IsFlint(argv[argi])) {
+			outchns = GetAFlint(argv[argi]);
 			argi++;
 			post("%s: old style command line suspected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
 		}
@@ -112,12 +112,12 @@ xgroove::xgroove(I argc,t_atom *argv):
 	else
 		buf = new buffer(NULL,true);		
 
-	add_in_signal(); // speed signal
-	add_in_float(2); // min & max play pos
-	add_out_signal(outchns); // output
-	add_out_signal(); // position
-	add_out_float(2); // play min & max	
-	setup_inout();
+	AddInSignal(); // speed signal
+	AddInFloat(2); // min & max play pos
+	AddOutSignal(outchns); // output
+	AddOutSignal(); // position
+	AddOutFloat(2); // play min & max	
+	SetupInOut();
 
 	FLEXT_ADDMETHOD(1,m_min);
 	FLEXT_ADDMETHOD(2,m_max);
@@ -128,8 +128,8 @@ xgroove::xgroove(I argc,t_atom *argv):
 	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
 
 
-	outmin = get_out(outchns+1);
-	outmax = get_out(outchns+2);
+	outmin = GetOut(outchns+1);
+	outmax = GetOut(outchns+2);
 }
 
 

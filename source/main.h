@@ -51,6 +51,16 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 
+// lazy me
+#define F float
+#define D double
+#define I int
+#define L long
+#define C char
+#define V void
+#define BL bool
+
+
 class xsample:
 	public flext_dsp
 {

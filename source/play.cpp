@@ -63,20 +63,20 @@ xplay::xplay(I argc, t_atom *argv):
 {
 	I argi = 0;
 #ifdef MAXMSP
-	if(argc > argi && is_flint(argv[argi])) {
-		outchns = geta_flint(argv[argi]);
+	if(argc > argi && IsFlint(argv[argi])) {
+		outchns = GetAFlint(argv[argi]);
 		argi++;
 	}
 #endif
 
-	if(argc > argi && is_symbol(argv[argi])) {
-		buf = new buffer(get_symbol(argv[argi]),true);
+	if(argc > argi && IsSymbol(argv[argi])) {
+		buf = new buffer(GetSymbol(argv[argi]),true);
 		argi++;
 		
 #ifdef MAXMSP
 		// oldstyle command line?
-		if(argi == 1 && argc == 2 && is_flint(argv[argi])) {
-			outchns = geta_flint(argv[argi]);
+		if(argi == 1 && argc == 2 && IsFlint(argv[argi])) {
+			outchns = GetAFlint(argv[argi]);
 			argi++;
 			post("%s: old style command line suspected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
 		}
@@ -85,9 +85,9 @@ xplay::xplay(I argc, t_atom *argv):
 	else
 		buf = new buffer(NULL,true);
 
-	add_in_signal();  // pos signal
-	add_out_signal(outchns);
-	setup_inout();
+	AddInSignal();  // pos signal
+	AddOutSignal(outchns);
+	SetupInOut();
 }
 
 
