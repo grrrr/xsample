@@ -83,7 +83,7 @@ V xgroove::cb_setup(t_class *c)
 {
 	FLEXT_ADDFLOAT_N(c,1,m_min);
 	FLEXT_ADDFLOAT_N(c,2,m_max);
-	FLEXT_ADDMETHOD_1(c,"min",m_min,F);
+	FLEXT_ADDMETHOD_1(c,"min",m_min,F); 
 	FLEXT_ADDMETHOD_1(c,"max",m_max,F);
 	FLEXT_ADDMETHOD_1(c,"pos",m_pos,F);
 
@@ -153,7 +153,7 @@ V xgroove::m_max(F mx)
 
 V xgroove::m_pos(F pos)
 {
-	curpos = (L)(pos/s2u+.5);
+	curpos = pos/s2u;
 	if(curpos < curmin) curpos = curmin;
 	else if(curpos > curmax) curpos = curmax;
 }
@@ -299,7 +299,7 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 						o = fmod(o+smax,plen)+smin;
 
 					*(pos++) = scale(o);
-					for(I ci = 0; ci < OCHNS; ++ci)
+					for(I ci = 0; ci < OCHNS; ++ci) 
 						sig[ci][si] = buf->Data()[(I)o*BCHNS+ci];
 
 					o += spd;
@@ -387,7 +387,7 @@ V xgroove::m_help()
 	post("Methods:");
 	post("\thelp: shows this help");
 	post("\tset [name]: set buffer or reinit");
-	post("\tenable 0/1: turn dsp calculation off/on");	
+	post("\tdspon 0/1: turn dsp calculation off/on");	
 	post("\treset: reset min/max playing points and playing offset");
 	post("\tprint: print current settings");
 	post("\tloop 0/1: switches looping off/on");

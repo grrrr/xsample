@@ -234,7 +234,7 @@ V xplay::m_help()
 	post("Methods:");
 	post("\thelp: shows this help");
 	post("\tset name: set buffer");
-	post("\tenable 0/1: turn dsp calculation off/on");	
+	post("\tdspon 0/1: turn dsp calculation off/on");	
 	post("\tprint: print current settings");
 	post("\tbang/start: begin playing");
 	post("\tstop: stop playing");

@@ -61,7 +61,7 @@ xsample::xsample():
 	
 xsample::~xsample()
 {
-	if(buf) delete buf;
+	if(buf) delete buf; 
 }
 
 
@@ -73,18 +73,22 @@ I xsample::m_set(I argc, t_atom *argv)
 
 V xsample::m_refresh()
 {
-	buf->Set();	
-	m_min((F)curmin); // also checks pos
-	m_max((F)curmax); // also checks pos
+	if(buf->Set())	
+		m_dsp(0,NULL,NULL); // channel count may have changed
+	
+	m_min((F)curmin*s2u); // also checks pos
+	m_max((F)curmax*s2u); // also checks pos
 }
 
 V xsample::m_reset()
 {
-	buf->Set();
+	if(buf->Set())	
+		m_dsp(0,NULL,NULL); // channel count may have changed
+	
 	m_min(0);
     m_max(buf->Frames()*s2u);
 	m_units();
-	m_sclmode();
+	m_sclmode();	
 }
 
 V xsample::m_loadbang() 

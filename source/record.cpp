@@ -92,6 +92,7 @@ V xrecord::cb_setup(t_class *c)
 	FLEXT_ADDMETHOD(c,"start",m_start);
 	FLEXT_ADDMETHOD(c,"stop",m_stop);
 
+	FLEXT_ADDMETHOD_1(c,"pos",m_pos,F);
 	FLEXT_ADDFLOAT_N(c,2,m_min);
 	FLEXT_ADDFLOAT_N(c,3,m_max);
 	FLEXT_ADDMETHOD_1(c,"min",m_min,F);
@@ -183,6 +184,7 @@ I xrecord::m_set(I argc,t_atom *argv)
 
 V xrecord::m_start() 
 { 
+	if(!sigmode && !appmode) m_pos(0); 
 	m_refresh(); 
 	dorec = true; 
 	buf->SetRefrIntv(drintv);
@@ -191,7 +193,6 @@ V xrecord::m_start()
 V xrecord::m_stop() 
 { 
 	dorec = false; 
-	if(!sigmode && !appmode) m_pos(0); 
 	buf->Dirty(true);
 	buf->SetRefrIntv(0);
 }
@@ -232,12 +233,12 @@ TMPLDEF V xrecord::signal(I n,F *const *invecs,F *const *outvecs)
 			L ncur = curmax-o; // at max to buffer or recording end
 
 			if(ncur <= 0) {	// end of buffer
-				o = curmin;
-				if(doloop) 
+				if(doloop) { 
+					o = curmin;
 					ncur = curlen;
+				}
 				else 
 					m_stop(); // loop expired;
-		
 			}
 
 			if(!dorec) break;
@@ -393,7 +394,7 @@ V xrecord::m_help()
 	post("Methods:");
 	post("\thelp: shows this help");
 	post("\tset [name]: set buffer or reinit");
-	post("\tenable 0/1: turn dsp calculation off/on");	
+	post("\tdspon 0/1: turn dsp calculation off/on");	
 	post("\treset: reset min/max recording points and recording offset");
 	post("\tprint: print current settings");
 	post("\tsigmode 0/1: specify message or signal triggered recording");
