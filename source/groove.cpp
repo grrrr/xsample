@@ -39,7 +39,7 @@ public:
 	virtual BL m_reset();
 
 	virtual V m_pos(F pos);
-	V m_posmod(F pos);
+	V m_posmod(F pos); 
 	virtual V m_all();
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
@@ -276,6 +276,7 @@ V xgroove::m_pos(F pos)
 	setpos(pos?pos/s2u:0);
 }
 
+// motivated by Tim Blechmann
 V xgroove::m_posmod(F pos)
 {
 	setposmod(pos?pos/s2u:0);
