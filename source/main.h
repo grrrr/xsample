@@ -37,9 +37,9 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	#define TMPLOPT  // only workable with gcc >= 3.0
 #endif
 #elif defined(__MWERKS__)
-// CodeWarrior can't take address of a template member function 
+// CodeWarrior <= 8 can't take address of a template member function 
 	#define TMPLOPT
-	#define SIGSTATIC
+//	#define SIGSTATIC  // define that for CW6
 #elif defined(__MRC__)
 // Apple MPW - MrCpp
 //	#define TMPLOPT  // template optimation for more speed
@@ -111,7 +111,7 @@ protected:
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
 
-	virtual V m_dsp(I n,F *const *insigs,F *const *outsigs);
+	virtual V m_dsp(I n,S *const *insigs,S *const *outsigs);
 	virtual V s_dsp() = 0;
 
 	xs_unit unitmode; //iunitmode,ounitmode;
