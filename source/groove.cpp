@@ -45,7 +45,8 @@ public:
 	virtual V m_max(F mx);
 	
 	V ms_xzone(F xz);
-	V mg_xzone(F &xz);
+	V mg_xzone(F &xz) { xz = _xzone*s2u; }
+
 	V m_xsymm(F xz);
 	V m_xshape(I argc = 0,const t_atom *argv = NULL);
 	inline V ms_xshape(const AtomList &ret) { m_xshape(ret.Count(),ret.Atoms()); }
@@ -299,11 +300,6 @@ V xgroove::ms_xzone(F xz)
 	s_dsp(); 
 }
 
-V xgroove::mg_xzone(F &xz) 
-{ 
-	xz = _xzone*s2u; 
-}
-
 V xgroove::m_xsymm(F xs) 
 { 
 	if(xs < 0) 
@@ -399,7 +395,7 @@ V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const D smin = curmin,smax = curmax,plen = smax-smin; //curlen;
+	const D smin = curmin,smax = curmax,plen = smax-smin;
 
 	if(buf && plen > 0) {
 		register D o = curpos;
@@ -433,7 +429,7 @@ V xgroove::s_pos_c_once(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const D smin = curmin,smax = curmax,plen = smax-smin; //curlen;
+	const D smin = curmin,smax = curmax,plen = smax-smin;
 
 	if(buf && plen > 0) {
 		register D o = curpos;
@@ -479,7 +475,7 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 	vec_dst(speed,GetPrefetchConstant(1,n>>2,0),0);
 #endif
 
-	const D smin = curmin,smax = curmax,plen = smax-smin; //curlen;
+	const D smin = curmin,smax = curmax,plen = smax-smin;
 
 	if(buf && plen > 0) {
 		register D o = curpos;
@@ -524,7 +520,7 @@ V xgroove::s_pos_c_loop(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const D smin = curmin,smax = curmax,plen = smax-smin; //curlen;
+	const D smin = curmin,smax = curmax,plen = smax-smin;
 
 	if(buf && plen > 0) {
 		register D o = curpos;
@@ -578,7 +574,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	const D lmin = znmin,lmax = znmax,lsh = lmax+xz-lmin;
 
     // adapt the playing bounds to the current cross-fade zone
-    const L smin = znsmin,smax = znsmax,plen = smax-smin; //curlen;
+    const L smin = znsmin,smax = znsmax,plen = smax-smin;
 
 	if(buf && plen > 0) {
 		BL inzn = false;
@@ -666,7 +662,7 @@ V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
+	const I smin = curmin,smax = curmax,plen = smax-smin;
 
 	if(buf && plen > 0) {
 		register D o = curpos;
@@ -711,10 +707,8 @@ V xgroove::s_dsp()
 		switch(loopmode) {
 		case xsl_once: SETSIGFUN(posfun,SIGFUN(s_pos_once)); break;
 		case xsl_loop: 
-			if(_xzone > 0) {
-                // xzone might not be set yet (is done in do_xzone() )
-				do_xzone(); // recalculate (s2u may have been 0 before)
-			}
+            // xzone might not be set yet (is done in do_xzone() )
+			do_xzone(); // recalculate (s2u may have been 0 before)
 
 			if(xzone > 0) {
 				const I blksz = Blocksize();
