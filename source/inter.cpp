@@ -78,6 +78,7 @@ TMPLDEF V xinter::s_play4(I n,F *const *invecs,F *const *outvecs)
 	const F *pos = invecs[0];
 	F *const *sig = outvecs;
 	register I si = 0;
+	const F *bdt = buf->Data();
 	
 	// 4-point interpolation
 	// ---------------------
@@ -108,10 +109,10 @@ TMPLDEF V xinter::s_play4(I n,F *const *invecs,F *const *outvecs)
 
 		register F frac = o-oint;
 		
-		register F *fa = buf->Data()+ointm*BCHNS;
-		register F *fb = buf->Data()+oint*BCHNS;
-		register F *fc = buf->Data()+oint1*BCHNS;
-		register F *fd = buf->Data()+oint2*BCHNS;
+		register F *fa = bdt+ointm*BCHNS;
+		register F *fb = bdt+oint*BCHNS;
+		register F *fc = bdt+oint1*BCHNS;
+		register F *fd = bdt+oint2*BCHNS;
 
 		for(I ci = 0; ci < OCHNS; ++ci) {
 			const F cmb = fc[ci]-fb[ci];
@@ -144,6 +145,7 @@ TMPLDEF V xinter::s_play2(I n,F *const *invecs,F *const *outvecs)
 	// --------------------
 
 	const I maxo = smax-1;  // last sample in buffer
+	const F *bdt = buf->Data();
 
 	for(I i = 0; i < n; ++i,++si) {	
 		const F o = *(pos++)/s2u;
@@ -151,20 +153,20 @@ TMPLDEF V xinter::s_play2(I n,F *const *invecs,F *const *outvecs)
 
 		if(oint < smin) {
 			// position is before first sample -> take the first sample
-			register const F *const fp = buf->Data()+smin*BCHNS;
+			register const F *const fp = bdt+smin*BCHNS;
 			for(I ci = 0; ci < OCHNS; ++ci) 
 				sig[ci][si] = fp[ci]; 
 		}
 		else if(oint >= maxo) {
 			// position is past last sample -> take the last sample
-			register const F *const fp = buf->Data()+maxo*BCHNS;
+			register const F *const fp = bdt+maxo*BCHNS;
 			for(I ci = 0; ci < OCHNS; ++ci) 
 				sig[ci][si] = fp[ci]; 
 		}
 		else {
 			// normal interpolation
 			register const F frac = o-oint;
-			register const F *const fp0 = buf->Data()+oint*BCHNS;
+			register const F *const fp0 = bdt+oint*BCHNS;
 			register const F *const fp1 = fp0+BCHNS;
 			for(I ci = 0; ci < OCHNS; ++ci) 
 				sig[ci][si] = fp0[ci]+frac*(fp1[ci]-fp0[ci]);
@@ -184,6 +186,7 @@ TMPLDEF V xinter::s_play1(I n,F *const *invecs,F *const *outvecs)
 	F *const *sig = outvecs;
 	register I si = 0;
 	const I smin = curmin,smax = curmax;
+	const F *bdt = buf->Data();
 	
 	// no interpolation
 	// ----------------
@@ -193,15 +196,15 @@ TMPLDEF V xinter::s_play1(I n,F *const *invecs,F *const *outvecs)
 		register F *fp;
 		if(oint < smin) {
 			// position < 0 ... take only 0th sample
-			fp = buf->Data()+smin*BCHNS;
+			fp = bdt+smin*BCHNS;
 		}
 		else if(oint >= smax) {
 			// position > last sample ... take only last sample
-			fp = buf->Data()+(smax-1)*BCHNS;
+			fp = bdt+(smax-1)*BCHNS;
 		}
 		else {
 			// normal
-			fp = buf->Data()+oint*BCHNS;
+			fp = bdt+oint*BCHNS;
 		}
 
 		for(I ci = 0; ci < OCHNS; ++ci)
