@@ -69,7 +69,22 @@ private:
 	
 	DEFSIGFUN(xrecord)
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is the dsp method
-  
+
+	FLEXT_CALLBACK(m_start)
+	FLEXT_CALLBACK(m_stop)
+
+	FLEXT_CALLBACK_1(m_pos,F)
+	FLEXT_CALLBACK_1(m_min,F)
+	FLEXT_CALLBACK_1(m_max,F)
+
+	FLEXT_CALLBACK_B(m_loop)
+	FLEXT_CALLBACK_B(m_mixmode)
+	FLEXT_CALLBACK_B(m_sigmode)
+	FLEXT_CALLBACK_B(m_append)
+
+	FLEXT_CALLBACK_G(m_draw)
+
+/*
 	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
 
@@ -84,6 +99,7 @@ private:
 	static V cb_append(V *c,FI md) { thisObject(c)->m_append(md != 0); }
 
 	static V cb_draw(V *c,t_symbol *,I argc,t_atom *argv) { thisObject(c)->m_draw(argc,argv); }	
+*/
 };
 
 
@@ -91,6 +107,23 @@ FLEXT_TILDE_GIMME("xrecord~",xrecord)
 
 V xrecord::cb_setup(t_class *c)
 {
+	FLEXT_ADDBANG(c,m_start);
+	FLEXT_ADDMETHOD(c,"start",m_start);
+	FLEXT_ADDMETHOD(c,"stop",m_stop);
+
+	FLEXT_ADDFLOAT_N(c,2,m_min);
+	FLEXT_ADDFLOAT_N(c,3,m_max);
+	FLEXT_ADDMETHOD_1(c,"min",m_min,F);
+	FLEXT_ADDMETHOD_1(c,"max",m_max,F);
+	
+	FLEXT_ADDMETHOD_B(c,"loop",m_loop);
+	FLEXT_ADDMETHOD_B(c,"mixmode",m_mixmode);
+	FLEXT_ADDMETHOD_B(c,"sigmode",m_sigmode);
+	FLEXT_ADDMETHOD_B(c,"append",m_append);
+	
+	FLEXT_ADDMETHOD_G(c,"draw",m_draw);
+
+/*
 	add_floatn(c,cb_min,2);
 	add_floatn(c,cb_max,3);
 
@@ -107,6 +140,7 @@ V xrecord::cb_setup(t_class *c)
 	add_method1(c,cb_pos, "pos", A_FLOAT);	
 
 	add_methodG(c,cb_draw,"draw");
+*/
 }
 
 xrecord::xrecord(I argc,t_atom *argv):

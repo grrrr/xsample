@@ -75,7 +75,7 @@ private:
 	FLEXT_CALLBACK_1(m_min,F)
 	FLEXT_CALLBACK_1(m_max,F)
 
-	FLEXT_CALLBACK_1(m_loop,FI)
+	FLEXT_CALLBACK_B(m_loop)
 
 /*
 	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
@@ -94,17 +94,18 @@ FLEXT_TILDE_GIMME("xgroove~",xgroove)
 
 V xgroove::cb_setup(t_class *c)
 {
-	FLEXT_ADDFLOAT_N(c,m_min,1);
-	FLEXT_ADDFLOAT_N(c,m_max,2);
-	FLEXT_ADDMETHOD_1(c,"pos",m_pos,F);
-
-	FLEXT_ADDMETHOD_1(c,"loop",m_loop,FI);
+	FLEXT_ADDFLOAT_N(c,1,m_min);
+	FLEXT_ADDFLOAT_N(c,2,m_max);
 	FLEXT_ADDMETHOD_1(c,"min",m_min,F);
 	FLEXT_ADDMETHOD_1(c,"max",m_max,F);
+	FLEXT_ADDMETHOD_1(c,"pos",m_pos,F);
 
 	FLEXT_ADDBANG(c,m_start);
 	FLEXT_ADDMETHOD(c,"start",m_start);
 	FLEXT_ADDMETHOD(c,"stop",m_stop);
+
+	FLEXT_ADDMETHOD_B(c,"loop",m_loop);
+	
 /*
 	add_floatn(c,cb_min,1);
 	add_floatn(c,cb_max,2);
