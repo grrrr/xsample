@@ -305,10 +305,7 @@ V xgroove::m_xshape(I argc,const t_atom *argv)
 		if(xshparam < 0) xshparam = 0;
 		else if(xshparam > 1) xshparam = 1;
 	}
-/*
-	if(znmul) delete[] znmul; 
-	if(!znmul) znmul = new S[XZONE_TABLE+1];
-*/
+
 	I i;
 	switch(xshape) {
 	case 1:
@@ -615,7 +612,7 @@ V xgroove::s_dsp()
 
 				SETSIGFUN(posfun,SIGFUN(s_pos_loopzn)); 
 
-				// linear interpolation should be enough for fade zone, no?
+				// linear interpolation should be just ok for fade zone, no?
 /*
 				if(interp == xsi_4p) 
 					switch(outchns) {
