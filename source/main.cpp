@@ -36,6 +36,23 @@ FLEXT_LIB_SETUP(xsample,lib_setup)
 
 // ------------------------------
 
+void xsample::setup(t_class *c)
+{
+	FLEXT_CADDBANG(c,0,m_start);
+	FLEXT_CADDMETHOD_(c,0,"start",m_start);
+	FLEXT_CADDMETHOD_(c,0,"stop",m_stop);
+
+	FLEXT_CADDMETHOD_(c,0,"set",m_set);
+	FLEXT_CADDMETHOD_(c,0,"print",m_print);
+	FLEXT_CADDMETHOD_(c,0,"refresh",m_refresh);
+	FLEXT_CADDMETHOD_(c,0,"reset",m_reset);
+
+	FLEXT_CADDATTR_VAR(c,"buffer",mg_buffer,ms_buffer);
+	FLEXT_CADDATTR_VAR_E(c,"units",unitmode,m_units);
+	FLEXT_CADDATTR_VAR_E(c,"sclmode",sclmode,m_sclmode);
+	FLEXT_CADDATTR_GET(c,"scale",s2u);
+}
+
 xsample::xsample():
 	buf(NULL),
 #if FLEXT_SYS == FLEXT_SYS_MAX
@@ -45,21 +62,7 @@ xsample::xsample():
 #endif
 	sclmode(xss_unitsinbuf),
 	curmin(0),curmax(1<<30)
-{
-	FLEXT_ADDBANG(0,m_start);
-	FLEXT_ADDMETHOD_(0,"start",m_start);
-	FLEXT_ADDMETHOD_(0,"stop",m_stop);
-
-	FLEXT_ADDMETHOD_(0,"set",m_set);
-	FLEXT_ADDMETHOD_(0,"print",m_print);
-	FLEXT_ADDMETHOD_(0,"refresh",m_refresh);
-	FLEXT_ADDMETHOD_(0,"reset",m_reset);
-
-	FLEXT_ADDATTR_VAR("buffer",mg_buffer,ms_buffer);
-	FLEXT_ADDATTR_VAR_E("units",unitmode,m_units);
-	FLEXT_ADDATTR_VAR_E("sclmode",sclmode,m_sclmode);
-	FLEXT_ADDATTR_GET("scale",s2u);
-}
+{}
 	
 xsample::~xsample()
 {

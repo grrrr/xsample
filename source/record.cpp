@@ -18,8 +18,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xrecord:
 	public xsample
 {
-//	FLEXT_HEADER_S(xrecord,xsample,setup)
-	FLEXT_HEADER(xrecord,xsample)
+	FLEXT_HEADER_S(xrecord,xsample,setup)
 
 public:
 	xrecord(I argc,const t_atom *argv);
@@ -67,7 +66,7 @@ protected:
 	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
 	
 private:
-//	static V setup(t_class *c);
+	static V setup(t_class *c);
 
 	virtual V s_dsp();
 
@@ -97,14 +96,21 @@ private:
 
 FLEXT_LIB_DSP_V("xrecord~",xrecord)
 
-/*
-V xrecord::setup(t_class *)
+
+V xrecord::setup(t_class *c)
 {
-#ifndef PD
-	post("loaded xrecord~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");
-#endif
+	FLEXT_CADDMETHOD_F(c,0,"pos",m_pos);
+	FLEXT_CADDMETHOD_F(c,0,"min",m_min);
+	FLEXT_CADDMETHOD_F(c,0,"max",m_max);
+	FLEXT_CADDMETHOD_(c,0,"all",m_all);
+	
+	FLEXT_CADDMETHOD_(c,0,"draw",m_draw);
+	
+	FLEXT_CADDATTR_VAR1(c,"loop",doloop);
+	FLEXT_CADDATTR_VAR1(c,"mixmode",mixmode);
+	FLEXT_CADDATTR_VAR1(c,"sigmode",sigmode);
+	FLEXT_CADDATTR_VAR(c,"append",appmode,m_append);
 }
-*/
 
 xrecord::xrecord(I argc,const t_atom *argv):
 	dorec(false),
@@ -144,19 +150,8 @@ xrecord::xrecord(I argc,const t_atom *argv):
 	AddOutFloat(2); // min & max
 	AddOutBang();  // loop bang
 
-	FLEXT_ADDMETHOD_F(0,"pos",m_pos);
 	FLEXT_ADDMETHOD(inchns+1,m_min);
 	FLEXT_ADDMETHOD(inchns+2,m_max);
-	FLEXT_ADDMETHOD_F(0,"min",m_min);
-	FLEXT_ADDMETHOD_F(0,"max",m_max);
-	FLEXT_ADDMETHOD_(0,"all",m_all);
-	
-	FLEXT_ADDMETHOD_(0,"draw",m_draw);
-	
-	FLEXT_ADDATTR_VAR1("loop",doloop);
-	FLEXT_ADDATTR_VAR1("mixmode",mixmode);
-	FLEXT_ADDATTR_VAR1("sigmode",sigmode);
-	FLEXT_ADDATTR_VAR("append",appmode,m_append);
 }
 
 

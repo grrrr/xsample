@@ -76,7 +76,7 @@ Version history:
 - xgroove~, xrecord~: introduced a loop/end bang outlet 
 - added MaxMSP buffer resize recognition
 - xgroove~: introduced a crossfading loop zone
-- adapted source for flext 0.4.1
+- adapted source for flext 0.4.1 - most methods within class scope
 - introduced attributes
 
 0.2.4:

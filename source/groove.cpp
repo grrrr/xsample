@@ -22,8 +22,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xgroove:
 	public xinter
 {
-//	FLEXT_HEADER_S(xgroove,xinter,setup)
-	FLEXT_HEADER(xgroove,xinter)
+	FLEXT_HEADER_S(xgroove,xinter,setup)
 
 public:
 	xgroove(I argc,const t_atom *argv);
@@ -87,7 +86,7 @@ protected:
 	V mg_pos(F &v) const { v = curpos*s2u; }
 
 private:
-//	static V setup(t_class *c);
+	static V setup(t_class *c);
 
 	virtual V s_dsp();
 
@@ -129,14 +128,24 @@ private:
 
 FLEXT_LIB_DSP_V("xgroove~",xgroove)
 
-/*
-V xgroove::setup(t_class *)
+
+V xgroove::setup(t_class *c)
 {
-#ifndef PD
-	post("loaded xgroove~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");
-#endif
+	FLEXT_CADDMETHOD_(c,0,"all",m_all);
+	FLEXT_CADDMETHOD(c,1,m_min);
+	FLEXT_CADDMETHOD(c,2,m_max);
+
+	FLEXT_CADDATTR_VAR(c,"min",mg_min,m_min); 
+	FLEXT_CADDATTR_VAR(c,"max",mg_max,m_max);
+	FLEXT_CADDATTR_VAR(c,"pos",mg_pos,m_pos);
+
+	FLEXT_CADDATTR_VAR_E(c,"loop",loopmode,m_loop);
+
+	FLEXT_CADDMETHOD_F(c,0,"xzone",m_xzone);
+	FLEXT_CADDMETHOD_F(c,0,"xsymm",m_xsymm);
+	FLEXT_CADDMETHOD_(c,0,"xshape",m_xshape);
+	FLEXT_CADDMETHOD_B(c,0,"xkeep",m_xkeep);
 }
-*/
 
 xgroove::xgroove(I argc,const t_atom *argv):
 	loopmode(xsl_loop),curpos(0),
@@ -175,20 +184,6 @@ xgroove::xgroove(I argc,const t_atom *argv):
 	AddOutFloat(2); // play min & max	
 	AddOutBang();  // loop bang
 	
-	FLEXT_ADDMETHOD_(0,"all",m_all);
-	FLEXT_ADDMETHOD(1,m_min);
-	FLEXT_ADDMETHOD(2,m_max);
-
-	FLEXT_ADDATTR_VAR("min",mg_min,m_min); 
-	FLEXT_ADDATTR_VAR("max",mg_max,m_max);
-	FLEXT_ADDATTR_VAR("pos",mg_pos,m_pos);
-
-	FLEXT_ADDATTR_VAR_E("loop",loopmode,m_loop);
-
-	FLEXT_ADDMETHOD_F(0,"xzone",m_xzone);
-	FLEXT_ADDMETHOD_F(0,"xsymm",m_xsymm);
-	FLEXT_ADDMETHOD_(0,"xshape",m_xshape);
-	FLEXT_ADDMETHOD_B(0,"xkeep",m_xkeep);
 
 	znbuf = new S *[outchns];
 	for(I i = 0; i < outchns; ++i) znbuf[i] = new S[0];

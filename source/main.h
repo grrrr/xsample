@@ -64,7 +64,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xsample:
 	public flext_dsp
 {
-	FLEXT_HEADER(xsample,flext_dsp)
+	FLEXT_HEADER_S(xsample,flext_dsp,setup)
 	
 public:
 	xsample();
@@ -126,6 +126,7 @@ protected:
 	V mg_max(F &v) const { v = curmax*s2u; }
 
 private:
+	static V setup(t_class *c);
 
 	FLEXT_CALLBACK(m_start)
 	FLEXT_CALLBACK(m_stop)
