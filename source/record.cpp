@@ -1,15 +1,14 @@
-/*
+/* 
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
 */
 
 #include "main.h"
-#include <stdio.h>
 
 #ifdef _MSC_VER
 #pragma warning (disable:4244)
@@ -19,32 +18,38 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xrecord:
 	public xsample
 {
-	FLEXT_HEADER_S(xrecord,xsample,setup)
+//	FLEXT_HEADER_S(xrecord,xsample,setup)
+	FLEXT_HEADER(xrecord,xsample)
 
 public:
-	xrecord(I argc,const t_atom *argv);
+	xrecord(I argc,t_atom *argv);
 	
-	virtual BL Init();
-		
+#ifdef MAXMSP
+	virtual V m_assist(L msg,L arg,C *s);
+#endif
+	
 	virtual V m_help();
 	virtual V m_print();
 	
-	virtual I m_set(I argc,const t_atom *argv);
+	virtual I m_set(I argc,t_atom *argv);
 
 	virtual V m_pos(F pos);
 	virtual V m_all();
 	virtual V m_start();
 	virtual V m_stop();
 
-	virtual BL m_reset();
+	virtual V m_reset();
 
 	virtual V m_units(xs_unit md = xsu__);
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
 
-	inline V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
+	virtual V m_mixmode(BL mx) { mixmode = mx; }
+	virtual V m_sigmode(BL mode) { /*dorec =*/ sigmode = mode; }
+	virtual V m_loop(BL lp) { doloop = lp; }
+	virtual V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
 
-	virtual V m_draw(I argc,const t_atom *argv);	
+	virtual V m_draw(I argc,t_atom *argv);	
 
 protected:
 	I inchns;
@@ -54,63 +59,47 @@ protected:
 	BL dorec,doloop,mixmode;
 	L curpos;  // in samples
 
-	inline V outputmin() { ToOutFloat(1,curmin*s2u); }
-	inline V outputmax() { ToOutFloat(2,curmax*s2u); }
-
-	inline V mg_pos(F &v) const { v = curpos*s2u; }
+	outlet *outmin,*outmax; // float outlets	
+	
+	V outputmin() { ToOutFloat(outmin,curmin*s2u); }
+	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
 	
 private:
-	static V setup(t_classid c);
+//	static V setup(t_class *c);
 
 	virtual V s_dsp();
 
 	TMPLSIGFUN(s_rec);
 
 	DEFSIGCALL(recfun);
-	virtual V m_signal(I n,S *const *in,S *const *out) 
-	{ 
-		bufchk();
-		recfun(n,in,out); 
-	}
+	virtual V m_signal(I n,S *const *in,S *const *out) { recfun(n,in,out); }
 
-	FLEXT_CALLVAR_F(mg_pos,m_pos)
+	FLEXT_CALLBACK_F(m_pos)
 	FLEXT_CALLBACK(m_all)
-	FLEXT_CALLSET_F(m_min)
-	FLEXT_CALLSET_F(m_max)
 	FLEXT_CALLBACK_F(m_min)
 	FLEXT_CALLBACK_F(m_max)
 
-	FLEXT_ATTRVAR_B(doloop)
-	FLEXT_ATTRVAR_B(mixmode)
-	FLEXT_ATTRVAR_B(sigmode)
-	FLEXT_CALLSET_B(m_append)
-	FLEXT_ATTRGET_B(appmode)
+	FLEXT_CALLBACK_B(m_loop)
+	FLEXT_CALLBACK_B(m_mixmode)
+	FLEXT_CALLBACK_B(m_sigmode)
+	FLEXT_CALLBACK_B(m_append)
 
-	FLEXT_CALLBACK_V(m_draw)
+	FLEXT_CALLBACK_G(m_draw)
 };
 
 
-FLEXT_LIB_DSP_V("xrecord~",xrecord)
+FLEXT_LIB_TILDE_G("xrecord~",xrecord)
 
-
-V xrecord::setup(t_classid c)
+/*
+V xrecord::setup(t_class *)
 {
-	DefineHelp(c,"xrecord~");
-
-	FLEXT_CADDATTR_VAR(c,"pos",mg_pos,m_pos);
-	FLEXT_CADDATTR_VAR(c,"min",mg_min,m_min);
-	FLEXT_CADDATTR_VAR(c,"max",mg_max,m_max);
-	FLEXT_CADDMETHOD_(c,0,"all",m_all);
-	
-	FLEXT_CADDMETHOD_(c,0,"draw",m_draw);
-	
-	FLEXT_CADDATTR_VAR1(c,"loop",doloop);
-	FLEXT_CADDATTR_VAR1(c,"mixmode",mixmode);
-	FLEXT_CADDATTR_VAR1(c,"sigmode",sigmode);
-	FLEXT_CADDATTR_VAR(c,"append",appmode,m_append);
+#ifndef PD
+	post("loaded xrecord~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");
+#endif
 }
+*/
 
-xrecord::xrecord(I argc,const t_atom *argv):
+xrecord::xrecord(I argc,t_atom *argv):
 	dorec(false),
 	sigmode(false),mixmode(false),
 	appmode(true),doloop(false),
@@ -118,9 +107,9 @@ xrecord::xrecord(I argc,const t_atom *argv):
 	inchns(1)
 {
 	I argi = 0;
-#if FLEXT_SYS == FLEXT_SYS_MAX
-	if(argc > argi && CanbeInt(argv[argi])) {
-		inchns = GetAInt(argv[argi]);
+#ifdef MAXMSP
+	if(argc > argi && IsFlint(argv[argi])) {
+		inchns = GetAFlint(argv[argi]);
 		argi++;
 	}
 #endif
@@ -129,10 +118,10 @@ xrecord::xrecord(I argc,const t_atom *argv):
 		buf = new buffer(GetSymbol(argv[argi]),true);
 		argi++;
 
-#if FLEXT_SYS == FLEXT_SYS_MAX
+#ifdef MAXMSP		
 		// oldstyle command line?
-		if(argi == 1 && argc == 2 && CanbeInt(argv[argi])) {
-			inchns = GetAInt(argv[argi]);
+		if(argi == 1 && argc == 2 && IsFlint(argv[argi])) {
+			inchns = GetAFlint(argv[argi]);
 			argi++;
 			post("%s: old style command line detected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
 		}
@@ -141,34 +130,34 @@ xrecord::xrecord(I argc,const t_atom *argv):
 	else
 		buf = new buffer(NULL,true);
 
-	for(I ci = 0; ci < inchns; ++ci) {
-		C tmp[40];
-		STD::sprintf(tmp,ci == 0?"Messages/audio channel %i":"Audio channel %i",ci+1);
-		AddInSignal(tmp);  // audio signals
-	}
-	AddInSignal("On/Off/Fade/Mix signal (0..1)"); // on/off signal
-	AddInFloat("Starting point of recording");  // min 
-	AddInFloat("Ending point of recording");  // max
-	AddOutSignal("Current position of recording");  // pos signal
-	AddOutFloat("Starting point (rounded to frame)"); // min 
-	AddOutFloat("Ending point (rounded to frame)"); // max
-	AddOutBang("Bang on loop end/rollover");  // loop bang
+	AddInSignal(inchns);  // audio signals
+	AddInSignal(); // on/off signal
+	AddInFloat(2);  // min & max
+	AddOutSignal();  // pos signal
+	AddOutFloat(2); // min & max
+	SetupInOut();
 
+	FLEXT_ADDMETHOD_F(0,"pos",m_pos);
 	FLEXT_ADDMETHOD(inchns+1,m_min);
 	FLEXT_ADDMETHOD(inchns+2,m_max);
+	FLEXT_ADDMETHOD_F(0,"min",m_min);
+	FLEXT_ADDMETHOD_F(0,"max",m_max);
+	FLEXT_ADDMETHOD_(0,"all",m_all);
+	
+	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
+	FLEXT_ADDMETHOD_B(0,"mixmode",m_mixmode);
+	FLEXT_ADDMETHOD_B(0,"sigmode",m_sigmode);
+	FLEXT_ADDMETHOD_B(0,"append",m_append);
+	
+	FLEXT_ADDMETHOD_(0,"draw",m_draw);
+
+	outmin = GetOut(1);
+	outmax = GetOut(2);
+	
+	m_reset();
 }
 
 
-BL xrecord::Init()
-{
-	if(xsample::Init()) {
-		m_reset();
-		return true;
-	}
-	else
-		return false;
-}
-		
 V xrecord::m_units(xs_unit mode)
 {
 	xsample::m_units(mode);
@@ -208,7 +197,7 @@ V xrecord::m_pos(F pos)
 }
 
 
-I xrecord::m_set(I argc,const t_atom *argv)
+I xrecord::m_set(I argc,t_atom *argv)
 {
 	I r = xsample::m_set(argc,argv);
 	if(r < 0) m_reset(); // resets pos/min/max
@@ -233,16 +222,16 @@ V xrecord::m_stop()
 	s_dsp();
 }
 
-BL xrecord::m_reset()
+V xrecord::m_reset()
 {
 	curpos = 0;
-	return xsample::m_reset();
+	xsample::m_reset();
 }
 
-V xrecord::m_draw(I argc,const t_atom *argv)
+V xrecord::m_draw(I argc,t_atom *argv)
 {
 	if(argc >= 1) {
-		drintv = GetInt(argv[0]);
+		drintv = GetAFlint(argv[0]);
 		if(dorec) buf->SetRefrIntv(drintv);
 	}
 	else
@@ -259,27 +248,22 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 	const S *on = invecs[inchns];
 	S *pos = outvecs[0];
 
-	BL lpbang = false;
 	register const F pf = sclmul;
 	register L o = curpos;
 	
 	if(o < curmin) o = curmin;
 
-//	if(buf && dorec && curlen > 0) {
-	if(buf && dorec && curmax > curmin) {
+	if(buf && dorec && curlen > 0) {
 		while(n) {
 			L ncur = curmax-o; // at max to buffer or recording end
 
 			if(ncur <= 0) {	// end of buffer
 				if(doloop) { 
 					o = curmin;
-//					ncur = curlen;
-					ncur = curmax-o;
+					ncur = curlen;
 				}
 				else 
 					m_stop(); // loop expired;
-					
-				lpbang = true;
 			}
 
 			if(!dorec) break;
@@ -390,8 +374,6 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 		register F p = scale(o);
 		while(n--) *(pos++) = p;
 	}
-	
-	if(lpbang) ToOutBang(3);
 }
 
 V xrecord::s_dsp()
@@ -415,11 +397,11 @@ V xrecord::s_dsp()
 V xrecord::m_help()
 {
 	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
-#ifdef FLEXT_DEBUG
+#ifdef _DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2003");
-#if FLEXT_SYS == FLEXT_SYS_MAX
+	post("(C) Thomas Grill, 2001-2002");
+#ifdef MAXMSP
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
 	post("Arguments: %s [buffer]",thisName());
@@ -432,10 +414,10 @@ V xrecord::m_help()
 	post("\tenable 0/1: turn dsp calculation off/on");	
 	post("\treset: reset min/max recording points and recording offset");
 	post("\tprint: print current settings");
-	post("\t@sigmode 0/1: specify message or signal triggered recording");
-	post("\t@append 0/1: reset recording position or append to current position");
-	post("\t@loop 0/1: switches looping off/on");
-	post("\t@mixmode 0/1: specify if audio signal should be mixed in");
+	post("\tsigmode 0/1: specify message or signal triggered recording");
+	post("\tappend 0/1: reset recording position or append to current position");
+	post("\tloop 0/1: switches looping off/on");
+	post("\tmixmode 0/1: specify if audio signal should be mixed in");
 	post("\tmin {unit}: set minimum recording point");
 	post("\tmax {unit}: set maximum recording point");
 	post("\tall: select entire buffer length");
@@ -443,8 +425,8 @@ V xrecord::m_help()
 	post("\tbang/start: start recording");
 	post("\tstop: stop recording");
 	post("\trefresh: checks buffer and refreshes outlets");
-	post("\t@units 0/1/2/3: set units to frames/buffer size/ms/s");
-	post("\t@sclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
+	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
+	post("\tsclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
 	post("\tdraw [{float}]: redraw buffer immediately (arg omitted) or periodic (in ms)");
 	post("");
 }
@@ -456,8 +438,45 @@ V xrecord::m_print()
 	// print all current settings
 	post("%s - current settings:",thisName());
 	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
-	post("in channels = %i, frames/unit = %.3f, scale mode = %s",inchns,(F)(1./s2u),sclmode_txt[sclmode]); 
+	post("in channels = %i, samples/unit = %.3f, scale mode = %s",inchns,(F)(1./s2u),sclmode_txt[sclmode]); 
 	post("sigmode = %s, append = %s, loop = %s, mixmode = %s",sigmode?"yes":"no",appmode?"yes":"no",doloop?"yes":"no",mixmode?"yes":"no"); 
 	post("");
 }
+
+
+#ifdef MAXMSP
+V xrecord::m_assist(L msg,L arg,C *s)
+{
+	switch(msg) {
+	case 1: //ASSIST_INLET:
+		if(arg < inchns) {
+			if(arg) 
+				sprintf(s,"Messages and Audio channel 1"); 
+			else
+				sprintf(s,"Audio channel %li",arg+1); 
+		}
+		else
+			switch(arg-inchns) {
+			case 0:
+				sprintf(s,"On/Off/Fade/Mix signal (0..1)"); break;
+			case 1:
+				sprintf(s,"Starting point of recording"); break;
+			case 2:
+				sprintf(s,"Ending point of recording"); break;
+			}
+		break;
+	case 2: //ASSIST_OUTLET:
+		switch(arg) {
+		case 0:
+			sprintf(s,"Current position of recording"); break;
+		case 1:
+			sprintf(s,"Starting point (rounded to sample)"); break;
+		case 2:
+			sprintf(s,"Ending point (rounded to sample)"); break;
+		}
+		break;
+	}
+}
+#endif
+
 

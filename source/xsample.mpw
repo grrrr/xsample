@@ -1,0 +1,129 @@
+# xsample - extended sample objects for Max/MSP and pd (pure data)
+# Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+#
+# Makefile for Apple MPW-PR 
+#
+# usage: make -f xsample.mpw
+#
+# ---------------------------------------------
+
+MAKEFILE        = xsample.mpw
+ÄMondoBuildÄ    = {MAKEFILE}  # Make blank to avoid rebuilds when makefile is modified
+
+ObjDir          = ::MPW:
+MaxSDK			= HD Daten:Prog Stuff:Max/MSP SDK:SDK Examples
+flext			= :::flext:
+Includes        = -i :,"{flext}","{MaxSDK}:Max Includes","{MaxSDK}:MSP Includes"
+Defines			= -d MAXMSP 
+
+Sym-PPC         = -sym off
+Flags			= -bool on -enum int -includes unix -opt speed,unroll,unswitch  
+WarnOff			= -w 35
+
+PPCCPlusOptions = {Includes} {Sym-PPC} {Defines} {Flags} {WarnOff}
+
+
+### Source Files ###
+
+SrcFiles        =  main.cpp inter.cpp groove.cpp play.cpp record.cpp
+Headers			=  main.h
+
+### Object Files ###
+
+Obj-groove    =  è
+				  "{ObjDir}main.cpp.x" è
+				  "{ObjDir}inter.cpp.x" è
+				  "{ObjDir}groove.cpp.x" 
+
+Obj-play      =  è
+				  "{ObjDir}main.cpp.x" è
+				  "{ObjDir}inter.cpp.x" è
+				  "{ObjDir}play.cpp.x" 
+
+Obj-record    =  è
+				  "{ObjDir}main.cpp.x" è
+				  "{ObjDir}inter.cpp.x" è
+				  "{ObjDir}record.cpp.x"
+				  
+Obj			  = è
+				  "{ObjDir}main.cpp.x" è
+				  "{ObjDir}record.cpp.x" è
+				  "{ObjDir}play.cpp.x" è
+				  "{ObjDir}inter.cpp.x" è
+				  "{ObjDir}groove.cpp.x" 
+
+
+### Libraries ###
+
+LibFiles-Ext    =  è
+				  "{flext}MPW:flext.o" è
+				  "{MaxSDK}:Max Includes:MaxLib" è
+				  "{MaxSDK}:MSP Includes:MaxAudioLib"
+
+LibFiles-PPC    =  è
+				  "{SharedLibraries}StdCLib" è
+				  "{SharedLibraries}MathLib" è
+				  "{PPCLibraries}StdCRuntime.o" è
+				  "{PPCLibraries}PPCCRuntime.o" è
+				  "{PPCLibraries}MrCPlusLib.o" è
+
+
+### Default Rules ###
+
+{ObjDir} ü :
+
+.cpp.x  ü  .cpp  {ÄMondoBuildÄ} {Headers}
+	{PPCCPlus} {depDir}{default}.cpp -o {targDir}{default}.cpp.x {PPCCPlusOptions}
+
+
+### Build Rules ###
+
+all ü Folder {ObjDir}xsample 
+single ü Folder {ObjDir}xgroove~ {ObjDir}xplay~ {ObjDir}xrecord~
+
+Folder ü
+	if !`Exists {ObjDir}` ; NewFolder {ObjDir} ; end
+
+{ObjDir}xgroove~  üü  {Obj-groove}  {LibFiles-Ext} 
+	PPCLink è
+		-o {Targ} è
+		{deps} è
+		{LibFiles-PPC} è
+		{Sym-PPC} è
+		-mf -d è
+		-t 'iLaF' -c 'max2' è
+		-xm s è
+		-export main -main main
+
+{ObjDir}xplay~  üü  {Obj-play}  {LibFiles-Ext} 
+	PPCLink è
+		-o {Targ} è
+		{deps} è
+		{LibFiles-PPC} è
+		{Sym-PPC} è
+		-mf -d è
+		-t 'iLaF' -c 'max2' è
+		-xm s è
+		-export main -main main
+
+{ObjDir}xrecord~  üü  {Obj-record}  {LibFiles-Ext} 
+	PPCLink è
+		-o {Targ} è
+		{deps} è
+		{LibFiles-PPC} è
+		{Sym-PPC} è
+		-mf -d è
+		-t 'iLaF' -c 'max2' è
+		-xm s è
+		-export main -main main
+
+{ObjDir}xsample  üü  {Obj}  {LibFiles-Ext} 
+	PPCLink è
+		-o {Targ} è
+		{deps} è
+		{LibFiles-PPC} è
+		{Sym-PPC} è
+		-mf -d è
+		-t 'iLaF' -c 'max2' è
+		-xm s è
+		-export main -main main

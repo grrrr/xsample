@@ -2,7 +2,7 @@
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -15,22 +15,15 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #pragma warning (disable:4244)
 #endif
 
-#ifndef TMPLOPT
-#include "inter.ci"
-#endif
-
-void xinter::setup(t_classid c)
-{
-	FLEXT_CADDATTR_VAR_E(c,"interp",interp,m_interp);
-}
 
 xinter::xinter():
 	doplay(false),outchns(1),
 	interp(xsi_4p)
 {
+	FLEXT_ADDMETHOD_E(0,"interp",m_interp);
 }
 
-I xinter::m_set(I argc,const t_atom *argv) 
+I xinter::m_set(I argc,t_atom *argv) 
 {
 	I r = xsample::m_set(argc,argv);
 	if(r < 0) m_reset(); // resets pos/min/max
@@ -50,6 +43,180 @@ V xinter::m_stop()
 	doplay = false; 
 	s_dsp(); 
 }
+
+
+V xinter::m_interp(xs_intp mode) 
+{ 
+	interp = mode; 
+	s_dsp(); 
+}
+
+
+TMPLDEF V xinter::s_play0(I n,S *const *invecs,S *const *outvecs)
+{
+	// stopped
+	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
+
+	const S *pos = invecs[0];
+	S *const *sig = outvecs;
+	
+	for(I ci = 0; ci < outchns; ++ci) 
+		for(I si = 0; si < n; ++si) sig[ci][si] = 0;
+}
+
+TMPLDEF V xinter::s_play4(I n,S *const *invecs,S *const *outvecs)
+{
+	const I smin = curmin,smax = curmax,plen = curlen;
+	if(plen < 4) {
+		if(plen < 2) s_play1 TMPLCALL (n,invecs,outvecs);
+		else s_play2 TMPLCALL (n,invecs,outvecs);
+		return;
+	}
+
+	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
+
+	const S *pos = invecs[0];
+	S *const *sig = outvecs;
+	register I si = 0;
+	const S *bdt = buf->Data();
+	
+	// 4-point interpolation
+	// ---------------------
+	const I maxo = smax-1; // last sample in play region
+
+	for(I i = 0; i < n; ++i,++si) {	
+		F o = *(pos++)/s2u;
+		register I oint = (I)o,ointm,oint1,oint2;
+
+		if(oint <= smin) { 
+			if(oint < smin) oint = smin,o = smin;
+			// position is first simple
+			ointm = smin; // first sample 
+			oint1 = oint+1;
+			oint2 = oint1+1;
+		}
+		else if(oint >= maxo-2) { 
+			if(oint > maxo) oint = maxo,o = smax;
+			ointm = oint-1;
+			oint1 = oint >= maxo?maxo:oint+1;
+			oint2 = oint1 >= maxo?maxo:oint1+1;
+		}
+		else {
+			ointm = oint-1;
+			oint1 = oint+1;
+			oint2 = oint1+1;
+		}
+
+		register F frac = o-oint;
+		
+		register const S *fa = bdt+ointm*BCHNS;
+		register const S *fb = bdt+oint*BCHNS;
+		register const S *fc = bdt+oint1*BCHNS;
+		register const S *fd = bdt+oint2*BCHNS;
+
+		for(I ci = 0; ci < OCHNS; ++ci) {
+			const F cmb = fc[ci]-fb[ci];
+			sig[ci][si] = fb[ci] + frac*( 
+				cmb - 0.5f*(frac-1.) * ((fa[ci]-fd[ci]+3.0f*cmb)*frac + (fb[ci]-fa[ci]-cmb))
+			);
+		}
+	}
+
+	// clear rest of output channels (if buffer has less channels)
+	for(I ci = OCHNS; ci < outchns; ++ci) 
+		for(si = 0; si < n; ++si) sig[ci][si] = 0;
+}
+
+TMPLDEF V xinter::s_play2(I n,S *const *invecs,S *const *outvecs)
+{
+	const I smin = curmin,smax = curmax,plen = curlen;
+	if(plen < 2) {
+		s_play1 TMPLCALL (n,invecs,outvecs);
+		return;
+	}
+
+	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
+
+	const S *pos = invecs[0];
+	S *const *sig = outvecs;
+	register I si = 0;
+	
+	// linear interpolation
+	// --------------------
+
+	const I maxo = smax-1;  // last sample in buffer
+	const S *bdt = buf->Data();
+
+	for(I i = 0; i < n; ++i,++si) {	
+		const F o = *(pos++)/s2u;
+		register const I oint = (I)o;
+
+		if(oint < smin) {
+			// position is before first sample -> take the first sample
+			register const S *const fp = bdt+smin*BCHNS;
+			for(I ci = 0; ci < OCHNS; ++ci) 
+				sig[ci][si] = fp[ci]; 
+		}
+		else if(oint >= maxo) {
+			// position is past last sample -> take the last sample
+			register const S *const fp = bdt+maxo*BCHNS;
+			for(I ci = 0; ci < OCHNS; ++ci) 
+				sig[ci][si] = fp[ci]; 
+		}
+		else {
+			// normal interpolation
+			register const F frac = o-oint;
+			register const S *const fp0 = bdt+oint*BCHNS;
+			register const S *const fp1 = fp0+BCHNS;
+			for(I ci = 0; ci < OCHNS; ++ci) 
+				sig[ci][si] = fp0[ci]+frac*(fp1[ci]-fp0[ci]);
+		}
+	}
+
+	// clear rest of output channels (if buffer has less channels)
+	for(I ci = OCHNS; ci < outchns; ++ci) 
+		for(si = 0; si < n; ++si) sig[ci][si] = 0;
+}
+
+TMPLDEF V xinter::s_play1(I n,S *const *invecs,S *const *outvecs)
+{
+	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
+
+	const S *pos = invecs[0];
+	S *const *sig = outvecs;
+	register I si = 0;
+	const I smin = curmin,smax = curmax;
+	const S *bdt = buf->Data();
+	
+	// no interpolation
+	// ----------------
+	
+	for(I i = 0; i < n; ++i,++si) {	
+		register const I oint = (I)(*(pos++)/s2u);
+		register const S *fp;
+		if(oint < smin) {
+			// position < 0 ... take only 0th sample
+			fp = bdt+smin*BCHNS;
+		}
+		else if(oint >= smax) {
+			// position > last sample ... take only last sample
+			fp = bdt+(smax-1)*BCHNS;
+		}
+		else {
+			// normal
+			fp = bdt+oint*BCHNS;
+		}
+
+		for(I ci = 0; ci < OCHNS; ++ci)
+			sig[ci][si] = fp[ci];
+	}
+
+	// clear rest of output channels (if buffer has less channels)
+	for(I ci = OCHNS; ci < outchns; ++ci) 
+		for(si = 0; si < n; ++si) sig[ci][si] = 0;
+}
+
+
 
 V xinter::s_dsp()
 {
@@ -94,5 +261,3 @@ V xinter::s_dsp()
 	else
 		SETSIGFUN(playfun,TMPLFUN(s_play0,-1,-1));
 }
-
-
