@@ -17,6 +17,7 @@ include ${CONFIG}
 INCLUDES=$(PDINC) 
 FLAGS=-DFLEXT_SYS=2
 CFLAGS=-O2 ${UFLAGS} 
+LDFLAGS=${UFLAGS}  # needed by icc
 LIBS= 
 
 ifdef FLEXT_SHARED
