@@ -13,9 +13,16 @@ o GCC for linux: the compiler (version 2.95.2) dies when template optimization i
 o Metrowerks CodeWarrior V6: works just perfectly
 
 
+Files:
+- main.h,main.cpp: base class definition for all the other objects
+- record.cpp: xrecord~
+- play.cpp: xplay~
+- groove.cpp: xgroove~
+
+
 TODO list:
 - Documentation and better example patches
 - makefile and build for PD/Borland C++
 - makefile and build for PD/GCC
-- make use of resource files for text items
+- eventually make use of resource files for text items
 
