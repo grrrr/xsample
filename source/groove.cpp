@@ -295,7 +295,7 @@ V xgroove::s_pos_bidir(I n,F *const *invecs,F *const *outvecs)
 		// normalize and store current playing position
 		setpos(o);
 
-		bidir = bd;
+		bidir = (I)bd;
 		playfun(n,&pos,outvecs); 
 	} 
 	else 
@@ -340,7 +340,7 @@ V xgroove::m_help()
 	post("\tenable 0/1: turn dsp calculation off/on");	
 	post("\treset: reset min/max playing points and playing offset");
 	post("\tprint: print current settings");
-	post("\tloop 0/1: switches looping off/on");
+	post("\tloop 0/1/2: sets looping to off/forward/bidirectional");
 	post("\tinterp 0/1/2: set interpolation to off/4-point/linear");
 	post("\tmin {unit}: set minimum playing point");
 	post("\tmax {unit}: set maximum playing point");
@@ -398,6 +398,8 @@ V xgroove::m_assist(long msg, long arg, char *s)
 	}
 }
 #endif
+
+
 
 
 

@@ -29,7 +29,7 @@ TARGDIR=../pd-linux
 # compiler stuff
 INCLUDES=$(PDPATH)
 FLAGS=-DPD
-CFLAGS=-O6 -mpentium -funroll-loops
+CFLAGS=-O6 -mcpu=pentiumpro -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions
 LIBS=m
 
 # ----------------------------------------------
@@ -39,25 +39,27 @@ LIBS=m
 NAME=xsample
 
 # all the source files from the package
-SRCS=main.cpp inter.cpp play.cpp record.cpp groove.cpp 
+SRCS=main.cpp inter.cpp play.cpp record.cpp groove.cpp
 HDRS=main.h
 
+MAKEFILE=makefile.pd-linux
 TARGET=$(TARGDIR)/$(NAME).pd_linux
 
 # default target
-all: $(TARGDIR) $(TARGET)
+all: $(TARGDIR) $(TARGET) 
 
-$(SRCS): $(HDRS)
+$(SRCS): $(HDRS) $(MAKEFILE)
 	touch $@
 
 $(TARGDIR):
 	mkdir $(TARGDIR)
 
-$(TARGDIR)/%.o : %.cpp
+$(TARGDIR)/%.o : %.cpp 
 	$(CXX) -c $(CFLAGS) $(FLAGS) $(patsubst %,-I%,$(INCLUDES) $(FLEXTPATH)) $< -o $@
 
 $(TARGET) : $(patsubst %.cpp,$(TARGDIR)/%.o,$(SRCS)) $(FLEXTLIB) 
 	$(CXX) $(LDFLAGS) -shared $^ $(patsubst %,-l%,$(LIBS)) -o $@ 
+	strip --strip-unneeded $@
 	chmod 755 $@
 
 $(INSTDIR):
@@ -73,6 +75,10 @@ install:: $(TARGET)
 clean:
 	rm -f $(TARGDIR)/*.o $(TARGET)
 	
+
+
+
+
 
 
 

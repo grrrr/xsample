@@ -24,17 +24,22 @@ Package files:
 
 The package should at least compile (and is tested) with the following compilers:
 
-# pd - Windows:
+pd - Windows:
+-------------
 o Borland C++ 5.5 (free): edit & run "make -f makefile.bcc"
+
 o Microsoft Visual C++ 6: edit "xsample.dsp" project file
 > due to a compiler bug the optimization using templates is not functional
 
-# pd - linux:
+pd - linux:
+-----------
 o GCC for linux: run "make -f makefile.pd-linux" and as root "make -f makefile.pd-linux install"
-> various version of GCC die during compile with template optimization turned on 
+> various versions of GCC die during compile with template optimization turned on 
 
-# Max/MSP - MacOS:
+Max/MSP - MacOS:
+----------------
 o Metrowerks CodeWarrior V6: edit "xsample.cw" project file functions
+
 o Apple MPW-PR: edit & use the "flext.mpw" makefile
 
 
