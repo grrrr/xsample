@@ -39,7 +39,7 @@ LIBS=m
 NAME=xsample
 
 # all the source files from the package
-SRCS=main.cpp play.cpp record.cpp groove.cpp 
+SRCS=main.cpp inter.cpp play.cpp record.cpp groove.cpp 
 HDRS=main.h
 
 TARGET=$(TARGDIR)/$(NAME).pd_linux

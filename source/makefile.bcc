@@ -35,7 +35,7 @@ CFLAGS=-6 -O2 -OS -ff -tWD
 # ----------------------------------------------
 
 # all the source files from the package
-SRCS= main.cpp record.cpp play.cpp groove.cpp
+SRCS= main.cpp inter.cpp record.cpp play.cpp groove.cpp
 HDRS= main.h
 
 OBJS= $(SRCS:.cpp=.obj)
