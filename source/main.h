@@ -27,7 +27,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #if defined(_MSC_VER)
 // MS VC 6.0 can't handle <int,int> templates?! -> no optimization
 //	#define TMPLOPT
-#elif defined(__BORLANDC__) || defined(__MRC__)
+#elif defined(__BORLANDC__) 
 // handles all optimizations
 	#define TMPLOPT
 	#define TMPLINT
@@ -39,10 +39,14 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	#define TMPLOPT
 	#define TMPLINT
 	#define SIGSTATIC
-#else
-// another compiler
+#elif defined(__MRC__)
+// Apple MPW - MrCpp
 	#define TMPLOPT  // template optimation for more speed
 	#define TMPLINT	 // if <int,int> templates are correctly handled 
+#else
+// another compiler
+//	#define TMPLOPT  // template optimation for more speed
+//	#define TMPLINT	 // if <int,int> templates are correctly handled 
 	//#define SIGSTATIC  // another redirection to avoid addresses of class member functions
 #endif
 
