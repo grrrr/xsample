@@ -118,6 +118,7 @@ Version history:
 0.3.1:
 - added mixmode=2 to Max/MSP help files
 - fixed limit consideration for loopmode=0 and 2.
+- fixed buggy sampling in crossfade zones (and simplified it a lot)
 
 0.3.0:
 - added resources to MaxMSP build

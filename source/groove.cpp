@@ -17,7 +17,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 
-#define XZONE_TABLE 64
+#define XZONE_TABLE 512
 
 
 class xgroove:
@@ -642,6 +642,11 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
     // adapt the playing bounds to the current cross-fade zone
     const L smin = znsmin,smax = znsmax,plen = smax-smin;
 
+	// temporary storage
+	const L cmin = curmin,cmax = curmax;
+	// hack -> set curmin/curmax to loop extremes so that sampling functions (playfun) don't get confused
+	curmin = smin,curmax = smax;
+
 	if(buf && plen > 0) {
 		BL inzn = false;
 		register D o = curpos;
@@ -661,17 +666,24 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 				lpbang = true;
 			}
 
+#if 0
 			if(o < lmin) {
 				register F inp;
 				if(o < lmin2) {
+					// in first half of early cross-fade zone
+					// this happens only once, then the offset is normalized to the end
+					// of the loop (before mid of late crossfade)
+
 					o += lsh;
-					lpbang = true;
 					// now lmax <= o <= lmax2
+					lpbang = true;
 
 					inp = xz-(F)(o-lmax);  // 0 <= inp < xz
 					znpos[i] = lmin-inp;
 				}
-				else { // in early cross-fade zone
+				else { 
+					// in second half of early cross-fade zone
+
 					inp = xz+(F)(o-lmin);  // 0 <= inp < xz
 					znpos[i] = lmax+inp;
 				}
@@ -681,14 +693,18 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 			else if(!(o < lmax)) {
 				register F inp;
 				if(!(o < lmax2)) {
+					// in second half of late cross-fade zone
+					// this happens only once, then the offset is normalized to the beginning
+					// of the loop (after mid of early crossfade)
 					o -= lsh;
-					lpbang = true;
 					// now lmin2 <= o <= lmin
+					lpbang = true;
 
 					inp = xz+(F)(o-lmin);  // 0 <= inp < xz
 					znpos[i] = lmax+inp;
 				}
-				else { // in late cross-fade zone
+				else { 
+					// in first half of late cross-fade zone
 					inp = xz-(F)(o-lmax);  // 0 <= inp < xz
 					znpos[i] = lmin-inp;
 				}
@@ -701,6 +717,24 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 			const S spd = speed[i];  // must be first because the vector is reused for output!
 			pos[i] = o;
 			o += spd;
+#else
+			if(o >= lmax) { o -= lsh; lpbang = true; }
+
+			if(o < lmin) {
+				register F inp = (F)(o-smin); // 0 <= inp < xz
+				znpos[i] = lmax+inp;
+				znidx[i] = inp*xf;
+				inzn = true;
+			}
+			else {
+				znpos[i] = 0;
+				znidx[i] = XZONE_TABLE;
+			}
+
+			const S spd = speed[i];  // must be first because the vector is reused for output!
+			pos[i] = o;
+			o += spd;
+#endif
 		}
 
 		// normalize and store current playing position
@@ -736,6 +770,8 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	else 
 		s_pos_off(n,invecs,outvecs);
 		
+	curmin = cmin,curmax = cmax;
+
 	if(lpbang) ToOutBang(outchns+3);
 }
 
