@@ -295,6 +295,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	const I smin = curmin,smax = curmax,plen = curlen;
 
 	if(buf && plen > 0) {
+	/*
 		register D o = curpos;
 
 		for(I i = 0; i < n; ++i) {	
