@@ -11,13 +11,13 @@
 ## EDIT ZONE ##################################
 
 # flext path 
-FLEXTPATH=/usr/lib/pd/flext
+FLEXTPATH=/usr/local/lib/pd/flext
 
 # pd path 
-PDPATH=/usr/lib/pd/include
+PDPATH=/usr/local/lib/pd/include
 
 # where to install  
-INSTDIR=/usr/lib/pd/extra
+INSTDIR=/usr/local/lib/pd/extra
 
 ###############################################
 
