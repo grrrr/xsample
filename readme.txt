@@ -66,6 +66,7 @@ Version history:
 
 0.2.5:
 - xgroove~, xrecord~: introduced a loop/end bang outlet 
+- added MaxMSP buffer resize recognition
 
 0.2.4:
 - according to flext 0.2.3 changed sample type to t_sample (S)
@@ -113,7 +114,7 @@ general:
 - Documentation and better example patches
 
 features:
-- crossfading loop zone for xplay~ and xgroove~
+- crossfading loop zone for xgroove~
 - multi-buffer handling (aka multi-channel for pd)
 - vasp handling
 - performance comparison to respective PD/Max objects

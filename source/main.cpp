@@ -53,6 +53,8 @@ xsample::xsample():
 	
 xsample::~xsample()
 {
+	m_enable(false); // switch off DSP
+
 	if(buf) delete buf; 
 }
 
@@ -63,22 +65,30 @@ I xsample::m_set(I argc, t_atom *argv)
 	return buf->Set(argc >= 1?GetASymbol(argv[0]):NULL);
 }
 
-V xsample::m_refresh()
+BL xsample::m_refresh()
 {
-	if(buf->Set())	s_dsp(); // channel count may have changed
+	BL ret;
+	if(buf->Set()) { s_dsp(); ret = true; } // channel count may have changed
+	else ret = false;
 	
 	m_min((F)curmin*s2u); // also checks pos
 	m_max((F)curmax*s2u); // also checks pos
+
+	return ret;
 }
 
-V xsample::m_reset()
+BL xsample::m_reset()
 {
-	if(buf->Set())	s_dsp(); // channel count may have changed
+	BL ret;
+	if(buf->Set()) { s_dsp(); ret = true; } // channel count may have changed
+	else ret = false;
 	
 	m_units();
 	m_sclmode();	
 	m_min(0);
     m_max(buf->Frames()*s2u);
+
+	return ret;
 }
 
 V xsample::m_loadbang() 
@@ -121,7 +131,8 @@ V xsample::m_sclmode(xs_sclmd mode)
 			sclmin = 0; sclmul = buf->Frames()?1.f/buf->Frames():0;
 			break;
 		case 3:	// unity between recmin and recmax
-			sclmin = curmin; sclmul = curlen?1.f/curlen:0;
+//			sclmin = curmin; sclmul = curlen?1.f/curlen:0;
+			sclmin = curmin; sclmul = curmin != curmax?1.f/(curmax-curmin):0;
 			break;
 		default:
 			post("%s: Unknown scale mode",thisName());
@@ -134,7 +145,7 @@ V xsample::m_min(F mn)
 	if(mn < 0) mn = 0;
 	else if(mn > curmax) mn = (F)curmax;
 	curmin = (I)(mn+.5);
-	curlen = curmax-curmin;
+//	curlen = curmax-curmin;
 
 	m_sclmode();
 }
@@ -145,14 +156,15 @@ V xsample::m_max(F mx)
 	if(mx > buf->Frames()) mx = (F)buf->Frames();
 	else if(mx < curmin) mx = (F)curmin;
 	curmax = (I)(mx+.5);
-	curlen = curmax-curmin;
+//	curlen = curmax-curmin;
 
 	m_sclmode();
 }
 
 V xsample::m_all()
 {
-	curlen = (curmax = buf->Frames())-(curmin = 0);
+//	curlen = (curmax = buf->Frames())-(curmin = 0);
+	curmin = 0; curmax = buf->Frames();
 	m_sclmode();
 }
 
@@ -161,7 +173,7 @@ V xsample::m_dsp(I /*n*/,S *const * /*insigs*/,S *const * /*outsigs*/)
 	// this is hopefully called at change of sample rate ?!
 
 	m_refresh();  
-	s_dsp();
+	s_dsp();  // s_dsp is eventually done a second time!
 }
 
 

@@ -34,7 +34,13 @@ public:
 private:
 //	static V setup(t_class *c);
 
-	virtual V m_signal(I n,S *const *in,S *const *out) { playfun(n,in,out); }
+	virtual V m_signal(I n,S *const *in,S *const *out) 
+	{ 
+#ifdef MAXMSP // in max/msp the dsp tree is not rebuilt upon buffer resize
+		if(buf->Update()) refresh();
+#endif
+		playfun(n,in,out); 
+	}
 };
 
 FLEXT_LIB_TILDE_G("xplay~",xplay)

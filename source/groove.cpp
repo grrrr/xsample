@@ -35,7 +35,7 @@ public:
 
 	virtual V m_units(xs_unit mode = xsu__);
 
-	virtual V m_reset();
+	virtual BL m_reset();
 
 	virtual V m_pos(F pos);
 	virtual V m_all();
@@ -84,7 +84,13 @@ private:
 	DEFSIGFUN(s_pos_bidir);
 
 	DEFSIGCALL(posfun);
-	virtual V m_signal(I n,S *const *in,S *const *out) { posfun(n,in,out); }
+	virtual V m_signal(I n,S *const *in,S *const *out) 
+	{ 
+#ifdef MAXMSP // in max/msp the dsp tree is not rebuilt upon buffer resize
+		if(buf->Update()) refresh();
+#endif
+		posfun(n,in,out); 
+	}
 
 	FLEXT_CALLBACK_F(m_pos)
 	FLEXT_CALLBACK(m_all)
@@ -204,11 +210,11 @@ V xgroove::m_all()
 	outputmax();
 }
 
-V xgroove::m_reset()
+BL xgroove::m_reset()
 {
 	curpos = 0; 
 	bidir = 1;
-	xsample::m_reset();
+	return xsample::m_reset();
 }
 
 V xgroove::m_loop(xs_loop lp) 
@@ -235,7 +241,7 @@ V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const I smin = curmin,smax = curmax,plen = curlen;
+	const I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
 
 	if(buf && plen > 0) {
 		register D o = curpos;
@@ -266,7 +272,7 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const I smin = curmin,smax = curmax,plen = curlen;
+	const I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
 
 	if(buf && plen > 0) {
 		register D o = curpos;
@@ -304,7 +310,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const I smin = curmin,smax = curmax,plen = curlen;
+	const I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
 
 	if(buf && plen > 0) {
 	/*
@@ -345,7 +351,7 @@ V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const I smin = curmin,smax = curmax,plen = curlen;
+	const I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
 
 	if(buf && plen > 0) {
 		register D o = curpos;

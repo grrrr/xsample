@@ -87,11 +87,11 @@ protected:
 
 	virtual V m_start() = 0;
 	virtual V m_stop() = 0;
-	virtual V m_reset();
+	virtual BL m_reset();
 
   	virtual I m_set(I argc,t_atom *argv);
 	virtual V m_print() = 0;
-	virtual V m_refresh();
+	virtual BL m_refresh();
 	virtual V m_loadbang();
 
 	virtual V m_units(xs_unit u = xsu__);
@@ -107,7 +107,7 @@ protected:
 	xs_unit unitmode; //iunitmode,ounitmode;
 	xs_sclmd sclmode; //isclmode,osclmode;
 
-	I curmin,curmax,curlen;  // in samples
+	I curmin,curmax; //,curlen;  // in samples
 	I sclmin; // in samples
 	F sclmul;
 	F s2u;  // sample to unit conversion factor

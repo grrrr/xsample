@@ -59,7 +59,7 @@ TMPLDEF V xinter::s_play0(I n,S *const *invecs,S *const *outvecs)
 
 TMPLDEF V xinter::s_play4(I n,S *const *invecs,S *const *outvecs)
 {
-	const I smin = curmin,smax = curmax,plen = curlen;
+	const I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
 	if(plen < 4) {
 		if(plen < 2) s_play1 TMPLCALL (n,invecs,outvecs);
 		else s_play2 TMPLCALL (n,invecs,outvecs);
@@ -122,7 +122,7 @@ TMPLDEF V xinter::s_play4(I n,S *const *invecs,S *const *outvecs)
 
 TMPLDEF V xinter::s_play2(I n,S *const *invecs,S *const *outvecs)
 {
-	const I smin = curmin,smax = curmax,plen = curlen;
+	const I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
 	if(plen < 2) {
 		s_play1 TMPLCALL (n,invecs,outvecs);
 		return;

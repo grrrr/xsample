@@ -38,7 +38,7 @@ public:
 	virtual V m_start();
 	virtual V m_stop();
 
-	virtual V m_reset();
+	virtual BL m_reset();
 
 	virtual V m_units(xs_unit md = xsu__);
 	virtual V m_min(F mn);
@@ -72,7 +72,13 @@ private:
 	TMPLSIGFUN(s_rec);
 
 	DEFSIGCALL(recfun);
-	virtual V m_signal(I n,S *const *in,S *const *out) { recfun(n,in,out); }
+	virtual V m_signal(I n,S *const *in,S *const *out) 
+	{ 
+#ifdef MAXMSP // in max/msp the dsp tree is not rebuilt upon buffer resize
+		if(buf->Update()) refresh();
+#endif
+		recfun(n,in,out); 
+	}
 
 	FLEXT_CALLBACK_F(m_pos)
 	FLEXT_CALLBACK(m_all)
@@ -223,10 +229,10 @@ V xrecord::m_stop()
 	s_dsp();
 }
 
-V xrecord::m_reset()
+BL xrecord::m_reset()
 {
 	curpos = 0;
-	xsample::m_reset();
+	return xsample::m_reset();
 }
 
 V xrecord::m_draw(I argc,t_atom *argv)
@@ -255,14 +261,16 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 	
 	if(o < curmin) o = curmin;
 
-	if(buf && dorec && curlen > 0) {
+//	if(buf && dorec && curlen > 0) {
+	if(buf && dorec && curmax > curmin) {
 		while(n) {
 			L ncur = curmax-o; // at max to buffer or recording end
 
 			if(ncur <= 0) {	// end of buffer
 				if(doloop) { 
 					o = curmin;
-					ncur = curlen;
+//					ncur = curlen;
+					ncur = curmax-o;
 				}
 				else 
 					m_stop(); // loop expired;
