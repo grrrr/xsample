@@ -23,9 +23,7 @@ class xrecord:
 
 public:
 	xrecord(I argc,t_atom *argv);
-	~xrecord();
 	
-	virtual V m_loadbang() { m_reset();	}
 #ifdef MAXMSP
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
@@ -173,13 +171,8 @@ xrecord::xrecord(I argc,t_atom *argv):
 	
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL,true);
 #ifdef PD
-	m_loadbang();
+	m_loadbang();  // in PD loadbang is not called upon object creation
 #endif
-}
-
-xrecord::~xrecord()
-{
-	if(buf) delete buf;
 }
 
 

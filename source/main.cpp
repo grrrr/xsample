@@ -59,6 +59,7 @@ V xsample::cb_setup(t_class *c)
 }
 
 xsample::xsample():
+	buf(NULL),
 #ifdef PD
 	unitmode(xsu_sample),  // PD defaults to samples
 #else
@@ -69,6 +70,11 @@ xsample::xsample():
 	curmin(0),curmax(1<<30)
 {}
 	
+xsample::~xsample()
+{
+	if(buf) delete buf;
+}
+
 /*
 V xsample::cb_set(V *c,t_symbol *,I argc,t_atom *argv) { thisObject(c)->m_set(argc,argv); }
 V xsample::cb_print(V *c) { thisObject(c)->m_print(); }	
@@ -99,6 +105,11 @@ V xsample::m_reset()
     m_max(buf->Frames()*s2u);
 	m_units();
 	m_sclmode();
+}
+
+V xsample::m_loadbang() 
+{
+	m_reset();
 }
 
 V xsample::m_units(xs_unit mode)

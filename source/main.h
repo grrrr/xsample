@@ -54,6 +54,7 @@ class xsample:
 	
 public:
 	xsample();
+	~xsample();
 	
 	enum xs_unit {
 		xsu__ = -1,  // don't change
@@ -77,6 +78,7 @@ protected:
 	virtual V m_print() = 0;
 	virtual V m_refresh();
 	virtual V m_reset();
+	virtual V m_loadbang();
 
 	virtual V m_units(xs_unit u = xsu__);
 	virtual V m_interp(xs_intp u = xsi__);

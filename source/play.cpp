@@ -22,9 +22,7 @@ class xplay:
 
 public:
 	xplay(I argc, t_atom *argv);
-	~xplay();
 	
-	virtual V m_loadbang() { m_reset(); }
 #ifdef MAXMSP
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
@@ -96,14 +94,10 @@ xplay::xplay(I argc, t_atom *argv):
 
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL,true);	
 #ifdef PD
-	m_loadbang();
+	m_loadbang();  // in PD loadbang is not called upon object creation
 #endif
 }
 
-xplay::~xplay()
-{
-	if(buf) delete buf;
-}
 
 I xplay::m_set(I argc,t_atom *argv) 
 {

@@ -23,9 +23,7 @@ class xgroove:
 
 public:
 	xgroove(I argc,t_atom *argv);
-	~xgroove();
 
-	virtual V m_loadbang() { m_reset(); }
 #ifdef MAXMSP
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
@@ -149,13 +147,8 @@ xgroove::xgroove(I argc,t_atom *argv):
 	
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL,true);	
 #ifdef PD
-	m_loadbang();
+	m_loadbang();  // in PD loadbang is not called upon object creation
 #endif
-}
-
-xgroove::~xgroove()
-{
-	if(buf) delete buf;
 }
 
 
