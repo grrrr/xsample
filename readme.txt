@@ -115,6 +115,10 @@ Goals/features of the package:
 
 Version history:
 
+0.3.1:
+- added mixmode=2 to Max/MSP help files
+- fixed limit consideration for loopmode=0 and 2.
+
 0.3.0:
 - added resources to MaxMSP build
 - xgroove~, xrecord~: introduced a loop/end bang outlet 

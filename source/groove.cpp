@@ -787,12 +787,14 @@ V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 V xgroove::s_dsp()
 {
 	if(doplay) {
-		switch(loopmode) {
-		case xsl_once: SETSIGFUN(posfun,SIGFUN(s_pos_once)); break;
-		case xsl_loop: 
-            // xzone might not be set yet (is done in do_xzone() )
-			do_xzone(); // recalculate (s2u may have been 0 before)
+        // xzone might not be set yet (is done in do_xzone() )
+		do_xzone(); // recalculate (s2u may have been 0 before)
 
+		switch(loopmode) {
+		case xsl_once: 
+			SETSIGFUN(posfun,SIGFUN(s_pos_once)); 
+			break;
+		case xsl_loop: 
 			if(xzone > 0) {
 				const I blksz = Blocksize();
 
@@ -823,7 +825,9 @@ V xgroove::s_dsp()
 			else
 				SETSIGFUN(posfun,SIGFUN(s_pos_loop)); 
 			break;
-		case xsl_bidir: SETSIGFUN(posfun,SIGFUN(s_pos_bidir)); break;
+		case xsl_bidir: 
+			SETSIGFUN(posfun,SIGFUN(s_pos_bidir)); 
+			break;
 		}
 	}
 	else
