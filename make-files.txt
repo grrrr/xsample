@@ -1,0 +1,7 @@
+# all the source files from the package
+SRCS= \
+	main.cpp play.cpp groove.cpp record.cpp inter.cpp
+              
+HDRS= \
+	main.h inter.ci
+

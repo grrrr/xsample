@@ -1,0 +1,78 @@
+# xsample - extended sample objects for Max/MSP and pd (pure data)
+# Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+#
+# Makefile for gcc @ OSX (darwin)
+#
+# usage:
+# to build run "make -f makefile.pd-darwin"
+# to install (as root), do "make -f makefile.pd-darwin install"
+# to install help, do "make -f makefile.pd-darwin install-help"
+#
+
+CONFIG=config-pd-darwin.txt
+
+include ${CONFIG}
+
+FLEXTLIB=$(FLEXTPATH)/flext_t.a
+
+# compiler stuff
+INCLUDES=$(PDINC) 
+FLAGS=-DFLEXT_SYS=2 -DFLEXT_THREADS
+CFLAGS=-O6 -Wno-unused -Wno-parentheses -Wno-switch -Wstrict-prototypes # -maltivec
+LIBS=m
+LDFLAGS=-bundle -bundle_loader $(PDBIN)
+
+# ----------------------------------------------
+# the rest can stay untouched
+# ----------------------------------------------
+
+NAME=xsample
+SRCDIR=source
+
+include make-files.txt
+
+MAKEFILE=makefile.pd-darwin
+TARGET=$(TARGDIR)/$(NAME).pd_darwin
+
+
+# default target
+all: $(TARGDIR) $(TARGET) 
+
+$(patsubst %,$(SRCDIR)/%,$(SRCS)): $(patsubst %,$(SRCDIR)/%,$(HDRS)) $(MAKEFILE) $(CONFIG)
+	touch $(patsubst %,$(SRCDIR)/%,$(SRCS))
+
+$(TARGDIR):
+	mkdir $(TARGDIR)
+
+$(TARGDIR)/%.o : $(SRCDIR)/%.cpp 
+	$(CXX) -c $(CFLAGS) $(FLAGS) $(patsubst %,-I%,$(INCLUDES) $(FLEXTPATH)) $< -o $@
+
+$(TARGET) : $(patsubst %.cpp,$(TARGDIR)/%.o,$(SRCS)) $(FLEXTLIB) 
+	$(CXX) $(LDFLAGS) $^ $(patsubst %,-l%,$(LIBS)) -o $@ 
+	chmod 755 $@
+
+
+$(INSTDIR):
+	mkdir $(INSTDIR)
+
+install:: $(INSTDIR)
+
+install:: $(TARGET) 
+	cp -R $^ $(INSTDIR)
+#	chown -R root.root $(INSTDIR)
+
+
+$(HELPDIR):
+	mkdir $(HELPDIR)
+
+install-help:: $(HELPDIR)
+
+install-help:: ./pd
+	cp $^/*.* $(HELPDIR)
+#	chown -R root.root $(HELPDIR)
+
+
+.PHONY: clean
+clean:
+	rm -f $(TARGDIR)/*.o $(TARGET)
+	
