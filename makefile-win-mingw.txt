@@ -1,0 +1,5 @@
+# Makefile for MSVC++ 6 and .NET
+#
+# usage:
+# to build run "build-win-max-mingw.bat" or "build-win-pd-mingw.bat"
+#
