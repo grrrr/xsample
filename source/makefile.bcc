@@ -10,23 +10,20 @@
 NAME=xsample
 SETUPFUNCTION=$(NAME)_setup
 
-# all the source files from the package
-SRC= main.cpp record.cpp play.cpp groove.cpp
-
 # where to put the build
 OUTPATH=..\bcc
 
 # flext stuff
-FLEXTPATH=..\flext
+FLEXTPATH=..\..\flext  ### EDIT! ##
 TARGET=pdwin
 
 # paths
-BCCPATH=c:\programme\prog\bcc55
-PDPATH=c:\programme\audio\pd
+BCCPATH=c:\programme\prog\bcc55  	### EDIT! ##
+PDPATH=c:\programme\audio\pd		### EDIT! ##
 
 # includes, libs
 INCPATH=-I$(BCCPATH)\include -I$(PDPATH)\src -I$(FLEXTPATH)
-LIBPATH=-L$(BCCPATH)\lib -L$(PDPATH)\lib -L$(FLEXTPATH)
+LIBPATH=-L$(BCCPATH)\lib -L$(PDPATH)\lib 
 LIBS=cw32.lib import32.lib C0D32.OBJ
 
 # compiler definitions and flags
@@ -37,19 +34,41 @@ CFLAGS=-6 -O2 -OS -ff -tWD
 # the rest can stay untouched
 # ----------------------------------------------
 
-OBJ= $(SRC:.cpp=.obj)
+# all the source files from the package
+SRCS= main.cpp record.cpp play.cpp groove.cpp
+HDRS= main.h
+
+OBJS= $(SRCS:.cpp=.obj)
+
+# default target
+all: $(OUTPATH)\$(NAME).dll
+
+# remove build
+clean:
+	-del /s /q $(OUTPATH) > nul
+	rmdir $(OUTPATH)
+
+# ----------------------------------------------
+
+$(SRCS): $(HDRS)
+	-touch $<
+
+.PATH.OBJ=$(OUTPATH)
 
 .cpp.obj:
 	bcc32 -c $(CFLAGS) $(DEFS) $(INCPATH) -n$(OUTPATH) $<
 
+$(OUTPATH):
+	-@if not exist $< mkdir $<
+
 $(OUTPATH)\pd.lib: $(PDPATH)\bin\pd.dll
 	implib -a $@ $**
 
-$(NAME).dll:: $(OUTPATH)\pd.lib 
+$(OUTPATH)\$(NAME).def:
+	@echo EXPORTS $(SETUPFUNCTION) = _$(SETUPFUNCTION) > $<
 
-$(NAME).dll:: $(OBJ) 
-	@cd $(OUTPATH)
-	@echo EXPORTS $(SETUPFUNCTION) = _$(SETUPFUNCTION) > $(NAME).def
-	ilink32 -Tpd $(LIBPATH) $** ,$.,,$(LIBS) $(OUTPATH)\pd.lib ..\$(FLEXTPATH)\bcc\flext-$(TARGET).lib,$(NAME).def
+$(OUTPATH)\$(NAME).dll :: $(OUTPATH) $(OUTPATH)\$(NAME).def $(OUTPATH)\pd.lib 
 
-all: $(NAME).dll
+$(OUTPATH)\$(NAME).dll :: $(OBJS) 
+	ilink32 -C -Tpd $(LIBPATH) $** ,$<,,$(LIBS) $(OUTPATH)\pd.lib $(FLEXTPATH)\bcc\flext-$(TARGET).lib,$(OUTPATH)\$(NAME).def
+

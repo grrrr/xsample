@@ -1,33 +1,62 @@
-CFLAGS=-O6 -mpentium -g
-FLAGS=-DPD
+# xsample - extended sample objects for Max/MSP and pd (pure data)
+# Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+#
+# Makefile for gcc @ linux
+#
+# usage: make -f makefile.pd-linux
+#
+# ---------------------------------------------
 
-FLEXTPATH=../../flext
+NAME=xsample
 
-INCLUDES=/usr/lib/pd/include $(FLEXTPATH)
+# where to build
+TARGDIR=../pd-linux
+
+# where to install
+INSTDIR=/usr/lib/pd/extra  ### EDIT! ###
+
+# flext stuff
+FLEXTPATH=/usr/lib/pd/flext  		### EDIT! ###
 FLEXTLIB=$(FLEXTPATH)/pd-linux/flext.a
+
+# compiler+linker stuff
+INCLUDES=/usr/lib/pd/include   ### EDIT! ###
+FLAGS=-DPD
+CFLAGS=-O6 -mpentium -g
 LIBS=m
 
-PDEXTRA=/usr/lib/pd/extra
 
-TARGDIR=../pd-linux
-TARGET=$(TARGDIR)/xsample.pd_linux
+# the rest can stay untouched
+# ----------------------------------------------
+
+# all the source files from the package
 SRCS=main.cpp play.cpp record.cpp groove.cpp 
+HDRS=main.h
 
+TARGET=$(TARGDIR)/$(NAME).pd_linux
+
+# default target
 all: $(TARGDIR) $(TARGET)
+
+$(SRCS): $(HDRS)
+	touch $@
 
 $(TARGDIR):
 	mkdir $(TARGDIR)
 
 $(TARGDIR)/%.o : %.cpp
-	$(CXX) -c $(CFLAGS) $(FLAGS) $(patsubst %,-I%,$(INCLUDES)) $< -o $@
+	$(CXX) -c $(CFLAGS) $(FLAGS) $(patsubst %,-I%,$(INCLUDES) $(FLEXTPATH)) $< -o $@
 
 $(TARGET) : $(patsubst %.cpp,$(TARGDIR)/%.o,$(SRCS)) $(FLEXTLIB) 
 	$(CXX) $(LDFLAGS) -shared $^ $(patsubst %,-l%,$(LIBS)) -o $@ 
 	chmod 755 $@
 
-install: $(TARGET)
-	chown root.root $^ 
-	cp $^ $(PDEXTRA)
+$(INSTDIR):
+	mkdir $(INSTDIR)
+
+install: $(TARGET) $(INSTDIR) 
+	cp $^ $(INSTDIR)
+	chown root.root $(INSTDIR)/$^ 
 
 .PHONY: clean
 clean:
