@@ -43,7 +43,8 @@ public:
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
 	
-	V m_xzone(F xz);
+	V ms_xzone(F xz);
+	V mg_xzone(F &xz);
 	V m_xsymm(F xz);
 	V m_xshape(I argc = 0,const t_atom *argv = NULL);
 	inline V ms_xshape(const AtomList &ret) { m_xshape(ret.Count(),ret.Atoms()); }
@@ -115,8 +116,8 @@ private:
 	FLEXT_CALLBACK_F(m_max)
 	FLEXT_CALLBACK(m_all)
 
-	FLEXT_CALLSET_F(m_xzone)
-	FLEXT_ATTRGET_F(_xzone)
+	FLEXT_CALLSET_F(ms_xzone)
+	FLEXT_CALLGET_F(mg_xzone)
 	FLEXT_CALLSET_F(m_xsymm)
 	FLEXT_ATTRGET_F(xsymm)
 	FLEXT_CALLVAR_V(mg_xshape,ms_xshape)
@@ -148,7 +149,7 @@ V xgroove::setup(t_classid c)
 
 	FLEXT_CADDATTR_VAR_E(c,"loop",loopmode,m_loop);
 
-	FLEXT_CADDATTR_VAR(c,"xzone",_xzone,m_xzone);
+	FLEXT_CADDATTR_VAR(c,"xzone",mg_xzone,ms_xzone);
 	FLEXT_CADDATTR_VAR(c,"xsymm",xsymm,m_xsymm);
 	FLEXT_CADDATTR_VAR(c,"xshape",mg_xshape,ms_xshape);
 	FLEXT_CADDATTR_VAR(c,"xkeep",xkeep,m_xkeep);
@@ -276,12 +277,17 @@ BL xgroove::m_reset()
 	return xsample::m_reset();
 }
 
-V xgroove::m_xzone(F xz) 
+V xgroove::ms_xzone(F xz) 
 { 
 	bufchk();
-	_xzone = xz < 0?0:xz; 
+	_xzone = xz < 0?0:xz/s2u; 
 //	do_xzone();
 	s_dsp(); 
+}
+
+V xgroove::mg_xzone(F &xz) 
+{ 
+	xz = _xzone*s2u; 
 }
 
 V xgroove::m_xsymm(F xs) 
@@ -341,7 +347,7 @@ V xgroove::do_xzone()
 {
 	if(!s2u) return; // this can happen if DSP is off
 
-	xzone = _xzone/s2u;
+	xzone = _xzone; // make a copy for changing it
 	znsmin = curmin,znsmax = curmax;
     I plen = znsmax-znsmin; //curlen;
 
