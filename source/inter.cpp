@@ -16,7 +16,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 #ifndef TMPLOPT
-#include "inter.ci"
+#include "inter.h"
 #endif
 
 void xinter::setup(t_classid c)

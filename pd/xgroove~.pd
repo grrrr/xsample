@@ -1,15 +1,15 @@
-#N canvas 92 110 839 558 12;
+#N canvas 92 110 841 560 12;
 #X obj 258 240 hsl 128 15 0.001 3 1 1 empty empty empty 20 8 0 8 -225271
--1 -1 0 1;
-#X floatatom 255 261 8 0 0;
-#X floatatom 275 312 8 0 0;
-#X floatatom 350 312 8 0 0;
-#X floatatom 273 372 8 0 0;
-#X floatatom 348 372 8 0 0;
+-1 -1 3600 1;
+#X floatatom 255 261 8 0 0 0 - - -;
+#X floatatom 275 312 8 0 0 0 - - -;
+#X floatatom 350 312 8 0 0 0 - - -;
+#X floatatom 273 372 8 0 0 0 - - -;
+#X floatatom 348 372 8 0 0 0 - - -;
 #X obj 275 419 loadbang;
 #X obj 274 445 metro 30;
 #X obj 250 470 snapshot~;
-#X floatatom 250 494 8 0 0;
+#X floatatom 250 494 8 0 0 0 - - -;
 #X msg 258 82 loop \$1;
 #X obj 159 27 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1
 -1;
@@ -70,7 +70,7 @@
 #X text 416 234 speed;
 #X text 337 254 (float or signal);
 #X obj 656 365 table buf2;
-#X floatatom 519 380 8 0 0;
+#X floatatom 519 380 8 0 0 0 - - -;
 #X obj 519 353 soundfiler;
 #X msg 158 172 set buf2;
 #X msg 157 144 set buf;
@@ -85,8 +85,8 @@
 #X obj 22 242 ramp 10;
 #X msg 10 105 xzone \$1;
 #X obj 13 62 hsl 128 15 0 300 0 0 empty empty empty -2 -6 0 8 -262144
--1 -1 0 1;
-#X floatatom 10 83 5 0 0;
+-1 -1 800 1;
+#X floatatom 10 83 5 0 0 0 - - -;
 #X obj 258 32 vdl 15 0 0 3 empty empty empty 0 -6 0 8 -262144 -1 -1
 0;
 #X text 277 29 once;

@@ -109,6 +109,10 @@ SOURCE=.\source\inter.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\source\inter.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\source\main.cpp
 # End Source File
 # Begin Source File

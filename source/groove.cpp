@@ -197,11 +197,11 @@ xgroove::xgroove(I argc,const t_atom *argv):
 	AddOutFloat("Ending point (rounded to frame)"); // play max
 	AddOutBang("Bang on loop end/rollover");  // loop bang
 	
-
 	znbuf = new S *[outchns];
 	for(I i = 0; i < outchns; ++i) znbuf[i] = new S[0];
-	znpos = new S[0];
+	znpos = new S[0]; // don't know vector size yet -> m_dsp
 	znidx = new S[0];
+	znmul = new S[XZONE_TABLE+1];
 	m_xshape();
 }
 
@@ -305,10 +305,10 @@ V xgroove::m_xshape(I argc,const t_atom *argv)
 		if(xshparam < 0) xshparam = 0;
 		else if(xshparam > 1) xshparam = 1;
 	}
-
-//	if(znmul) delete[] znmul; 
+/*
+	if(znmul) delete[] znmul; 
 	if(!znmul) znmul = new S[XZONE_TABLE+1];
-
+*/
 	I i;
 	switch(xshape) {
 	case 1:
@@ -531,8 +531,8 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 			
 			arrscale(n,znidx,znpos,-XZONE_TABLE,-1);
 			
-			zonefun(znmul,0,XZONE_TABLE+1,1,1,1,&znidx,&znidx);
-			zonefun(znmul,0,XZONE_TABLE+1,1,1,1,&znpos,&znpos);
+			zonefun(znmul,0,XZONE_TABLE+1,n,1,1,&znidx,&znidx);
+			zonefun(znmul,0,XZONE_TABLE+1,n,1,1,&znpos,&znpos);
 
 			for(I o = 0; o < outchns; ++o) {
 				F *ov = outvecs[o],*ob = znbuf[o];
@@ -615,6 +615,8 @@ V xgroove::s_dsp()
 
 				SETSIGFUN(posfun,SIGFUN(s_pos_loopzn)); 
 
+				// linear interpolation should be enough for fade zone, no?
+/*
 				if(interp == xsi_4p) 
 					switch(outchns) {
 						case 1:	SETSTFUN(zonefun,TMPLSTF(st_play4,1,1)); break;
@@ -623,12 +625,14 @@ V xgroove::s_dsp()
 						default: SETSTFUN(zonefun,TMPLSTF(st_play4,1,-1));
 					}
 				else if(interp == xsi_lin) 
+*/
 					switch(outchns) {
 						case 1:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,1)); break;
 						case 2:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,2)); break;
 						case 4:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,4)); break;
 						default: SETSTFUN(zonefun,TMPLSTF(st_play2,1,-1));
 					}
+/*
 				else 
 					switch(outchns) {
 						case 1:	SETSTFUN(zonefun,TMPLSTF(st_play1,1,1)); break;
@@ -636,6 +640,7 @@ V xgroove::s_dsp()
 						case 4:	SETSTFUN(zonefun,TMPLSTF(st_play1,1,4)); break;
 						default: SETSTFUN(zonefun,TMPLSTF(st_play1,1,-1));
 					}
+*/
 			}
 			else
 				SETSIGFUN(posfun,SIGFUN(s_pos_loop)); 

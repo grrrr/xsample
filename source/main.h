@@ -124,10 +124,10 @@ protected:
 	inline F scale(F smp) const { return (smp-sclmin)*sclmul; }
 	
 	static V arrscale(I n,const S *in,S *out,S add,S mul);
-	inline V arrscale(I n,const S *in,S *out) const { arrscale(n,in,out,-sclmin,sclmul); }
+	inline V arrscale(I n,const S *in,S *out) const { arrscale(n,in,out,(S)-sclmin,sclmul); }
 	
 	static V arrmul(I n,const S *in,S *out,S mul);
-	inline V arrmul(I n,const S *in,S *out) const { arrmul(n,in,out,1./s2u); }
+	inline V arrmul(I n,const S *in,S *out) const { arrmul(n,in,out,(S)(1./s2u)); }
 
 	BL bufchk();
 
