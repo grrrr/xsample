@@ -14,6 +14,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #pragma warning (disable:4244)
 #endif
 
+namespace flext {
 
 class xplay:
 	public xinter
@@ -143,6 +144,8 @@ V xplay::m_assist(L msg,L arg,C *s)
 	}
 }
 #endif
+
+} // namespace flext
 
 
 

@@ -1,6 +1,8 @@
 #ifndef __INTER_H
 #define __INTER_H
 
+namespace flext {
+
 TMPLDEF V xinter::st_play0(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 {
 	// stopped
@@ -350,5 +352,7 @@ TMPLDEF V xinter::s_play4(I n,S *const *invecs,S *const *outvecs)
 }
 
 #endif
+
+} // namespace flext
 
 #endif

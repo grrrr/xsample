@@ -16,8 +16,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
  
 #include <flext.h>
 
-#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 304)
-#error You need at least flext version 0.3.4
+#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 400)
+#error You need at least flext version 0.4.0
 #endif
 
 
@@ -48,6 +48,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	//#define SIGSTATIC  // another redirection to avoid addresses of class member functions
 #endif
 
+namespace flext {
 
 // lazy me
 #define F float
@@ -267,6 +268,8 @@ private:
 
 	FLEXT_CALLBACK_1(m_interp,xs_intp)
 };
+
+} // namespace flext
 
 #ifdef TMPLOPT
 #include "inter.ci"

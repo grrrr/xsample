@@ -18,6 +18,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 #define XZONE_TABLE 512
 
+namespace flext {
+
 class xgroove:
 	public xinter
 {
@@ -693,7 +695,7 @@ V xgroove::m_assist(long msg, long arg, char *s)
 }
 #endif
 
-
+} // namespace flext
 
 
 
