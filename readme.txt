@@ -58,7 +58,7 @@ Version history:
 - using flext 0.2.2 - xsample is now a library under MaxMSP
 - cleaner gcc makefile
 - xgroove~, xrecord~: added "all" message to select entire buffer length
-- xgroove~, xplay~: added linear interpolation (message to send: "interp 2") 
+- xgroove~, xplay~: revisited dsp methods, restructured the code, added linear interpolation (message to send: "interp 2") 
 
 0.2.2:
 - using flext 0.2.0

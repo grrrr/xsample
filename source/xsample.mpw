@@ -41,6 +41,13 @@ Obj-play      =  è
 Obj-record    =  è
 				  "{ObjDir}main.cpp.x" è
 				  "{ObjDir}record.cpp.x"
+				  
+Obj			  = è
+				  "{ObjDir}main.cpp.x" è
+				  "{ObjDir}record.cpp.x" è
+				  "{ObjDir}play.cpp.x" è
+				  "{ObjDir}groove.cpp.x" 
+
 
 ### Libraries ###
 
@@ -67,7 +74,8 @@ LibFiles-PPC    =  è
 
 ### Build Rules ###
 
-all ü Folder {ObjDir}xgroove~ {ObjDir}xplay~ {ObjDir}xrecord~
+all ü Folder {ObjDir}xsample 
+single ü Folder {ObjDir}xgroove~ {ObjDir}xplay~ {ObjDir}xrecord~
 
 Folder ü
 	if !`Exists {ObjDir}` ; NewFolder {ObjDir} ; end
@@ -95,6 +103,17 @@ Folder ü
 		-export main -main main
 
 {ObjDir}xrecord~  üü  {Obj-record}  {LibFiles-Ext} 
+	PPCLink è
+		-o {Targ} è
+		{deps} è
+		{LibFiles-PPC} è
+		{Sym-PPC} è
+		-mf -d è
+		-t 'iLaF' -c 'max2' è
+		-xm s è
+		-export main -main main
+
+{ObjDir}xsample  üü  {Obj}  {LibFiles-Ext} 
 	PPCLink è
 		-o {Targ} è
 		{deps} è

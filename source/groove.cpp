@@ -299,7 +299,7 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 				register F *fd = buf->Data()+oint2*BCHNS;
 
 				for(I ci = 0; ci < OCHNS; ++ci) {
-					const F cmb = fc[ci]-fb[ci];
+					register const F cmb = fc[ci]-fb[ci];
 					sig[ci][si] = fb[ci] + frac*( 
 						cmb - 0.5f*(frac-1.) * ((fa[ci]-fd[ci]+3.0f*cmb)*frac + (fb[ci]-fa[ci]-cmb))
 					);
@@ -309,7 +309,7 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 				o += spd;
 			}
 		}
-		else if(interp == xsi_lin && plen > 2) {
+		else if(interp == xsi_lin && plen >= 2) {
 			// linear interpolation
 		
 			const I maxo = smax-1; // last sample in play region
@@ -337,8 +337,6 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 					}
 					else oint1 = oint+1;
 					
-					*(pos++) = scale(o);
-
 					register F frac = o-oint;
 					register F *fp0 = buf->Data()+oint*BCHNS;
 					register F *fp1 = buf->Data()+oint1*BCHNS;
@@ -380,36 +378,30 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 					const F spd = *(speed++);  // must be first because the vector is reused for output!
 
 					// normalize offset
-					if(o >= smax) 
-						o = fmod(o,plen)+smin;
-					else if(o < smin) 
+					if(o < smin) 
 						o = fmod(o+smax,plen)+smin;
+					else if(o >= smax) 
+						o = fmod(o,plen)+smin;
 
-					*(pos++) = scale(o);
-					register const F *fp = buf->Data()+(I)o*BCHNS;
+					register const F *const fp = buf->Data()+(I)o*BCHNS;
 					for(I ci = 0; ci < OCHNS; ++ci) 
 						sig[ci][si] = fp[ci];
 
+					*(pos++) = scale(o);
 					o += spd;
 				}
 			}
 			else {
 				for(I i = 0; i < n; ++i,++si) {	
 					const F spd = *(speed++);  // must be first because the vector is reused for output!
-					register F *fp;
-					const I oint = (I)o;
-					if(oint < smin) {
-						o = smin;
-						fp = buf->Data()+smin*BCHNS;
-					}
-					else if(oint >= smax) {
-						o = smax;
-						fp = buf->Data()+(smax-1)*BCHNS;
-					}
-					else {
-						fp = buf->Data()+oint*BCHNS;
-					}
-
+					
+					register I oint = (I)o;
+					if(oint < smin) 
+						o = oint = smin;
+					else if(oint >= smax)
+						oint = smax-1,o = smax;
+					
+					register const F *const fp = buf->Data()+oint*BCHNS;
 					for(I ci = 0; ci < OCHNS; ++ci)
 						sig[ci][si] = fp[ci];
 

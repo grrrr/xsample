@@ -29,7 +29,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 //	#define TMPLOPT
 #elif defined(__BORLANDC__) 
 // handles all optimizations
-	#define TMPLOPT
+	#define TMPLOPT 
 	#define TMPLINT
 #elif defined(__GNUC__)
 // GNUC 2.95.2 dies at compile with <int,int> templates
@@ -45,7 +45,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 //	#define TMPLINT	 // if <int,int> templates are correctly handled 
 #else
 // another compiler
-//	#define TMPLOPT  // template optimation for more speed
+//	#define TMPLOPT  // template optimation for more speed (about 10%)
 //	#define TMPLINT	 // if <int,int> templates are correctly handled 
 	//#define SIGSTATIC  // another redirection to avoid addresses of class member functions
 #endif

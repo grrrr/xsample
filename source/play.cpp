@@ -124,12 +124,11 @@ TMPLDEF V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 	const I smin = 0,smax = buf->Frames(),plen = smax-smin;
 	
 	if(doplay && buf->Frames() > 0) {
-		if(interp == xsi_4p && plen > 4) {
+		if(interp == xsi_4p && plen >= 4) {
 			// 4-point interpolation
 			// ---------------------
 			
 			const I maxo = smax-1; // last sample in play region
-			const I maxi = smax-3; // last position for straight interpolation
 
 			for(I i = 0; i < n; ++i,++si) {	
 				F o = *(pos++)/s2u;
@@ -142,8 +141,8 @@ TMPLDEF V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 					oint1 = oint+1;
 					oint2 = oint1+1;
 				}
-				else if(oint >= maxi) { 
-					if(oint >= smax) oint = maxo,o = smax;
+				else if(oint >= maxo-2) { 
+					if(oint > maxo) oint = maxo,o = smax;
 					ointm = oint-1;
 					oint1 = oint >= maxo?maxo:oint+1;
 					oint2 = oint1 >= maxo?maxo:oint1+1;
@@ -169,7 +168,7 @@ TMPLDEF V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 				}
 			}
 		}
-		else if(interp == xsi_lin && plen > 2) {
+		else if(interp == xsi_lin && plen >= 2) {
 			// linear interpolation
 			// --------------------
 		
@@ -192,6 +191,7 @@ TMPLDEF V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 						sig[ci][si] = fp[ci]; 
 				}
 				else {
+					// normal interpolation
 					register const F frac = o-oint;
 					register const F *const fp0 = buf->Data()+oint*BCHNS;
 					register const F *const fp1 = fp0+BCHNS;
@@ -207,11 +207,11 @@ TMPLDEF V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 			for(I i = 0; i < n; ++i,++si) {	
 				register const I oint = (I)(*(pos++)/s2u);
 				register F *fp;
-				if(oint < 0) {
+				if(oint < smin) {
 					// position < 0 ... take only 0th sample
 					fp = buf->Data()+smin*BCHNS;
 				}
-				else if(oint >= buf->Frames()) {
+				else if(oint >= smax) {
 					// position > last sample ... take only last sample
 					fp = buf->Data()+(smax-1)*BCHNS;
 				}
