@@ -78,7 +78,7 @@ private:
 };
 
 
-FLEXT_TILDE_NEW_GIMME("xgroove~",xgroove)
+FLEXT_TILDE_GIMME("xgroove~",xgroove)
 
 V xgroove::cb_setup(t_class *c)
 {
@@ -396,7 +396,6 @@ V xgroove::m_help()
 	post("\tmin {unit}: set minimum playing point");
 	post("\tmax {unit}: set maximum playing point");
 	post("\tpos {unit}: set playing position (obeying the current scale mode)");
-//	post("\tfloat {unit}: set playing position");
 	post("\tbang/start: start playing");
 	post("\tstop: stop playing");
 	post("\trefresh: checks buffer and refreshes outlets");

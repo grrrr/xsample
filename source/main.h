@@ -19,7 +19,7 @@ FLEXT_EXT V xgroove_tilde_setup();
 
 #if defined(_MSC_VER)
 // MS VC 6.0 can't handle <int,int> templates?!
-	#define TMPLOPT
+//	#define TMPLOPT
 #elif defined(__BORLANDC__)
 // BorlandC++ 5.5 works fine (recommendation: it's FREE!)
 	#define TMPLOPT

@@ -55,7 +55,7 @@ private:
 	static V cb_reset(t_class *c) { thisObject(c)->m_reset(); }
 };
 
-FLEXT_TILDE_NEW_GIMME("xplay~",xplay)
+FLEXT_TILDE_GIMME("xplay~",xplay)
 
 
 V xplay::cb_setup(t_class *c)

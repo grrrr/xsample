@@ -87,7 +87,7 @@ private:
 };
 
 
-FLEXT_TILDE_NEW_GIMME("xrecord~",xrecord)
+FLEXT_TILDE_GIMME("xrecord~",xrecord)
 
 V xrecord::cb_setup(t_class *c)
 {
@@ -409,7 +409,6 @@ V xrecord::m_help()
 	post("\tmin {unit}: set minimum recording point");
 	post("\tmax {unit}: set maximum recording point");
 	post("\tpos {unit}: set recording position (obeying the current scale mode)");
-//	post("\tfloat {unit}: set recording position");
 	post("\tbang/start: start recording");
 	post("\tstop: stop recording");
 	post("\trefresh: checks buffer and refreshes outlets");
