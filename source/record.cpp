@@ -207,8 +207,9 @@ V xrecord::m_pos(F pos)
 I xrecord::m_set(I argc,const t_atom *argv)
 {
 	I r = xsample::m_set(argc,argv);
-	if(r < 0) m_reset(); // resets pos/min/max
-	if(r != 0) m_units();
+	if(r) 
+        // buffer parameters have changed, reset pos/min/max
+        m_reset(); 
 	return r;
 }
 
