@@ -1,26 +1,23 @@
 # xsample - extended sample objects for Max/MSP and pd (pure data)
-# Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+# Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
 #
 
 # your c++ compiler (if not g++)
 # CXX=g++
 
 # where does the PD installation reside?
-PD=/usr/local/pd
+PD=/usr/local/lib/pd
 
 # where are the PD header files?
 # leave it blank if it is a system directory (like /usr/local/include), 
 # 	since gcc 3.2 complains about it
-PDINC=${PD}/src
-
-# where is the PD executable?
-PDBIN=${PD}/bin/pd
+PDINC=
 
 # where do the flext libraries reside?
 FLEXTPATH=${PD}/flext
 
-# where should the xsample objects be built?
-TARGDIR=./pd-darwin
+# where should xsample objects be built?
+TARGDIR=./pd-linux
 
 # where should xsample be installed?
 # (leave blank to omit installation)

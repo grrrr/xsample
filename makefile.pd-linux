@@ -1,15 +1,14 @@
 # xsample - extended sample objects for Max/MSP and pd (pure data)
 # Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
 #
-# Makefile for gcc @ OSX (darwin)
+# Makefile for gcc @ linux
 #
 # usage:
-# to build run "make -f makefile.pd-darwin"
-# to install (as root), do "make -f makefile.pd-darwin install"
-# to install help, do "make -f makefile.pd-darwin install-help"
+# to build run "make -f makefile.pd-linux"
+# to install (as root), do "make -f makefile.pd-linux install"
 #
 
-CONFIG=config-pd-darwin.txt
+CONFIG=config-pd-linux.txt
 
 include ${CONFIG}
 
@@ -18,9 +17,9 @@ FLEXTLIB=$(FLEXTPATH)/flext.a
 # compiler stuff
 INCLUDES=$(PDINC) 
 FLAGS=-DFLEXT_SYS=2
-CFLAGS=-O6 -Wno-unused -Wno-parentheses -Wno-switch -Wstrict-prototypes # -maltivec
+CFLAGS=-O6 -mcpu=pentiumpro -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions
+#CFLAGS=-O6 -mcpu=pentium3 -msse -mfpmath=sse -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions
 LIBS=m
-LDFLAGS=-bundle -bundle_loader $(PDBIN)
 
 # ----------------------------------------------
 # the rest can stay untouched
@@ -31,9 +30,8 @@ SRCDIR=source
 
 include make-files.txt
 
-MAKEFILE=makefile.pd-darwin
-TARGET=$(TARGDIR)/$(NAME).pd_darwin
-
+MAKEFILE=makefile.pd-linux
+TARGET=$(TARGDIR)/$(NAME).pd_linux
 
 # default target
 all: $(TARGDIR) $(TARGET) 
@@ -48,9 +46,9 @@ $(TARGDIR)/%.o : $(SRCDIR)/%.cpp
 	$(CXX) -c $(CFLAGS) $(FLAGS) $(patsubst %,-I%,$(INCLUDES) $(FLEXTPATH)) $< -o $@
 
 $(TARGET) : $(patsubst %.cpp,$(TARGDIR)/%.o,$(SRCS)) $(FLEXTLIB) 
-	$(CXX) $(LDFLAGS) $^ $(patsubst %,-l%,$(LIBS)) -o $@ 
+	$(CXX) $(LDFLAGS) -shared $^ $(patsubst %,-l%,$(LIBS)) -o $@ 
+	strip --strip-unneeded $@
 	chmod 755 $@
-
 
 $(INSTDIR):
 	-mkdir $(INSTDIR)
@@ -58,9 +56,8 @@ $(INSTDIR):
 install:: $(INSTDIR)
 
 install:: $(TARGET) 
-	cp -R $^ $(INSTDIR)
-#	chown -R root.root $(INSTDIR)
-
+	cp $^ $(INSTDIR)
+	chown root.root $(patsubst %,$(INSTDIR)/%,$(notdir $^))
 
 $(HELPDIR):
 	-mkdir $(HELPDIR)
@@ -76,3 +73,14 @@ install-help:: ./pd
 clean:
 	rm -f $(TARGDIR)/*.o $(TARGET)
 	
+
+
+
+
+
+
+
+
+
+
+
