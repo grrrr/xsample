@@ -24,7 +24,7 @@ class xplay:
 public:
 	xplay(I argc,const t_atom *argv);
 	
-	virtual BL Init();
+	virtual bool Init();
 		
 	virtual V m_help();
 	virtual V m_print();
@@ -53,7 +53,7 @@ xplay::xplay(I argc,const t_atom *argv)
 #endif
 
 	if(argc > argi && IsSymbol(argv[argi])) {
-		buf = new buffer(GetSymbol(argv[argi]),true);
+		buf.Set(GetSymbol(argv[argi]),true);
 		argi++;
 		
 #if FLEXT_SYS == FLEXT_SYS_MAX
@@ -65,8 +65,8 @@ xplay::xplay(I argc,const t_atom *argv)
 		}
 #endif
 	}
-	else
-		buf = new buffer(NULL,true);
+//	else
+//		buf = new buffer(NULL,true);
 
 	AddInSignal("Messages and Signal of playing position");  // pos signal
 	for(I ci = 0; ci < outchns; ++ci) {
@@ -74,10 +74,11 @@ xplay::xplay(I argc,const t_atom *argv)
 		STD::sprintf(tmp,"Audio signal channel %i",ci+1); 
 		AddOutSignal(tmp);
 	}
-	
-	m_reset();
+
+//	m_reset();
 }
 
+/*
 BL xplay::Init()
 {
 	if(xinter::Init()) {
@@ -87,6 +88,7 @@ BL xplay::Init()
 	else
 		return false;
 }
+*/
 	
 V xplay::m_signal(I n,S *const *in,S *const *out) 
 { 

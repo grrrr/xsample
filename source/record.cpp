@@ -24,12 +24,12 @@ class xrecord:
 public:
 	xrecord(I argc,const t_atom *argv);
 	
-	virtual BL Init();
+//	virtual BL Init();
 		
 	virtual V m_help();
 	virtual V m_print();
 	
-	virtual I m_set(I argc,const t_atom *argv);
+//	virtual I m_set(I argc,const t_atom *argv);
 
 	virtual V m_pos(F pos);
 	virtual V m_all();
@@ -63,12 +63,15 @@ protected:
 private:
 	static V setup(t_classid c);
 
-	virtual V s_dsp();
+	virtual void SetPlay();
 
 	TMPLSIGFUN(s_rec);
 
 	DEFSIGCALL(recfun);
 	virtual V m_signal(I n,S *const *in,S *const *out);
+
+	FLEXT_CALLBACK(m_start)
+	FLEXT_CALLBACK(m_stop)
 
 	FLEXT_CALLVAR_F(mg_pos,m_pos)
 	FLEXT_CALLBACK(m_all)
@@ -93,6 +96,10 @@ FLEXT_LIB_DSP_V("xrecord~",xrecord)
 V xrecord::setup(t_classid c)
 {
 	DefineHelp(c,"xrecord~");
+
+	FLEXT_CADDBANG(c,0,m_start);
+	FLEXT_CADDMETHOD_(c,0,"start",m_start);
+	FLEXT_CADDMETHOD_(c,0,"stop",m_stop);
 
 	FLEXT_CADDATTR_VAR(c,"pos",mg_pos,m_pos);
 	FLEXT_CADDATTR_VAR(c,"min",mg_min,m_min);
@@ -155,7 +162,7 @@ xrecord::xrecord(I argc,const t_atom *argv):
 	FLEXT_ADDMETHOD(inchns+2,m_max);
 }
 
-
+/*
 BL xrecord::Init()
 {
 	if(xsample::Init()) {
@@ -165,6 +172,7 @@ BL xrecord::Init()
 	else
 		return false;
 }
+*/
 		
 V xrecord::m_units(xs_unit mode)
 {
@@ -204,7 +212,7 @@ V xrecord::m_pos(F pos)
 	else if(curpos > curmax) curpos = curmax;
 }
 
-
+/*
 I xrecord::m_set(I argc,const t_atom *argv)
 {
 	I r = xsample::m_set(argc,argv);
@@ -213,6 +221,7 @@ I xrecord::m_set(I argc,const t_atom *argv)
         m_reset(); 
 	return r;
 }
+*/
 
 V xrecord::m_start() 
 { 
@@ -443,16 +452,20 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 
 V xrecord::m_signal(I n,S *const *in,S *const *out) 
 { 
-	if(bufchk()) 
+	if(ChkBuffer()) 
 		// call the appropriate dsp function
 		recfun(n,in,out); 
 	else
 		// set position signal to zero
 		ZeroSamples(out[0],n);
+        
+    DoUpdate();
 }
 
-V xrecord::s_dsp()
+void xrecord::SetPlay()
 {
+    xsample::SetPlay();
+
 	switch(buf->Channels()*1000+inchns) {
 	case 1001:	SETSIGFUN(recfun,TMPLFUN(s_rec,1,1));	break;
 	case 1002:	SETSIGFUN(recfun,TMPLFUN(s_rec,1,2));	break;

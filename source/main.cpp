@@ -37,10 +37,6 @@ FLEXT_LIB_SETUP(xsample,xsample_main)
 
 void xsample::setup(t_classid c)
 {
-	FLEXT_CADDBANG(c,0,m_start);
-	FLEXT_CADDMETHOD_(c,0,"start",m_start);
-	FLEXT_CADDMETHOD_(c,0,"stop",m_stop);
-
 	FLEXT_CADDMETHOD_(c,0,"set",m_set);
 	FLEXT_CADDMETHOD_(c,0,"print",m_print);
 	FLEXT_CADDMETHOD_(c,0,"refresh",m_refresh);
@@ -53,7 +49,7 @@ void xsample::setup(t_classid c)
 }
 
 xsample::xsample():
-	buf(NULL),
+    update(xsc_all),
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	unitmode(xsu_ms),	   // Max/MSP defaults to milliseconds
 #else
@@ -66,77 +62,131 @@ xsample::xsample():
 xsample::~xsample()
 {
 //	m_enable(false); // switch off DSP
-
-	if(buf) delete buf; 
 }
 
+bool xsample::Init()
+{
+    if(!flext_dsp::Init()) return false;
+    DoUpdate();
+    return true;
+}
 
-BL xsample::bufchk() 
+bool xsample::ChkBuffer() 
 { 
-	if(buf->Valid()) {
-		if(buf->Update()) {
-//			post("%s - buffer updated",thisName()); 
-			m_refresh(); 
-		}
-		return true; 
+	if(!buf.Valid()) return false;
+        
+    if(buf.Update() || buf.Set())) {
+        Update(xsc_buffer);
+        s_dsp(); // channel count may have changed
+        return true;
 	}
-	else
-		return false; 
+    return false;
 }
 
-I xsample::m_set(I argc,const t_atom *argv)
-{
-	const t_symbol *sym = argc >= 1?GetASymbol(argv[0]):NULL;
-	int r = buf->Set(sym);
-	if(sym && r < 0) post("%s - can't find buffer %s",thisName(),GetString(sym));
-	return r;
-}
-
-BL xsample::m_refresh()
-{
-	BL ret;
-	if(buf->Set()) { s_dsp(); ret = true; } // channel count may have changed
-	else ret = false;
-	
-	m_units();
-	m_sclmode();	
-	// realize positions... 2 times bufchk()!!
-	m_min((F)curmin*s2u); // also checks pos
-	m_max((F)curmax*s2u); // also checks pos
-
-	return ret;
-}
-
-BL xsample::m_reset()
-{
-	BL ret;
-	if(buf->Set()) { s_dsp(); ret = true; } // channel count may have changed
-	else ret = false;
-	
-	// now... 4 times bufchk()!! \todo get rid of that
-	m_units();
-	m_sclmode();	
-	m_min(0);
-    m_max(buf->Frames()*s2u);
-
-	return ret;
-}
-
-V xsample::m_loadbang() 
+/* called after all buffer objects have been created in the patch */
+void xsample::m_loadbang() 
 {
 	m_reset();
 }
 
+void xsample::m_set(I argc,const t_atom *argv)
+{
+	const t_symbol *sym = argc >= 1?GetASymbol(argv[0]):NULL;
+	int r = buf->Set(sym);
+	if(sym) {
+        if(r < 0) post("%s - can't find buffer %s",thisName(),GetString(sym));
+        else ChkBuffer();
+    }
+    DoUpdate();
+}
+
 V xsample::m_units(xs_unit mode)
 {
-	if(mode != xsu__) unitmode = mode;
+    unitmode = mode;
+    Update(xsc_units);
+    DoUpdate();
+}
 
+V xsample::m_sclmode(xs_sclmd mode)
+{
+    sclmode = mode;
+    Update(xsc_sclmd);
+    DoUpdate();
+}
+
+V xsample::m_min(F mn)
+{
+    ChkBuffer();
+    DoUpdate();
+
+	if(s2u) {
+		mn /= s2u;  // conversion to samples
+		if(mn < 0) mn = 0;
+		else if(mn > curmax) mn = (F)curmax;
+		curmin = (I)(mn+.5);
+
+        Update(xsc_range);
+        DoUpdate();
+	}
+}
+
+V xsample::m_max(F mx)
+{
+    ChkBuffer();
+    DoUpdate();
+
+	if(s2u) {
+		mx /= s2u;  // conversion to samples
+		if(mx > buf.Frames()) mx = (F)buf.Frames();
+		else if(mx < curmin) mx = (F)curmin;
+		curmax = (I)(mx+.5);
+
+        Update(xsc_range);
+        DoUpdate();
+	}
+}
+
+V xsample::m_all()
+{
+    ChkBuffer();
+    DoUpdate();
+    
+	curmin = 0; 
+    curmax = buf.Frames();
+
+    Update(xsc_range);
+    DoUpdate();
+}
+
+V xsample::m_dsp(I /*n*/,S *const * /*insigs*/,S *const * /*outsigs*/)
+{
+	// this is hopefully called at change of sample rate ?!
+
+    ChkBuffer();
+    Update(xsc_srate);
+    DoUpdate();
+}
+
+void xsample::DoUpdate()
+{
+    if(update&xsc_units) SetUnits();
+    if(update&xsc_sclmd) SetSclmd();
+
+    if(update&xsc_range) SetRange();
+    if(update&xsc_play) SetPlay();
+    
+    update = xsc__;
+}
+
+/*! buffer must have been checked beforehand */
+void xsample::SetUnits()
+{
 	switch(unitmode) {
 		case xsu_sample: // samples
 			s2u = 1;
 			break;
 		case xsu_buffer: // buffer size
-			s2u = bufchk()?1.f/buf->Frames():0;
+			s2u = bufchk()?1.f/buf.Frames():0;
 			break;
 		case xsu_ms: // ms
 			s2u = 1000.f/Samplerate();
@@ -145,14 +195,15 @@ V xsample::m_units(xs_unit mode)
 			s2u = 1.f/Samplerate();
 			break;
 		default:
-			post("%s: Unknown unit mode",thisName());
+			throw "Unknown unit mode";
 	}
 }
 
-V xsample::m_sclmode(xs_sclmd mode)
+/*! buffer must have been checked beforehand 
+    units must have been set beforehand
+*/
+void xsample::SetSclmd()
 {
-	if(mode != xss__) sclmode = mode;
-
 	switch(sclmode) {
 		case 0: // samples/units
 			sclmin = 0; sclmul = s2u;
@@ -161,55 +212,16 @@ V xsample::m_sclmode(xs_sclmd mode)
 			sclmin = curmin; sclmul = s2u;
 			break;
 		case 2: // unity between 0 and buffer size
-			sclmin = 0; sclmul = (bufchk() && buf->Frames())?1.f/buf->Frames():0;
+			sclmin = 0; sclmul = (bufchk() && buf.Frames())?1.f/buf.Frames():0;
 			break;
 		case 3:	// unity between recmin and recmax
 			sclmin = curmin; sclmul = curmin != curmax?1.f/(curmax-curmin):0;
 			break;
 		default:
-			post("%s: Unknown scale mode",thisName());
+			throw "Unknown scale mode";
 	}
 }
 
-V xsample::m_min(F mn)
+void xsample::SetPlay()
 {
-//	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
-
-	if(s2u) {
-		mn /= s2u;  // conversion to samples
-		if(mn < 0) mn = 0;
-		else if(mn > curmax) mn = (F)curmax;
-		curmin = (I)(mn+.5);
-
-		m_sclmode();
-	}
-}
-
-V xsample::m_max(F mx)
-{
-//	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
-
-	if(s2u) {
-		mx /= s2u;  // conversion to samples
-		if(mx > buf->Frames()) mx = (F)buf->Frames();
-		else if(mx < curmin) mx = (F)curmin;
-		curmax = (I)(mx+.5);
-
-		m_sclmode();
-	}
-}
-
-V xsample::m_all()
-{
-	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
-
-	curmin = 0; curmax = buf->Frames();
-	m_sclmode();
-}
-
-V xsample::m_dsp(I /*n*/,S *const * /*insigs*/,S *const * /*outsigs*/)
-{
-	// this is hopefully called at change of sample rate ?!
-
-	if(!m_refresh()) s_dsp();
 }

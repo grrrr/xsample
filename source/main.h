@@ -17,7 +17,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #error You need at least flext version 0.4.6
 #endif
 
-#define XSAMPLE_VERSION "0.3.1pre3"
+#define XSAMPLE_VERSION "0.3.1pre4"
 
 
 // most compilers are somehow broken - in other words - can't handle all C++ features
@@ -101,73 +101,102 @@ class xsample:
 public:
 	xsample();
 	~xsample();
+    
+    enum xs_change {
+        xsc__ = 0;
+        xsc_units = 0x0001,
+        xsc_play = 0x0002,
+        xsc_sclmd = 0x0004,
+        xsc_pos = 0x0008,
+        xsc_range = 0x0010,
+        xsc_transport = 0x0020,
+        
+        xsc_intp = xsc_play,
+        xsc_srate = xsc_play,
+        xsc_chns = xsc_play,
+        xsc_startstop = xsc_play|xsc_transport,
+        xsc_buffer = xsc_units|xsc_sclmd|xsc_pos|xsc_range|xsc_play,
+        xsc_all = 0xffff
+    };
 	
 	enum xs_unit {
-		xsu__ = -1,  // don't change
+//		xsu__ = -1,  // don't change
 		xsu_sample = 0,xsu_buffer,xsu_ms,xsu_s
 	};
 	
 	enum xs_intp {
-		xsi__ = -1,  // don't change
+//		xsi__ = -1,  // don't change
 		xsi_none = 0,xsi_4p,xsi_lin
 	};
 	
 	enum xs_sclmd {
-		xss__ = -1,  // don't change
+//		xss__ = -1,  // don't change
 		xss_unitsinbuf = 0,xss_unitsinloop,xss_buffer,xss_loop
 	};
 	
 protected:
-	buffer *buf;
+    virtual bool Init();
+	virtual void m_loadbang();
 
-	virtual V m_start() = 0;
-	virtual V m_stop() = 0;
-	virtual BL m_reset();
+	buffer buf;
 
-  	virtual I m_set(I argc,const t_atom *argv);
-	virtual V m_print() = 0;
-	virtual BL m_refresh();
-	virtual V m_loadbang();
+//    void m_start();
+//	void m_stop();
+	void m_reset() { m_refresh(); m_all(); }
 
-	virtual V m_units(xs_unit u = xsu__);
-	virtual V m_sclmode(xs_sclmd u = xss__);
+  	virtual int m_set(I argc,const t_atom *argv);
+	virtual void m_print() = 0;
+    void m_refresh() { Update(xsc_buffer); DoUpdate(); }
 
-	virtual V m_all();
-	virtual V m_min(F mn);
-	virtual V m_max(F mx);
+	void m_units(xs_unit u /*= xsu__*/);
+	void m_sclmode(xs_sclmd u /*= xss__*/);
 
-	virtual V m_dsp(I n,S *const *insigs,S *const *outsigs);
-	virtual V s_dsp() = 0;
+	void m_all();
+	void m_min(F mn);
+	void m_max(F mx);
+
+	virtual void m_dsp(I n,S *const *insigs,S *const *outsigs);
+	virtual void s_dsp() = 0;
 
 	xs_unit unitmode; //iunitmode,ounitmode;
 	xs_sclmd sclmode; //isclmode,osclmode;
 
-	L curmin,curmax; //,curlen;  // in samples
-	I sclmin; // in samples
-	F sclmul;
-	F s2u;  // sample to unit conversion factor
+	long curmin,curmax; //,curlen;  // in samples
+	int sclmin; // in samples
+	float sclmul;
+	float s2u;  // sample to unit conversion factor
 
-	inline F scale(F smp) const { return (smp-sclmin)*sclmul; }
+	inline float scale(F smp) const { return (smp-sclmin)*sclmul; }
 	
-    static V arrscale(I n,const S *in,S *out,S add,S mul) { flext::ScaleSamples(out,in,mul,add,n); }
-	inline V arrscale(I n,const S *in,S *out) const { arrscale(n,in,out,-sclmin*sclmul,sclmul); }
+    static void arrscale(I n,const S *in,S *out,S add,S mul) { flext::ScaleSamples(out,in,mul,add,n); }
+	inline void arrscale(I n,const S *in,S *out) const { arrscale(n,in,out,-sclmin*sclmul,sclmul); }
 	
-	static V arrmul(I n,const S *in,S *out,S mul) { flext::MulSamples(out,in,mul,n); }
-	inline V arrmul(I n,const S *in,S *out) const { arrmul(n,in,out,(S)(1./s2u)); }
+	static void arrmul(I n,const S *in,S *out,S mul) { flext::MulSamples(out,in,mul,n); }
+	inline void arrmul(I n,const S *in,S *out) const { arrmul(n,in,out,(S)(1./s2u)); }
 
-	BL bufchk();
+	void mg_buffer(AtomList &l) { if(buf.Symbol()) { l(1); SetSymbol(l[0],buf.Symbol()); } }
+	inline void ms_buffer(const AtomList &l) { m_set(l.Count(),l.Atoms()); }
 
-	V mg_buffer(AtomList &l) { if(buf && buf->Symbol()) { l(1); SetSymbol(l[0],buf->Symbol()); } else l(); }
-	inline V ms_buffer(const AtomList &l) { m_set(l.Count(),l.Atoms()); }
+	inline void mg_min(float &v) const { v = curmin*s2u; }
+	inline void mg_max(float &v) const { v = curmax*s2u; }
+    
+    virtual void DoUpdate();
+    void Update() { if(update) DoUpdate();
+    void Update(unsigned int f) { update |= f; }
 
-	inline V mg_min(F &v) const { v = curmin*s2u; }
-	inline V mg_max(F &v) const { v = curmax*s2u; }
+	bool ChkBuffer();
+//    virtual void SetBuffer();
+
+    virtual void SetUnits();
+    virtual void SetSclmode();
+    virtual void SetRange();
+    virtual void SetPlay();
 
 private:
-	static V setup(t_classid c);
 
-	FLEXT_CALLBACK(m_start)
-	FLEXT_CALLBACK(m_stop)
+    unsigned int update;
+
+	static void setup(t_classid c);
 
 	FLEXT_CALLBACK_V(m_set)
 	FLEXT_CALLBACK(m_print)
@@ -294,12 +323,12 @@ public:
 	xinter(): outchns(1),doplay(false),interp(xsi_4p) {}
 	
 protected:
-	virtual I m_set(I argc,const t_atom *argv);
+//	virtual I m_set(I argc,const t_atom *argv);
 
-	virtual V m_start();
-	virtual V m_stop();
+	void m_start();
+	void m_stop();
 
-	inline V m_interp(xs_intp mode = xsi__) { interp = mode; s_dsp(); }
+	inline V m_interp(xs_intp mode /*= xsi__*/) { interp = mode; Update(xsc_intp); DoUpdate(); }
 
 	I outchns;
 	BL doplay;	
@@ -318,10 +347,13 @@ protected:
 	DEFSIGCALL(playfun);
 	DEFSIGCALL(zerofun);
 
-	virtual V s_dsp();
+	virtual void SetPlay();
 
 private:
 	static V setup(t_classid c);
+
+	FLEXT_CALLBACK(m_start)
+	FLEXT_CALLBACK(m_stop)
 
 	FLEXT_CALLSET_E(m_interp,xs_intp)
 	FLEXT_ATTRGET_E(interp,xs_intp)

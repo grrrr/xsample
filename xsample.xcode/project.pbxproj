@@ -415,10 +415,9 @@
 				GCC_PREPROCESSOR_DEFINITIONS = "FLEXT_SYS=1";
 				HEADER_SEARCH_PATHS = "$(Max SDK)/max-includes $(Max SDK)/msp-includes $(Flext)/source";
 				INFOPLIST_FILE = "source/xsample-Info.plist";
-				INSTALL_PATH = "\"/Library/Application Support/Cycling '74/externals\"";
+				INSTALL_PATH = "/Library/Application Support/Cycling '74/externals";
 				LIBRARY_SEARCH_PATHS = "$(Flext)/build";
 				LIBRARY_STYLE = DYNAMIC;
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = xsample;

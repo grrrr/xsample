@@ -21,9 +21,14 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 void xinter::setup(t_classid c)
 {
+	FLEXT_CADDBANG(c,0,m_start);
+	FLEXT_CADDMETHOD_(c,0,"start",m_start);
+	FLEXT_CADDMETHOD_(c,0,"stop",m_stop);
+
 	FLEXT_CADDATTR_VAR_E(c,"interp",interp,m_interp);
 }
 
+/*
 I xinter::m_set(I argc,const t_atom *argv) 
 {
 	I r = xsample::m_set(argc,argv);
@@ -32,22 +37,28 @@ I xinter::m_set(I argc,const t_atom *argv)
         m_reset(); 
 	return r;
 }
+*/
 
-V xinter::m_start() 
+void xinter::m_start() 
 { 
-	m_refresh(); 
-	doplay = true; 
-	s_dsp(); 
+	ChkBuffer();
+    doplay = true;
+    Update(xsc_startstop);
+    DoUpdate();
 }
 
-V xinter::m_stop() 
+void xinter::m_stop() 
 { 
-	doplay = false; 
-	s_dsp(); 
+	ChkBuffer();
+    doplay = false;
+    Update(xsc_startstop);
+    DoUpdate();
 }
 
-V xinter::s_dsp()
+void xinter::SetPlay()
 {
+    xsample::SetPlay();
+
 	switch(outchns) {
 		case 1:	SETSIGFUN(zerofun,TMPLFUN(s_play0,-1,1)); break;
 		case 2:	SETSIGFUN(zerofun,TMPLFUN(s_play0,-1,2)); break;
