@@ -48,7 +48,6 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	//#define SIGSTATIC  // another redirection to avoid addresses of class member functions
 #endif
 
-namespace flext {
 
 // lazy me
 #define F float
@@ -268,8 +267,6 @@ private:
 
 	FLEXT_CALLBACK_1(m_interp,xs_intp)
 };
-
-} // namespace flext
 
 #ifdef TMPLOPT
 #include "inter.ci"

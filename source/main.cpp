@@ -10,7 +10,6 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 #include "main.h"
 
-namespace flext {
 
 // Initialization function for xsample library
 V lib_setup()
@@ -199,7 +198,6 @@ V xsample::m_dsp(I /*n*/,S *const * /*insigs*/,S *const * /*outsigs*/)
 	if(!m_refresh()) s_dsp();
 }
 
-} // namespace flext
 
 
 

@@ -19,7 +19,6 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #include "inter.ci"
 #endif
 
-namespace flext {
 
 xinter::xinter():
 	doplay(false),outchns(1),
@@ -93,5 +92,4 @@ V xinter::s_dsp()
 		SETSIGFUN(playfun,TMPLFUN(s_play0,-1,-1));
 }
 
-} // namespace flext
 
