@@ -161,7 +161,7 @@ V xgroove::setup(t_classid c)
 
 xgroove::xgroove(I argc,const t_atom *argv):
 	loopmode(xsl_loop),curpos(0),
-	_xzone(0),xzone(0),xsymm(0.5),xkeep(0),pblksz(0),
+	_xzone(0),xzone(0),xsymm(0.5),xkeep(false),pblksz(0),
 	xshape(0),xshparam(1),
 	znbuf(NULL),znmul(NULL),znidx(NULL),znpos(NULL),
 	bidir(1)
