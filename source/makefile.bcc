@@ -1,34 +1,42 @@
-NAME=xsample
+# xsample - extended sample objects for Max/MSP and pd (pure data)
+# Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+#
+# Makefile for BorlandC++ 
+#
+# usage: make -f makefile.bcc
+#
+# ---------------------------------------------
 
+NAME=xsample
+SETUPFUNCTION=$(NAME)_setup
+
+# all the source files from the package
+SRC= main.cpp record.cpp play.cpp groove.cpp
+
+# where to put the build
+OUTPATH=..\bcc
+
+# flext stuff
+FLEXTPATH=..\flext
 TARGET=pdwin
 
+# paths
 BCCPATH=c:\programme\prog\bcc55
 PDPATH=c:\programme\audio\pd
-FLEXTPATH=..\..\flext
 
+# includes, libs
 INCPATH=-I$(BCCPATH)\include -I$(PDPATH)\src -I$(FLEXTPATH)
 LIBPATH=-L$(BCCPATH)\lib -L$(PDPATH)\lib -L$(FLEXTPATH)
 LIBS=cw32.lib import32.lib C0D32.OBJ
 
-
-OUTPATH=..\bcc
-
+# compiler definitions and flags
 DEFS=-DPD -DNT 
 CFLAGS=-6 -O2 -OS -ff -tWD 
 
-all: $(NAME).dll
 
+# the rest can stay untouched
+# ----------------------------------------------
 
-main.cpp: main.h $(FLEXTPATH)\flext.h
-
-record.cpp: main.h $(FLEXTPATH)\flext.h
-
-play.cpp: main.h $(FLEXTPATH)\flext.h
-
-groove.cpp: main.h $(FLEXTPATH)\flext.h
-
-
-SRC= main.cpp record.cpp play.cpp groove.cpp
 OBJ= $(SRC:.cpp=.obj)
 
 .cpp.obj:
@@ -41,7 +49,7 @@ $(NAME).dll:: $(OUTPATH)\pd.lib
 
 $(NAME).dll:: $(OBJ) 
 	@cd $(OUTPATH)
-	@echo EXPORTS xsample_setup = _xsample_setup > xsample.def
-	ilink32 -Tpd $(LIBPATH) $** ,$.,,$(LIBS) $(OUTPATH)\pd.lib $(FLEXTPATH)\bcc\flext-$(TARGET).lib,xsample.def
+	@echo EXPORTS $(SETUPFUNCTION) = _$(SETUPFUNCTION) > $(NAME).def
+	ilink32 -Tpd $(LIBPATH) $** ,$.,,$(LIBS) $(OUTPATH)\pd.lib ..\$(FLEXTPATH)\bcc\flext-$(TARGET).lib,$(NAME).def
 
-
+all: $(NAME).dll

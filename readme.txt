@@ -80,8 +80,7 @@ TODO list:
 general:
 - Documentation and better example patches
 - cleaner makefile PD/Borland C++
-- makefile and build for PD/GCC
-- eventually make use of resource files for text items
+- example patches and MPW builds for MaxMSP@MacOS
 
 features:
 - crossfading loop zone for xgroove~
@@ -91,7 +90,6 @@ features:
 - anti-alias filter? (possible?)
 
 tests:
-- test graphics update behavior in Max (all done automatically ?)
 - reconsider startup sequence of set buffer,set units,set sclmode,set pos/min/max
 
 bugs:
