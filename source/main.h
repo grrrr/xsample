@@ -22,7 +22,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 #if defined(_MSC_VER)
 // MS VC 6.0 can't handle <int,int> templates?! -> no optimization
-	#if _MSC_VER >= 1300
+// MS VC .NET 2002 just dies with template optimization switched on
+	#if _MSC_VER >= 1310
 		#define TMPLOPT
 	#endif
 #elif defined(__BORLANDC__) 
@@ -79,7 +80,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	}
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__)
 template<typename I,typename F> inline I CASTINT(F o) { return lrintf(o); }
 #elif FLEXT_CPU == FLEXT_CPU_INTEL && defined(_MSC_VER)
 template<typename I,typename F>

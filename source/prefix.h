@@ -11,3 +11,5 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #define FLEXT_ATTRIBUTES 1 
 
 #include <flext.h>
+
+#include <math.h>

@@ -29,7 +29,8 @@ TMPLDEF void xinter::st_play1(const t_sample *bdt,const int smin,const int smax,
     if(smin == smax) {
         // zero loop length -> assume that smin is a valid sample position...
 
-        for(int ci = 0; ci < OCHNS; ++ci) SetSamples(sig[ci],n,bdt[smin*BCHNS]);
+		int ci;
+        for(ci = 0; ci < OCHNS; ++ci) SetSamples(sig[ci],n,bdt[smin*BCHNS]);
 	    // clear rest of output channels (if buffer has less channels)
 	    for(; ci < outchns; ++ci) ZeroSamples(sig[ci],n);
     }
