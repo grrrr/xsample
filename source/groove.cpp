@@ -83,7 +83,7 @@ private:
 	static V cb_loop(V *c,FI lp) { thisClass(c)->m_loop(lp != 0); }
 };
 
-CPPEXTERN_NEW_WITH_GIMME(xgroove_obj)
+CPPEXTERN_NEW_WITH_GIMME(OBJNAME,xgroove_obj)
 
 V xgroove_obj::cb_setup(t_class *c)
 {
@@ -112,26 +112,30 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 	} 
 #endif
 	
+#ifdef MAX
 	outchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
+#else
+	outchns = 1;
+#endif
 
 #ifdef PD	
-    inlet_new(&x_obj, &x_obj.ob_pd, &s_float, gensym("ft1"));  // min play pos
-    inlet_new(&x_obj, &x_obj.ob_pd, &s_float, gensym("ft2"));  // max play pos
+    inlet_new(x_obj, &x_obj->ob_pd, &s_float, gensym("ft1"));  // min play pos
+    inlet_new(x_obj, &x_obj->ob_pd, &s_float, gensym("ft2"));  // max play pos
     
 	int ci;
 	for(ci = 0; ci < outchns; ++ci) newout_signal(x_obj); // output
-	outlet_signal(&x_obj); // position
-	x->outmin = newout_float(&x_obj); // play min
-	x->outmax = newout_float(&x_obj); // play max
+	newout_signal(x_obj); // position
+	outmin = newout_float(x_obj); // play min
+	outmax = newout_float(x_obj); // play max
 #elif defined(MAX)
 	// set up inlets and outlets in reverse
 	floatin(&x_obj,2);  // max play pos
 	floatin(&x_obj,1);  // min play pos
 
 	dsp_setup(x_obj,1); // speed sig
-	outmax = newout_float(&x_obj); // play max
-	outmin = newout_float(&x_obj); // play min
-	newout_signal(&x_obj); // position signal
+	outmax = newout_float(x_obj); // play max
+	outmin = newout_float(x_obj); // play min
+	newout_signal(x_obj); // position signal
 	int ci;
 	for(ci = 0; ci < outchns; ++ci) newout_signal(x_obj); // output
 #endif
@@ -344,7 +348,11 @@ V xgroove_obj::m_help()
 {
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001 - version " VERSION " compiled on " __DATE__ " " __TIME__);
+#ifdef MAX
 	post("Arguments: " OBJNAME " [buffer] [channels]");
+#else
+	post("Arguments: " OBJNAME " [buffer]");
+#endif
 	post("Inlets: 1:Messages/Speed signal, 2:Min position, 3:Max position");
 	post("Outlets: 1:Audio signal, 2:Position signal, 3:Min position (rounded), 4:Max position (rounded)");	
 	post("Methods:");

@@ -90,7 +90,7 @@ private:
 };
 
 
-CPPEXTERN_NEW_WITH_GIMME(xrec_obj)
+CPPEXTERN_NEW_WITH_GIMME(OBJNAME,xrec_obj)
 
 V xrec_obj::cb_setup(t_class *c)
 {
@@ -123,22 +123,26 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 		post(OBJNAME " - Warning: no buffer defined");
 	} 
 #endif
-	
+
+#ifdef MAX
 	inchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
+#else
+	inchns = 1;
+#endif
 
 #ifdef PD
 	I ci;
 	for(ci = 0; ci < inchns; ++ci)
-    	inlet_new(&x_obj, &x_obj.ob_pd, &s_signal, &s_signal);  // sound in
+    	inlet_new(x_obj, &x_obj->ob_pd, &s_signal, &s_signal);  // sound in
     	
-    inlet_new(&x_obj, &x_obj.ob_pd, &s_float, gensym("ft2"));  
-    inlet_new(&x_obj, &x_obj.ob_pd, &s_float, gensym("ft3"));  
+    inlet_new(x_obj, &x_obj->ob_pd, &s_float, gensym("ft2"));  
+    inlet_new(x_obj, &x_obj->ob_pd, &s_float, gensym("ft3"));  
 
-	newout_signal(&x_obj);
-	outmin = newout_float(&x_obj);
-	outmax = newout_float(&x_obj);
+	newout_signal(x_obj);
+	outmin = newout_float(x_obj);
+	outmax = newout_float(x_obj);
 
-    clock = clock_new(x,(t_method)method_tick);
+//    clock = clock_new(x,(t_method)method_tick);
 #elif defined(MAX)
 	// inlets and outlets set up in reverse
 	floatin(&x_obj,3);  // max record pos
@@ -159,7 +163,7 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 xrec_obj::~xrec_obj()
 {
 #ifdef PD
-	clock_free(clock);
+//	clock_free(clock);
 #endif
 }
 
@@ -210,6 +214,7 @@ V xrec_obj::setbuf(t_symbol *s)
 
 	
 #ifdef PD
+/*
 V xrec_obj::m_tick()
 {
 	if(x->dirty) {
@@ -220,6 +225,7 @@ V xrec_obj::m_tick()
 		x->dirty = false;
 	}
 }
+*/
 #endif
 
 
@@ -323,7 +329,7 @@ V xrec_obj::signal(I n,const F *sig,const F *on,F *pos)
 				n -= ncur;
 	#ifdef PD
 				dirty = true;
-	    	    clock_delay(clock, 10);
+//	    	    clock_delay(clock, 10);
 	#endif
 			} 
 			curpos = o;
@@ -350,7 +356,11 @@ V xrec_obj::m_help()
 {
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001 - version " VERSION " compiled on " __DATE__ " " __TIME__);
+#ifdef MAX
 	post("Arguments: " OBJNAME " [buffer] [channels]");
+#else
+	post("Arguments: " OBJNAME " [buffer]");
+#endif
 	post("Inlets: 1:Messages/Audio signal, 2:Trigger signal, 3:Min point, 4: Max point");
 	post("Outlets: 1:Position signal, 2:Min point, 3:Max point");	
 	post("Methods:");
@@ -431,8 +441,7 @@ extern "C" {
 #endif
 
 #ifdef PD
-PD_EXTERN 
-V xrecord_tilde_setup()
+EXT_EXTERN V xrecord_tilde_setup()
 #elif defined(MAX)
 V main()
 #endif

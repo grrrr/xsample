@@ -63,7 +63,7 @@ private:
 	}
 };
 
-CPPEXTERN_NEW_WITH_GIMME(xplay_obj)
+CPPEXTERN_NEW_WITH_GIMME(OBJNAME,xplay_obj)
 
 
 V xplay_obj::cb_setup(t_class *c)
@@ -85,9 +85,11 @@ xplay_obj::xplay_obj(I argc, t_atom *argv):
 	
 #ifdef MAX
 	dsp_setup(x_obj,1); // pos signal in
+	outchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
+#else
+	outchns = 1;
 #endif
 
-	outchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
 	int ci;
 	for(ci = 0; ci < outchns; ++ci)
 		newout_signal(x_obj); // output
@@ -179,7 +181,11 @@ V xplay_obj::m_help()
 {
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
+#ifdef MAX
 	post("Arguments: " OBJNAME " [buffer] [channels]");
+#else
+	post("Arguments: " OBJNAME " [buffer]");
+#endif
 	post("Inlets: 1:Messages/Position signal");
 	post("Outlets: 1:Audio signal");	
 	post("Methods:");

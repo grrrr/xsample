@@ -36,7 +36,7 @@ V xs_obj::cb_setup(t_class *c)
 
 xs_obj::xs_obj():
 #ifdef PD
-	unitmode(xsu_samples),
+	unitmode(xsu_sample),
 #else
 	unitmode(xsu_ms),
 #endif
@@ -48,9 +48,9 @@ xs_obj::xs_obj():
 
 V xs_obj::cb_set(V *c,t_symbol *s,I argc,t_atom *argv) { thisClass(c)->m_set(s,argc,argv); }
 V xs_obj::cb_print(V *c) { thisClass(c)->m_print(); }	
-V xs_obj::cb_units(V *c,FI md) { thisClass(c)->m_units((xs_unit)md); }
-V xs_obj::cb_interp(V *c,FI md) { thisClass(c)->m_interp((xs_intp)md); }
-V xs_obj::cb_sclmode(V *c,FI md) { thisClass(c)->m_sclmode((xs_sclmd)md); }
+V xs_obj::cb_units(V *c,FI md) { thisClass(c)->m_units((xs_unit)(I)md); }
+V xs_obj::cb_interp(V *c,FI md) { thisClass(c)->m_interp((xs_intp)(I)md); }
+V xs_obj::cb_sclmode(V *c,FI md) { thisClass(c)->m_sclmode((xs_sclmd)(I)md); }
 
 
 V xs_obj::m_set(t_symbol *s, I argc, t_atom *argv)
@@ -106,7 +106,7 @@ V xs_obj::m_min(F mn)
 {
 	mn /= s2u;  // conversion to samples
 	if(mn < 0) mn = 0;
-	else if(mn > curmax) mn = curmax;
+	else if(mn > curmax) mn = (F)curmax;
 	curmin = (I)(mn+.5);
 	curlen = curmax-curmin;
 	m_sclmode();
@@ -115,8 +115,8 @@ V xs_obj::m_min(F mn)
 V xs_obj::m_max(F mx)
 {
 	mx /= s2u;  // conversion to samples
-	if(mx > buflen) mx = buflen;
-	else if(mx < curmin) mx = curmin;
+	if(mx > buflen) mx = (F)buflen;
+	else if(mx < curmin) mx = (F)curmin;
 	curmax = (I)(mx+.5);
 	curlen = curmax-curmin;
 	m_sclmode();
