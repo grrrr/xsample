@@ -9,7 +9,6 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 */
 
 #include "main.h"
-//#include <math.h>
 
 #ifdef _MSC_VER
 #pragma warning (disable:4244)
@@ -21,9 +20,9 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 
 class xplay_obj:
-	public xp_obj
+	public xs_obj
 {
-	CPPEXTERN_HEADER(xplay_obj,xp_obj)
+	CPPEXTERN_HEADER(xplay_obj,xs_obj)
 
 public:
 	xplay_obj(I argc, t_atom *argv);
@@ -41,7 +40,7 @@ public:
 
 	virtual V setbuf(t_symbol *s = NULL) 
 	{
-		xp_obj::setbuf(s);
+		xs_obj::setbuf(s);
 	    m_units();
 	}
 
@@ -88,7 +87,7 @@ xplay_obj::xplay_obj(I argc, t_atom *argv):
 	dsp_setup(x_obj,1); // pos signal in
 #endif
 
-	outchns = argc >= 2?atom_getflintarg(1,argc,argv):0;
+	outchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
 	int ci;
 	for(ci = 0; ci < outchns; ++ci)
 		newout_signal(x_obj); // output

@@ -30,20 +30,27 @@ V xs_obj::cb_setup(t_class *c)
 	add_method0(c,cb_print,"print");
 	
 	add_method1(c,cb_units,"units",A_FLINT);
+	add_method1(c,cb_interp,"interp",A_FLINT);
+	add_method1(c,cb_sclmode,"sclmode",A_FLINT);
 }
 
 xs_obj::xs_obj():
 #ifdef PD
-	unitmode(xsu_samples)
+	unitmode(xsu_samples),
 #else
-	unitmode(xsu_ms)
+	unitmode(xsu_ms),
 #endif
+	interp(xsi_4p),
+	sclmode(xss_unitsinbuf),
+	curmin(0),curmax(BIGLONG)
 {}
 	
 
 V xs_obj::cb_set(V *c,t_symbol *s,I argc,t_atom *argv) { thisClass(c)->m_set(s,argc,argv); }
 V xs_obj::cb_print(V *c) { thisClass(c)->m_print(); }	
-V xs_obj::cb_units(V *c,FI u) { thisClass(c)->m_units((xs_unit)u); }
+V xs_obj::cb_units(V *c,FI md) { thisClass(c)->m_units((xs_unit)md); }
+V xs_obj::cb_interp(V *c,FI md) { thisClass(c)->m_interp((xs_intp)md); }
+V xs_obj::cb_sclmode(V *c,FI md) { thisClass(c)->m_sclmode((xs_sclmd)md); }
 
 
 V xs_obj::m_set(t_symbol *s, I argc, t_atom *argv)
@@ -72,26 +79,9 @@ V xs_obj::m_units(xs_unit mode)
 	}
 }
 
-// ------------------------------
+V xs_obj::m_interp(xs_intp mode) { interp = mode; }
 
-V xp_obj::cb_setup(t_class *c)
-{
-	add_method1(c,cb_interp,"interp",A_FLINT);
-	add_method1(c,cb_sclmode,"sclmode",A_FLINT);
-}
-
-xp_obj::xp_obj():
-	interp(xsi_4p),
-	sclmode(xss_unitsinbuf),
-	playmin(0),playmax(BIGLONG)
-{}
-	
-V xp_obj::cb_interp(V *c,FI md) { thisClass(c)->m_interp((xs_intp)md); }
-V xp_obj::cb_sclmode(V *c,FI u) { thisClass(c)->m_sclmode((xs_sclmd)u); }
-
-V xp_obj::m_interp(xs_intp mode) { interp = mode; }
-
-V xp_obj::m_sclmode(xs_sclmd mode)
+V xs_obj::m_sclmode(xs_sclmd mode)
 {
 	if(mode != xss__) sclmode = mode;
 	switch(sclmode) {
@@ -99,16 +89,38 @@ V xp_obj::m_sclmode(xs_sclmd mode)
 			sclmin = 0; sclmul = s2u;
 			break;
 		case 1: // samples/units from recmin to recmax
-			sclmin = playmin; sclmul = s2u;
+			sclmin = curmin; sclmul = s2u;
 			break;
 		case 2: // unity between 0 and buffer size
 			sclmin = 0; sclmul = buflen?1.f/buflen:0;
 			break;
 		case 3:	// unity between recmin and recmax
-			sclmin = playmin; sclmul = playlen?1.f/playlen:0;
+			sclmin = curmin; sclmul = curlen?1.f/curlen:0;
 			break;
 		default:
-			post("Unknown scale mode");
+			post("%s: Unknown scale mode",thisName());
 	}
 }
+
+V xs_obj::m_min(F mn)
+{
+	mn /= s2u;  // conversion to samples
+	if(mn < 0) mn = 0;
+	else if(mn > curmax) mn = curmax;
+	curmin = (I)(mn+.5);
+	curlen = curmax-curmin;
+	m_sclmode();
+}
+
+V xs_obj::m_max(F mx)
+{
+	mx /= s2u;  // conversion to samples
+	if(mx > buflen) mx = buflen;
+	else if(mx < curmin) mx = curmin;
+	curmax = (I)(mx+.5);
+	curlen = curmax-curmin;
+	m_sclmode();
+}
+
+
 

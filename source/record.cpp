@@ -2,7 +2,7 @@
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -16,341 +16,201 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 #define OBJNAME "xrecord~"
-#define extobject record_object
 
-static t_class *extclass;
-
-//#define DEBUG 
-
-// defaults
-#define DEF_LOOPMODE 1
-#define DEF_APPMODE 1
-#define DEF_SIGMODE 0
-
-#define DEF_SCLMODE 0
-
-#ifdef PD
-#define DEF_UNITS 0
-#else
-#define DEF_UNITS 2
-#endif
-
-class extobject
+class xrec_obj:
+	public xs_obj
 {
+	CPPEXTERN_HEADER(xrec_obj,xs_obj)
+
 public:
+	xrec_obj(I argc,t_atom *argv);
+	~xrec_obj();
+	
 #ifdef MAX
-	t_pxobject obj;
-#else
-    t_object obj;
+	virtual V m_loadbang() { setbuf();	}
+	virtual V m_assist(L msg,L arg,C *s);
 #endif
+	
+	virtual V m_help();
+	virtual V m_print();
+	
+	virtual V m_units(xs_unit md = xsu__);
+	virtual V m_min(F mn);
+	virtual V m_max(F mx);
 
-	t_symbol *bufname;
-	F *buf;
-	I bchns;
+	virtual V m_mixmode(BL mx) { mixmode = mx; }
+	virtual V m_sigmode(BL mode) { dorec = sigmode = mode; }
+	virtual V m_loop(BL lp) { doloop = lp; }
+	virtual V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
+	
+	virtual V m_pos(F pos);
+	virtual V m_start() { dorec = true; }
+	virtual V m_stop() { dorec = false; if(!sigmode && !appmode) m_pos(0); }
+	virtual V m_reset();
+
+	virtual V setbuf(t_symbol *s = NULL);
+
+protected:
+	I inchns;
 	BL sigmode,appmode;
-	I sclmode,unitmode;
+	BL dirty;
 
-	BL enable,dorec,doloop,domix,dirty;
-	L buflen,curpos;  // in samples
-	L recmin,recmax,reclen; //,recdone;  // in samples
-
-	L sclmin; // in samples
-	F sclmul;
-	F s2u; // sample to unit conversion factor
+	BL dorec,doloop,mixmode;
+	L curpos;  // in samples
 
 	_outlet *outmin,*outmax; // float outlets	
 	
-	V outputmin() const { outlet_float(outmin,recmin*s2u); }
-	V outputmax() const { outlet_float(outmax,recmax*s2u); }
+	V outputmin() const { outlet_float(outmin,curmin*s2u); }
+	V outputmax() const { outlet_float(outmax,curmax*s2u); }
 	
-	V set_min(F mn);
-	V set_max(F mx);
-	
-	inline F scale(I smp) const { return (smp-sclmin)*sclmul; }
-	V setscale(I mode = -1);
-	V setunits(I mode = -1);
-	
-	V setbuf(t_symbol *bufname = NULL);
-	V setdirty();
-	V testdirty();
+	V signal(I n,const F *in,const F *on,F *pos);  // this is the dsp method
 
-#ifdef PD   
-    t_clock *clock;
-    F defsig;
-#endif
+private:
+	virtual V m_dsp(t_signal **sp);
+
+	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
+	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
+
+	static t_int *dspmeth(t_int *w) 
+	{ 
+		thisClass(w+1)->signal((I)w[2],(const F *)w[3],(const F *)w[4],(F *)w[5]); 
+		return w+6;
+	}
+
+	static V cb_pos(V *c,F pos) { thisClass(c)->m_pos(pos); }
+	static V cb_min(V *c,F mn) { thisClass(c)->m_min(mn); }
+	static V cb_max(V *c,F mx) { thisClass(c)->m_max(mx); }
+
+	static V cb_reset(V *c) { thisClass(c)->m_reset(); }
+	static V cb_loop(V *c,FI lp) { thisClass(c)->m_loop(lp != 0); }
+
+	static V cb_mixmode(V *c,FI md) { thisClass(c)->m_mixmode(md != 0); }
+	static V cb_sigmode(V *c,FI md) { thisClass(c)->m_sigmode(md != 0); }
+	static V cb_append(V *c,FI md) { thisClass(c)->m_append(md != 0); }
 };
 
-V extobject::setscale(I mode)
+
+CPPEXTERN_NEW_WITH_GIMME(xrec_obj)
+
+V xrec_obj::cb_setup(t_class *c)
 {
-	if(mode >= 0) sclmode = mode;
-	switch(sclmode) {
-		case 0: // samples/units
-			sclmin = 0; sclmul = s2u;
-			break;
-		case 1: // samples/units from recmin to recmax
-			sclmin = recmin; sclmul = s2u;
-			break;
-		case 2: // unity between 0 and buffer size
-			sclmin = 0; sclmul = buflen?1.f/buflen:0;
-			break;
-		case 3:	// unity between recmin and recmax
-			sclmin = recmin; sclmul = reclen?1.f/reclen:0;
-			break;
-		default:
-			post("Unknown scale mode");
-	}
+	add_float2(c,cb_min);
+	add_float3(c,cb_max);
+
+	add_method0(c,cb_reset, "reset");	
+	add_method1(c,cb_mixmode, "mixmode", A_FLINT);	
+	add_method1(c,cb_sigmode, "sigmode", A_FLINT);	
+	add_method1(c,cb_loop, "loop", A_FLINT);	
+	add_method1(c,cb_append, "append", A_FLINT);	
+	add_method1(c,cb_min, "min", A_FLOAT);	
+	add_method1(c,cb_max, "max", A_FLOAT);	
+
+	add_bang(c,cb_start);	
+	add_method0(c,cb_start, "start");	
+	add_method0(c,cb_stop, "stop");	
+	add_float(c,cb_pos);	
+	add_method1(c,cb_pos, "pos", A_FLOAT);	
 }
 
-V extobject::setunits(I mode)
+xrec_obj::xrec_obj(I argc,t_atom *argv):
+	dorec(false),
+	sigmode(false),mixmode(false),
+	appmode(true),doloop(false),
+	dirty(false)
 {
-	if(mode >= 0) unitmode = mode;
-	switch(unitmode) {
-		case 0: // samples
-			s2u = 1;
-			break;
-		case 1: // buffer size
-			s2u = 1.f/buflen;
-			break;
-		case 2: // ms
-			s2u = 1000.f/sys_getsr();
-			break;
-		case 3: // s
-			s2u = 1.f/sys_getsr();
-			break;
-		default:
-			post("Unknown unit mode");
-	}
-	setscale();
+#ifdef DEBUG
+	if(argc < 1) {
+		post(OBJNAME " - Warning: no buffer defined");
+	} 
+#endif
+	
+	inchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
+
+#ifdef PD
+	I ci;
+	for(ci = 0; ci < inchns; ++ci)
+    	inlet_new(&x_obj, &x_obj.ob_pd, &s_signal, &s_signal);  // sound in
+    	
+    inlet_new(&x_obj, &x_obj.ob_pd, &s_float, gensym("ft2"));  
+    inlet_new(&x_obj, &x_obj.ob_pd, &s_float, gensym("ft3"));  
+
+	newout_signal(&x_obj);
+	outmin = newout_float(&x_obj);
+	outmax = newout_float(&x_obj);
+
+    clock = clock_new(x,(t_method)method_tick);
+#elif defined(MAX)
+	// inlets and outlets set up in reverse
+	floatin(&x_obj,3);  // max record pos
+	floatin(&x_obj,2);  // min record pos
+	dsp_setup(x_obj,inchns+1); // sound and on/off signal in
+
+	outmax = newout_float(&x_obj);  // max record out
+	outmin = newout_float(&x_obj);  // min record out
+	newout_signal(&x_obj);  // pos signal out
+#endif
+
+	bufname = atom_getsymbolarg(0,argc,argv);
+#ifdef PD  // in max it is called by loadbang
+	setbuf(bufname);  // calls reset
+#endif
+}
+
+xrec_obj::~xrec_obj()
+{
+#ifdef PD
+	clock_free(clock);
+#endif
+}
+
+
+V xrec_obj::m_units(xs_unit mode)
+{
+	xs_obj::m_units(mode);
+
+	m_sclmode();
 	outputmin();
 	outputmax();
 }
 
-V extobject::set_min(F mn)
+V xrec_obj::m_min(F mn)
 {
-#ifdef DEBUG
-	post("recmin/recmax = %li/%li, min = %f",recmin,recmax,mn);
-#endif
-	mn /= s2u;  // conversion to samples
-	if(mn < 0) mn = 0;
-	else if(mn > recmax) mn = recmax;
-	recmin = (L)(mn+.5);
-	reclen = recmax-recmin;
-	setscale();
-#ifdef DEBUG
-	post("min = %f/%li",mn,recmin);
-#endif
+	xs_obj::m_min(mn);
 	outputmin();
 }
 
-V extobject::set_max(F mx)
+V xrec_obj::m_max(F mx)
 {
-#ifdef DEBUG
-	post("recmin/recmax = %li/%li, max = %f",recmin,recmax,mx);
-#endif
-	mx /= s2u;  // conversion to samples
-	if(mx > buflen) mx = buflen;
-	else if(mx < recmin) mx = recmin;
-	recmax = (L)(mx+.5);
-	reclen = recmax-recmin;
-	setscale();
-#ifdef DEBUG
-	post("max = %f/%li",mx,recmax);
-#endif
+	xs_obj::m_max(mx);
 	outputmax();
 }
 
 
-static V method_mixmode(extobject *x, t_flint mx)
+V xrec_obj::m_pos(F pos)
 {
-	x->domix = mx != 0;
+	curpos = (L)(pos/s2u+.5);
+	if(curpos < curmin) curpos = curmin;
+	else if(curpos > curmax) curpos = curmax;
 }
 
-static V method_sigmode(extobject *x, t_flint mode)
+V xrec_obj::m_reset()
 {
-	x->sigmode = mode != 0;	
-	x->dorec = x->sigmode;
-}
-
-static V method_sclmode(extobject *x, t_flint scl)
-{
-	x->setscale((I)scl);
-}
-
-static V method_units(extobject *x, t_flint cnv)
-{
-	x->setunits((I)cnv);
+	curpos = 0;
+	m_min(0);
+    m_max(buflen*s2u);
 }
 
 
-static V method_min(extobject *x,t_float mn)
+V xrec_obj::setbuf(t_symbol *s)
 {
-	x->set_min(mn);
-}
-
-static V method_max(extobject *x,t_float mx)
-{
-	x->set_max(mx);
-}
-
-static V method_pos(extobject *x,t_float pos)
-{
-	x->curpos = (L)(pos/x->s2u+.5);
-	if(x->curpos < x->recmin) x->curpos = x->recmin;
-	else if(x->curpos > x->recmax) x->curpos = x->recmax;
-}
-
-static V method_loop(extobject *x, t_flint mode)
-{
-	x->doloop = mode != 0;	
-}
-
-static V method_append(extobject *x, t_flint mode)
-{
-	x->appmode = mode != 0;	
-	if(!x->appmode) method_pos(x,0);
-}
-
-
-static V method_start(extobject *x)
-{
-	x->dorec = true;
-}
-
-static V method_stop(extobject *x)
-{
-	x->dorec = false;
-	if(!x->sigmode && !x->appmode) method_pos(x,0);
-}
-
-static V method_reset(extobject *x)
-{
-	x->curpos = 0;
-	x->set_min(0);
-    x->set_max(x->buflen*x->s2u);
-}
-
-static V method_enable(extobject *x,t_flint en)
-{
-	x->enable = en != 0;
-}
-
-V extobject::setbuf(t_symbol *s)
-{
-	if(s && *s->s_name)	bufname = s; 
-	
-	buf = NULL; 
-	bchns = 0;
-	buflen = 0; 
-
-	if(bufname) {
-#ifdef PD
-		t_garray *a;
-    
-		if (!(a = (t_garray *)pd_findbyclass(bufname, garray_class)))
-		{
-    		if (*bufname->s_name)
-    			error(OBJNAME ": no such array '%s'", bufname->s_name);
-    		bufname = 0;
-		}
-		else if (!garray_getfloatarray(a, &buflen, &buf))
-		{
-    		error(OBJNAME ": bad template '%s'", bufname->s_name);
-    		buf = 0;
-			buflen = 0;
-		}
-		else { 
-			garray_usedindsp(a);
-			bchns = 1;
-		}
-#elif defined(MAX)
-		if(bufname->s_thing) {
-			const _buffer *p = (const _buffer *)bufname->s_thing;
-			
-			if(NOGOOD(p)) {
-				post(OBJNAME ": buffer object '%s' no good",bufname->s_name);
-			}
-			else {
-#ifdef DEBUG
-				post(OBJNAME ": buffer object '%s' - samples:%i channels:%i buflen:%i",bufname->s_name,p->b_frames,p->b_nchans,p->b_size);
-#endif
-				buf = p->b_samples;
-				bchns = p->b_nchans;
-				buflen = p->b_size;
-			}
-		}
-		else {
-    		error(OBJNAME ": symbol '%s' not defined", bufname->s_name);
-		}
-#endif
-	}
-
-	method_reset(this); // calls recmin,recmax,rescale
-    setunits();
+	xs_obj::setbuf(s);
+	m_reset(); // calls recmin,recmax,rescale
+    m_units();
 }
 
 	
-V extobject::setdirty()
-{
-	if(bufname) {
 #ifdef PD
-		t_garray *a;
-    
-		if (!(a = (t_garray *)pd_findbyclass(bufname, garray_class))) {
-    		if (*bufname->s_name)
-    			error(OBJNAME ": no such array '%s'", bufname->s_name);
-		}
-		else if (!garray_getfloatarray(a, &buflen, &buf)) {
-    		error(OBJNAME ": bad template '%s'", bufname->s_name);
-		}
-		else garray_redraw(a);
-#elif defined(MAX)
-		if(bufname->s_thing) {
-			_buffer *p = (_buffer *)bufname->s_thing;
-			
-			if(NOGOOD(p)) {
-				post(OBJNAME ": buffer object '%s' no good",bufname->s_name);
-			}
-			else {
-				p->b_modtime = gettime();
-			}
-		}
-		else {
-    		error(OBJNAME ": symbol '%s' not defined", bufname->s_name);
-		}
-#endif 
-	}
-}
-	
-/*
-V extobject::testdirty()
-{
-	if(bufname) {
-#ifdef PD
-		t_garray *a = (t_garray *)pd_findbyclass(bufname, garray_class);
-    	if(a) garray_redraw(a);
-#elif defined(MAX)
-		if(bufname->s_thing) {
-			_buffer *p = (_buffer *)bufname->s_thing;
-			post("s_thing: valid:%i chns:%i buflen:%i",p->b_valid,p->b_nchans,p->b_size);
-			post("vol:%i space:%i modtime:%li time:%li",(I)p->b_vol,(I)p->b_space,p->b_modtime,(L)gettime());
-			post("selection:%i..%i",p->b_selbegin[0],p->b_selend[0]);
-		}
-		else {
-    		error(OBJNAME ": symbol '%s' not defined", bufname->s_name);
-		}
-#endif
-	}
-}
-*/
-
-
-static V method_set(extobject *x,t_symbol *s, I argc, t_atom *argv)
-{
-	x->setbuf(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
-}
-
-#ifdef PD
-static V method_tick(extobject *x)
+V xrec_obj::m_tick()
 {
 	if(x->dirty) {
 	    t_garray *a = (t_garray *)pd_findbyclass(x->bufname, garray_class);
@@ -362,151 +222,82 @@ static V method_tick(extobject *x)
 }
 #endif
 
-static V *method_new(t_symbol *s, I argc, t_atom *argv)
+
+
+V xrec_obj::signal(I n,const F *sig,const F *on,F *pos)
 {
-	if(argc < 1) {
-		post("Arg error: " OBJNAME " [buffer] [units = %i] [sclmode = %i] [sigmode = %i] [append = 1] [loop = 0] [mixmode = 0]",(I)DEF_UNITS,(I)DEF_SCLMODE,(I)DEF_SIGMODE);
-		return NULL;
-	} 
-	
-#ifdef PD
-    extobject *x = (extobject *)pd_new(extclass);
+	if(enable) {
+		register L o = curpos;
 
-    inlet_new(&x->obj, &x->obj.ob_pd, &s_signal, &s_signal);  
-    inlet_new(&x->obj, &x->obj.ob_pd, &s_float, gensym("ft2"));  
-    inlet_new(&x->obj, &x->obj.ob_pd, &s_float, gensym("ft3"));  
+		if(o < curmin) o = curmin;
 
-	outlet_new(&x->obj, &s_signal);
-	x->outmin = outlet_new(&x->obj, &s_float);
-	x->outmax = outlet_new(&x->obj, &s_float);
-
-    x->clock = clock_new(x,(t_method)method_tick);
-	x->dirty = false;
-    x->defsig = 0;
-#elif defined(MAX)
-	extobject *x = (extobject *)newobject(extclass);
-
-	// inlets and outlets set up in reverse
-	floatin(&x->obj,3);  // max record pos
-	floatin(&x->obj,2);  // min record pos
-	dsp_setup(&x->obj,2); // sound and on/off signal in
-
-	x->outmax = outlet_new(&x->obj,"float");  // max record out
-	x->outmin = outlet_new(&x->obj,"float");  // min record out
-	outlet_new(&x->obj,"signal");  // pos signal out
-#endif
-
-	x->recmin = 0;
-	x->recmax = BIGLONG;
-
-	method_sclmode(x,argc >= 3?atom_getflintarg(2,argc,argv):DEF_SCLMODE);
-	method_units(x,argc >= 2?atom_getflintarg(1,argc,argv):DEF_UNITS);
-	method_sigmode(x,argc >= 4?atom_getflintarg(3,argc,argv):0);
-	method_append(x,argc >= 5?atom_getflintarg(4,argc,argv):1);
-	method_loop(x,argc >= 6?atom_getflintarg(5,argc,argv):0);
-	method_mixmode(x,argc >= 7?atom_getflintarg(6,argc,argv):0);
-
-	x->bufname = atom_getsymbolarg(0,argc,argv);
-#ifdef PD  // in max it is called by loadbang
-	x->setbuf(x->bufname);  // calls reset
-#endif
-
-	x->dorec = false;
-	x->enable = true;
-	
-    return x;
-}
-
-static V method_free(extobject *x)
-{
-#ifdef PD
-	clock_free(x->clock);
-#endif
-}
-
-
-
-static t_int *method_perform(t_int *w)
-{
-    extobject *const x = (extobject *)(w[1]);
-    
-	if(x->enable) {
-	    I n = (int)(w[5]);    
-	    const t_float *sig = (const t_float *)(w[2]);
-	    const t_float *on = (const t_float *)(w[3]);
-	    t_float *pos = (t_float *)(w[4]);
-
-		register L o = x->curpos;
-
-		if(o < x->recmin) o = x->recmin;
-
-		if(x->buf && x->reclen > 0) {
+		if(buf && curlen > 0) {
 			while(n) {
-				L ncur = x->recmax-o; // maximal bis zum Bufferende bzw. Aufnahmeende
+				L ncur = curmax-o; // maximal bis zum Bufferende bzw. Aufnahmeende
 
 				if(ncur <= 0) {	// Ende des Buffers
-					o = x->recmin;
-					if(x->doloop) 
-						ncur = x->reclen;
+					o = curmin;
+					if(doloop) 
+						ncur = curlen;
 					else 
-						x->dorec = false;
+						dorec = false;
 				}
 
-				if(!x->dorec) break;
+				if(!dorec) break;
 
 				if(ncur > n) ncur = n;
 				
 				register I i;
-				register F *bf = x->buf+o;
+				register F *bf = buf+o;
 
-				if(x->sigmode) {
-					if(x->appmode) {
+				if(sigmode) {
+					if(appmode) {
 						// append to current position
 					
-						if(!x->domix) {
+						if(!mixmode) {
 							for(i = 0; i < ncur; ++i) {	
 								if(*(on++) >= 0) {
-									x->buf[o] = *(sig++);						
-									*(pos++) = x->scale(o++);
+									buf[o] = *(sig++);						
+									*(pos++) = scale(o++);
 								}
 								else
-									*(pos++) = x->scale(o);
+									*(pos++) = scale(o);
 							}
 						}
 						else {
 							for(i = 0; i < ncur; ++i) {	
 								register F g = *(on++);
 								if(g >= 0) {
-									x->buf[o] = x->buf[o]*(1.-g)+*(sig++)*g;
-									*(pos++) = x->scale(o++);
+									buf[o] = buf[o]*(1.-g)+*(sig++)*g;
+									*(pos++) = scale(o++);
 								}
 								else 
-									*(pos++) = x->scale(o);
+									*(pos++) = scale(o);
 							}
 						}
 					}
 					else {  
 						// don't append
-						if(!x->domix) {
+						if(!mixmode) {
 							for(i = 0; i < ncur; ++i) {	
 								if(*(on++) >= 0)
 								{ 	
-									x->buf[o] = *(sig++);
-									*(pos++) = x->scale(o++);
+									buf[o] = *(sig++);
+									*(pos++) = scale(o++);
 								}
 								else 
-									*(pos++) = x->scale(o = 0);
+									*(pos++) = scale(o = 0);
 							}
 						}
 						else {
 							for(i = 0; i < ncur; ++i) {	
 								register F g = *(on++);
 								if(g >= 0) {
-									x->buf[o] = x->buf[o]*(1.-g)+*(sig++)*g;
-									*(pos++) = x->scale(o++);
+									buf[o] = buf[o]*(1.-g)+*(sig++)*g;
+									*(pos++) = scale(o++);
 								}
 								else
-									*(pos++) = x->scale(o = 0);
+									*(pos++) = scale(o = 0);
 							}
 						}
 					}
@@ -515,53 +306,51 @@ static t_int *method_perform(t_int *w)
 					// message mode
 					
 					// Altivec optimization for that!
-					if(!x->domix) {
+					if(!mixmode) {
 						for(i = 0; i < ncur; ++i) {	
-							x->buf[o] = *(sig++);
-							*(pos++) = x->scale(o++);
+							buf[o] = *(sig++);
+							*(pos++) = scale(o++);
 						}
 					}
 					else {
 						for(i = 0; i < ncur; ++i) {	
-							x->buf[o] = *(sig++)* *(on++);
-							*(pos++) = x->scale(o++);
+							buf[o] = *(sig++)* *(on++);
+							*(pos++) = scale(o++);
 						}
 					}
 				}
 
 				n -= ncur;
-				x->dirty = true;
 	#ifdef PD
-	    	    clock_delay(x->clock, 10);
+				dirty = true;
+	    	    clock_delay(clock, 10);
 	#endif
 			} 
-			x->curpos = o;
+			curpos = o;
 			
 	#ifdef MAX
-			if(x->dirty) { x->setdirty(); x->dirty = false; }
+			if(dirty) { setdirty(); dirty = false; }
 	#endif
 		}
 
-		while(n--) *(pos++) = x->scale(o);
+		while(n--) *(pos++) = scale(o);
 	}
-
-    return (w+6);
 }
 
-static V method_dsp(extobject *x, t_signal **sp)
+V xrec_obj::m_dsp(t_signal **sp)
 {
-	x->setunits();  // method_dsp hopefully called at change of sample rate ?!
-	dsp_add(method_perform, 5, x, sp[0]->s_vec,sp[1]->s_vec,sp[2]->s_vec,sp[0]->s_n);
+	m_units();  // method_dsp hopefully called at change of sample rate ?!
+	dsp_add(dspmeth, 5,x_obj,sp[0]->s_n,sp[0]->s_vec,sp[1]->s_vec,sp[2]->s_vec);
 }
 
 
 
 
-static V method_help(extobject *x)
+V xrec_obj::m_help()
 {
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001 - version " VERSION " compiled on " __DATE__ " " __TIME__);
-	post("Arguments: " OBJNAME " [buffer] [units = %i] [sclmode = %i] [sigmode = %i] [append = 1] [loop = 0] [mixmode = 0]",(I)DEF_UNITS,(I)DEF_SCLMODE,(I)DEF_SIGMODE);
+	post("Arguments: " OBJNAME " [buffer] [channels]");
 	post("Inlets: 1:Messages/Audio signal, 2:Trigger signal, 3:Min point, 4: Max point");
 	post("Outlets: 1:Position signal, 2:Min point, 3:Max point");	
 	post("Methods:");
@@ -585,32 +374,21 @@ static V method_help(extobject *x)
 	post("");
 }
 
-static V method_print(extobject *x)
+V xrec_obj::m_print()
 {
 	static const C sclmode_txt[][20] = {"units","units in loop","buffer","loop"};
 
 	// print all current settings
 	post(OBJNAME " - current settings:");
-	post("bufname = '%s',buflen = %.3f",x->bufname?x->bufname->s_name:"",(F)(x->buflen*x->s2u)); 
-	post("samples/unit = %.3f, scale mode = %s",(F)(1./x->s2u),sclmode_txt[x->sclmode]); 
-	post("sigmode = %s, append = %s, loop = %s, mixmode = %s",x->sigmode?"yes":"no",x->appmode?"yes":"no",x->doloop?"yes":"no",x->domix?"yes":"no"); 
+	post("bufname = '%s',buflen = %.3f",bufname?bufname->s_name:"",(F)(buflen*s2u)); 
+	post("samples/unit = %.3f, scale mode = %s",(F)(1./s2u),sclmode_txt[sclmode]); 
+	post("sigmode = %s, append = %s, loop = %s, mixmode = %s",sigmode?"yes":"no",appmode?"yes":"no",doloop?"yes":"no",mixmode?"yes":"no"); 
 	post("");
 }
 
-/*
-static V method_test(extobject *x)
-{
-	x->testdirty();
-}
-*/
 
 #ifdef MAX
-static V method_loadbang(extobject *x)
-{
-	x->setbuf();
-}
-
-static V method_assist(extobject *x, void *b, long msg, long arg, char *s)
+V xrec_obj::m_assist(L msg,L arg,C *s)
 {
 	switch(msg) {
 	case 1: //ASSIST_INLET:
@@ -659,46 +437,7 @@ V xrecord_tilde_setup()
 V main()
 #endif
 {
-#ifdef PD
-	extclass = class_new(gensym(OBJNAME),
-    	(t_newmethod)method_new, (t_method)method_free,
-    	sizeof(extobject), 0, A_GIMME, A_NULL);
-    CLASS_MAINSIGNALIN(extclass, extobject, defsig);
-#elif defined(MAX)
-	setup((t_messlist **)&extclass, (method)method_new, (method)method_free, (short)sizeof(extobject), 0L, A_GIMME, A_NULL);
-	dsp_initclass();
-	
-	addmess((method)method_loadbang, "loadbang", A_CANT, A_NULL);  // set buffer
-	addmess((method)method_assist, "assist", A_CANT, A_NULL);
-#endif
-	add_dsp(extclass,method_dsp);
-	
-	add_float2(extclass,method_min);
-	add_float3(extclass,method_max);
-
-	add_methodG(extclass,method_set, "set");
-
-	add_method1(extclass,method_enable, "enable",A_FLINT);	
-	add_method0(extclass,method_help, "help");	
-	add_method0(extclass,method_print, "print");	
-//	add_method0(extclass,method_test, "test");	
-		
-	add_method0(extclass,method_reset, "reset");	
-	add_method1(extclass,method_mixmode, "mixmode", A_FLINT);	
-	add_method1(extclass,method_sigmode, "sigmode", A_FLINT);	
-	add_method1(extclass,method_loop, "loop", A_FLINT);	
-	add_method1(extclass,method_append, "append", A_FLINT);	
-	add_method1(extclass,method_min, "min", A_FLOAT);	
-	add_method1(extclass,method_max, "max", A_FLOAT);	
-
-	add_bang(extclass,method_start);	
-	add_method0(extclass,method_start, "start");	
-	add_method0(extclass,method_stop, "stop");	
-	add_float(extclass,method_pos);	
-	add_method1(extclass,method_pos, "pos", A_FLOAT);	
-
-	add_method1(extclass,method_units, "units", A_FLINT);	
-	add_method1(extclass,method_sclmode, "sclmode", A_FLINT);	
+	xrec_obj_setup();
 }
 #ifdef __cplusplus
 }

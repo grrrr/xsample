@@ -2,7 +2,7 @@
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -21,9 +21,9 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 //#define DEBUG 
 
 class xgroove_obj:
-	public xp_obj
+	public xs_obj
 {
-	CPPEXTERN_HEADER(xgroove_obj,xp_obj)
+	CPPEXTERN_HEADER(xgroove_obj,xs_obj)
 
 public:
 	xgroove_obj(I argc,t_atom *argv);
@@ -57,8 +57,8 @@ protected:
 
 	_outlet *outmin,*outmax; // float outlets	
 	
-	V outputmin() { outlet_float(outmin,playmin*s2u); }
-	V outputmax() { outlet_float(outmax,playmax*s2u); }
+	V outputmin() { outlet_float(outmin,curmin*s2u); }
+	V outputmax() { outlet_float(outmax,curmax*s2u); }
 	
 	V signal(I n,const F *speed,F *sig,F *pos);  // this is the dsp method
 	V setbuf(t_symbol *s = NULL);
@@ -103,7 +103,8 @@ V xgroove_obj::cb_setup(t_class *c)
 }
 
 xgroove_obj::xgroove_obj(I argc,t_atom *argv):
-	doplay(false),doloop(true)
+	doplay(false),doloop(true),
+	curpos(0)
 {
 #ifdef DEBUG
 	if(argc < 1) {
@@ -111,7 +112,7 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 	} 
 #endif
 	
-	outchns = argc >= 2?atom_getflintarg(1,argc,argv):0;
+	outchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
 
 #ifdef PD	
     inlet_new(&x_obj, &x_obj.ob_pd, &s_float, gensym("ft1"));  // min play pos
@@ -143,7 +144,7 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 
 V xgroove_obj::m_units(xs_unit mode)
 {
-	xp_obj::m_units(mode);
+	xs_obj::m_units(mode);
 	
 	m_sclmode();
 	outputmin();
@@ -152,25 +153,13 @@ V xgroove_obj::m_units(xs_unit mode)
 
 V xgroove_obj::m_min(F mn)
 {
-	mn /= s2u;  // conversion to samples
-	if(mn < 0) mn = 0;
-	else if(mn > playmax) mn = playmax;
-	playmin = (I)(mn+.5);
-	playlen = playmax-playmin;
-	m_sclmode();
-
+	xs_obj::m_min(mn);
 	outputmin();
 }
 
 V xgroove_obj::m_max(F mx)
 {
-	mx /= s2u;  // conversion to samples
-	if(mx > buflen) mx = buflen;
-	else if(mx < playmin) mx = playmin;
-	playmax = (I)(mx+.5);
-	playlen = playmax-playmin;
-	m_sclmode();
-	
+	xs_obj::m_max(mx);
 	outputmax();
 }
 
@@ -178,8 +167,8 @@ V xgroove_obj::m_max(F mx)
 V xgroove_obj::m_pos(F pos)
 {
 	curpos = pos/s2u;
-	if(curpos < playmin) curpos = playmin;
-	else if(curpos > playmax) curpos = playmax;
+	if(curpos < curmin) curpos = curmin;
+	else if(curpos > curmax) curpos = curmax;
 }
 
 V xgroove_obj::m_reset() 
@@ -193,17 +182,18 @@ V xgroove_obj::m_reset()
 V xgroove_obj::setbuf(t_symbol *s)
 {
 	const I bufl1 = buflen;
-	xp_obj::setbuf(s);
+	xs_obj::setbuf(s);
 	if(bufl1 != buflen) m_reset(); // calls recmin,recmax,rescale
     m_units();
 }
 
 
+
 V xgroove_obj::signal(I n,const F *speed,F *sig,F *pos)
 {
 	if(enable) {    
-		const I smin = playmin,smax = playmax;
-		const I plen = playlen;
+		const I smin = curmin,smax = curmax;
+		const I plen = curlen;
 		D o = curpos;
 
 		if(buf && doplay && plen > 0) {
@@ -215,9 +205,9 @@ V xgroove_obj::signal(I n,const F *speed,F *sig,F *pos)
 
 					// Offset normalisieren
 					if(o >= smax) 
-						o = doloop?fmod(o-smin,playlen)+smin:(D)smax-0.001;
+						o = doloop?fmod(o-smin,plen)+smin:(D)smax-0.001;
 					else if(o < smin) 
-						o = doloop?fmod(o+(playlen-smin),playlen)+smin:smin;
+						o = doloop?fmod(o+(plen-smin),plen)+smin:smin;
 
 					*(pos++) = scale(o);
 
