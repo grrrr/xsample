@@ -186,5 +186,4 @@ TMPLDEF inline V xinter::s_play4(I n,S *const *invecs,S *const *outvecs)
 	st_play4 TMPLCALL (buf->Data(),curmin,curmax,n,buf->Channels(),outchns,invecs,outvecs);
 }
 
-
 #endif
