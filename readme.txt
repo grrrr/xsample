@@ -20,6 +20,14 @@ Hence it will be loaded at Max startup.
 
 ----------------------------------------------------------------------------
 
+IMPORTANT INFORMATION for all PD users:
+
+xsample is a library containing several external objects. You should load it at PD startup
+by adding "-lib xsample" to the PD command line.
+(If you forgot to do that, you can load the library by creating an [xsample] dummy object.
+
+----------------------------------------------------------------------------
+
 You will need the flext C++ layer for PD and Max/MSP externals to compile this.
 see http://www.parasitaere-kapazitaeten.net/ext
 
