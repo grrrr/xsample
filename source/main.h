@@ -11,13 +11,13 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #ifndef __XSAMPLE_H
 #define __XSAMPLE_H
 
-#define XSAMPLE_VERSION "0.2.1"
+#define XSAMPLE_VERSION "0.2.2"
 
 
 #include <flext.h>
 
-#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 101)
-#error You need at least flext version 0.1.1 
+#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 102)
+#error You need at least flext version 0.1.2 
 #endif
 
 

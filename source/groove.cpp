@@ -74,17 +74,6 @@ private:
 	FLEXT_CALLBACK_1(m_max,F)
 
 	FLEXT_CALLBACK_B(m_loop)
-
-/*
-	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
-	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
-
-	static V cb_pos(V *c,F pos) { thisObject(c)->m_pos(pos); }
-	static V cb_min(V *c,F mn) { thisObject(c)->m_min(mn); }
-	static V cb_max(V *c,F mx) { thisObject(c)->m_max(mx); }
-
-	static V cb_loop(V *c,FI lp) { thisObject(c)->m_loop(lp != 0); }
-*/
 };
 
 
@@ -103,20 +92,6 @@ V xgroove::cb_setup(t_class *c)
 	FLEXT_ADDMETHOD(c,"stop",m_stop);
 
 	FLEXT_ADDMETHOD_B(c,"loop",m_loop);
-	
-/*
-	add_floatn(c,cb_min,1);
-	add_floatn(c,cb_max,2);
-
-	add_method1(c,cb_loop, "loop", A_FLINT);	
-	add_method1(c,cb_min, "min", A_FLOAT);	
-	add_method1(c,cb_max, "max", A_FLOAT);	
-
-	add_bang(c,cb_start);	
-	add_method(c,cb_start, "start");	
-	add_method(c,cb_stop, "stop");	
-	add_method1(c,cb_pos, "pos", A_FLOAT);	
-*/
 }
 
 xgroove::xgroove(I argc,t_atom *argv):

@@ -45,17 +45,6 @@ V xsample::cb_setup(t_class *c)
 	FLEXT_ADDMETHOD_E(c,"units",m_units);
 	FLEXT_ADDMETHOD_E(c,"interp",m_interp);
 	FLEXT_ADDMETHOD_E(c,"sclmode",m_sclmode);
-
-/*
-	add_methodG(c,cb_set,"set");
-	add_method(c,cb_print,"print");
-	add_method(c,cb_refresh,"refresh");
-	add_method(c,cb_reset,"reset");
-	
-	add_method1(c,cb_units,"units",A_FLINT);
-	add_method1(c,cb_interp,"interp",A_FLINT);
-	add_method1(c,cb_sclmode,"sclmode",A_FLINT);
-*/
 }
 
 xsample::xsample():
@@ -75,16 +64,7 @@ xsample::~xsample()
 	if(buf) delete buf;
 }
 
-/*
-V xsample::cb_set(V *c,t_symbol *,I argc,t_atom *argv) { thisObject(c)->m_set(argc,argv); }
-V xsample::cb_print(V *c) { thisObject(c)->m_print(); }	
-V xsample::cb_refresh(V *c) { thisObject(c)->m_refresh(); }	
-V xsample::cb_reset(V *c) { thisObject(c)->m_reset(); }	
 
-V xsample::cb_units(V *c,FI md) { thisObject(c)->m_units((xs_unit)(I)md); }
-V xsample::cb_interp(V *c,FI md) { thisObject(c)->m_interp((xs_intp)(I)md); }
-V xsample::cb_sclmode(V *c,FI md) { thisObject(c)->m_sclmode((xs_sclmd)(I)md); }
-*/
 
 I xsample::m_set(I argc, t_atom *argv)
 {

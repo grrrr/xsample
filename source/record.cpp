@@ -81,23 +81,6 @@ private:
 	FLEXT_CALLBACK_B(m_append)
 
 	FLEXT_CALLBACK_G(m_draw)
-
-/*
-	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
-	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
-
-	static V cb_pos(V *c,F pos) { thisObject(c)->m_pos(pos); }
-	static V cb_min(V *c,F mn) { thisObject(c)->m_min(mn); }
-	static V cb_max(V *c,F mx) { thisObject(c)->m_max(mx); }
-
-	static V cb_loop(V *c,FI lp) { thisObject(c)->m_loop(lp != 0); }
-
-	static V cb_mixmode(V *c,FI md) { thisObject(c)->m_mixmode(md != 0); }
-	static V cb_sigmode(V *c,FI md) { thisObject(c)->m_sigmode(md != 0); }
-	static V cb_append(V *c,FI md) { thisObject(c)->m_append(md != 0); }
-
-	static V cb_draw(V *c,t_symbol *,I argc,t_atom *argv) { thisObject(c)->m_draw(argc,argv); }	
-*/
 };
 
 
@@ -120,26 +103,8 @@ V xrecord::cb_setup(t_class *c)
 	FLEXT_ADDMETHOD_B(c,"append",m_append);
 	
 	FLEXT_ADDMETHOD_G(c,"draw",m_draw);
-
-/*
-	add_floatn(c,cb_min,2);
-	add_floatn(c,cb_max,3);
-
-	add_method1(c,cb_mixmode, "mixmode", A_FLINT);	
-	add_method1(c,cb_sigmode, "sigmode", A_FLINT);	
-	add_method1(c,cb_loop, "loop", A_FLINT);	
-	add_method1(c,cb_append, "append", A_FLINT);	
-	add_method1(c,cb_min, "min", A_FLOAT);	
-	add_method1(c,cb_max, "max", A_FLOAT);	
-
-	add_bang(c,cb_start);	
-	add_method(c,cb_start, "start");	
-	add_method(c,cb_stop, "stop");	
-	add_method1(c,cb_pos, "pos", A_FLOAT);	
-
-	add_methodG(c,cb_draw,"draw");
-*/
 }
+
 
 xrecord::xrecord(I argc,t_atom *argv):
 	dorec(false),
@@ -443,7 +408,7 @@ V xrecord::m_help()
 	post("\trefresh: checks buffer and refreshes outlets");
 	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
 	post("\tsclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
-	post("\tdraw [{float}]: draw buffer immediately/set refresh time during recording (0 turns off)");
+	post("\tdraw [{float}]: redraw buffer immediately (arg omitted) or periodic (in ms)");
 	post("");
 }
 

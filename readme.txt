@@ -1,5 +1,5 @@
 xsample - extended sample objects for Max/MSP and pd (pure data)
-version 0.2.1
+version 0.2.2
 
 Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
@@ -50,6 +50,10 @@ Goals/features of the package:
 
 Version history:
 
+0.2.2:
+- flext 0.1.2
+- new flext brings better graphics update behavior for xrecord~ in PD
+
 0.2.1:
 - no leftmost float inlet for position setting - use pos method
 - changed dsp handling for flext 0.1.1 conformance
@@ -64,12 +68,23 @@ Version history:
 
 
 TODO list:
+
+general:
 - Documentation and better example patches
 - cleaner makefile PD/Borland C++
 - makefile and build for PD/GCC
 - eventually make use of resource files for text items
+- more copyright message at load time, less with help message
 
+features:
 - crossfading loop zone for xgroove~
 - multi-buffer handling (aka multi-channel for pd)
+- vasp handling
 - performance comparison to respective PD/Max objects
 - anti-alias filter? (possible?)
+
+tests:
+- test graphics update behavior in Max
+
+bugs:
+none known

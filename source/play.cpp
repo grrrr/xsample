@@ -48,12 +48,6 @@ private:
 	FLEXT_CALLBACK(m_start)
 	FLEXT_CALLBACK(m_stop)
 	FLEXT_CALLBACK(m_reset)
-
-/*
-	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
-	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
-	static V cb_reset(t_class *c) { thisObject(c)->m_reset(); }
-*/
 };
 
 FLEXT_TILDE_GIMME("xplay~",xplay)
@@ -64,12 +58,6 @@ V xplay::cb_setup(t_class *c)
 	FLEXT_ADDBANG(c,m_start);
 	FLEXT_ADDMETHOD(c,"start",m_start);
 	FLEXT_ADDMETHOD(c,"stop",m_stop);
-
-/*	
-	add_bang(c,cb_start);
-	add_method(c,cb_start,"start");
-	add_method(c,cb_stop,"stop");
-*/
 }
 
 
