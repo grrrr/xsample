@@ -120,7 +120,7 @@ xrecord::xrecord(I argc,t_atom *argv):
 		if(argi == 1 && argc == 2 && IsFlint(argv[argi])) {
 			inchns = GetAFlint(argv[argi]);
 			argi++;
-			post("%s: old style command line suspected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
+			post("%s: old style command line detected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
 		}
 #endif
 	}

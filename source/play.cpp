@@ -81,7 +81,7 @@ xplay::xplay(I argc, t_atom *argv):
 		if(argi == 1 && argc == 2 && IsFlint(argv[argi])) {
 			outchns = GetAFlint(argv[argi]);
 			argi++;
-			post("%s: old style command line suspected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
+			post("%s: old style command line detected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
 		}
 #endif
 	}
@@ -121,72 +121,107 @@ TMPLDEF V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 	const F *pos = invecs[0];
 	F *const *sig = outvecs;
 	register I si = 0;
-
+	const I smin = 0,smax = buf->Frames(),plen = smax-smin;
+	
 	if(doplay && buf->Frames() > 0) {
-		if(interp == xsi_4p && buf->Frames() > 4) {
-			I maxo = buf->Frames()-3;
+		if(interp == xsi_4p && plen > 4) {
+			// 4-point interpolation
+			// ---------------------
+			
+			const I maxo = smax-1; // last sample in play region
+			const I maxi = smax-3; // last position for straight interpolation
 
 			for(I i = 0; i < n; ++i,++si) {	
 				F o = *(pos++)/s2u;
-				I oint = (I)o;
-				register F a,b,c,d;
+				register I oint = (I)o,ointm,oint1,oint2;
+
+				if(oint <= smin) { 
+					if(oint < smin) oint = smin,o = smin;
+					// position is first simple
+					ointm = smin; // first sample 
+					oint1 = oint+1;
+					oint2 = oint1+1;
+				}
+				else if(oint >= maxi) { 
+					if(oint >= smax) oint = maxo,o = smax;
+					ointm = oint-1;
+					oint1 = oint >= maxo?maxo:oint+1;
+					oint2 = oint1 >= maxo?maxo:oint1+1;
+				}
+				else {
+					ointm = oint-1;
+					oint1 = oint+1;
+					oint2 = oint1+1;
+				}
+
+				register F frac = o-oint;
+				
+				register F *fa = buf->Data()+ointm*BCHNS;
+				register F *fb = buf->Data()+oint*BCHNS;
+				register F *fc = buf->Data()+oint1*BCHNS;
+				register F *fd = buf->Data()+oint2*BCHNS;
 
 				for(I ci = 0; ci < OCHNS; ++ci) {
-					register const F *fp = buf->Data()+oint*BCHNS+ci;
-					F frac = o-oint;
-
-					if (oint < 1) {
-						if(oint < 0) {
-							frac = 0;
-							a = b = c = d = buf->Data()[0*BCHNS+ci];
-						}
-						else {
-							a = b = fp[0*BCHNS];
-							c = fp[1*BCHNS];
-							d = fp[2*BCHNS];
-						}
-					}
-					else if(oint > maxo) {
-						if(oint == maxo+1) {
-							a = fp[-1*BCHNS];	
-							b = fp[0*BCHNS];	
-							c = d = fp[1*BCHNS];	
-						}
-						else {
-							frac = 0; 
-							a = b = c = d = buf->Data()[(buf->Frames()-1)*BCHNS+ci]; 
-						}
-					}
-					else {
-						a = fp[-1*BCHNS];
-						b = fp[0*BCHNS];
-						c = fp[1*BCHNS];
-						d = fp[2*BCHNS];
-					}
-
-					F cmb = c-b;
-					sig[ci][si] = b + frac*( 
-						cmb - 0.5f*(frac-1.) * ((a-d+3.0f*cmb)*frac + (b-a-cmb))
+					const F cmb = fc[ci]-fb[ci];
+					sig[ci][si] = fb[ci] + frac*( 
+						cmb - 0.5f*(frac-1.) * ((fa[ci]-fd[ci]+3.0f*cmb)*frac + (fb[ci]-fa[ci]-cmb))
 					);
+				}
+			}
+		}
+		else if(interp == xsi_lin && plen > 2) {
+			// linear interpolation
+			// --------------------
+		
+			const I maxo = smax-1;  // last sample in buffer
+
+			for(I i = 0; i < n; ++i,++si) {	
+				const F o = *(pos++)/s2u;
+				register const I oint = (I)o;
+
+				if(oint < smin) {
+					// position is before first sample -> take the first sample
+					register const F *const fp = buf->Data()+smin*BCHNS;
+					for(I ci = 0; ci < OCHNS; ++ci) 
+						sig[ci][si] = fp[ci]; 
+				}
+				else if(oint >= maxo) {
+					// position is past last sample -> take the last sample
+					register const F *const fp = buf->Data()+maxo*BCHNS;
+					for(I ci = 0; ci < OCHNS; ++ci) 
+						sig[ci][si] = fp[ci]; 
+				}
+				else {
+					register const F frac = o-oint;
+					register const F *const fp0 = buf->Data()+oint*BCHNS;
+					register const F *const fp1 = fp0+BCHNS;
+					for(I ci = 0; ci < OCHNS; ++ci) 
+						sig[ci][si] = fp0[ci]+frac*(fp1[ci]-fp0[ci]);
 				}
 			}
 		}
 		else {
 			// no interpolation
+			// ----------------
+			
 			for(I i = 0; i < n; ++i,++si) {	
-				I o = (I)(*(pos++)/s2u);
-				if(o < 0) {
-					for(I ci = 0; ci < OCHNS; ++ci)
-						sig[ci][si] = buf->Data()[0*BCHNS+ci];
+				register const I oint = (I)(*(pos++)/s2u);
+				register F *fp;
+				if(oint < 0) {
+					// position < 0 ... take only 0th sample
+					fp = buf->Data()+smin*BCHNS;
 				}
-				if(o > buf->Frames()) {
-					for(I ci = 0; ci < OCHNS; ++ci)
-						sig[ci][si] = buf->Data()[(buf->Frames()-1)*BCHNS+ci];
+				else if(oint >= buf->Frames()) {
+					// position > last sample ... take only last sample
+					fp = buf->Data()+(smax-1)*BCHNS;
 				}
 				else {
-					for(I ci = 0; ci < OCHNS; ++ci)
-						sig[ci][si] = buf->Data()[o*BCHNS+ci];
+					// normal
+					fp = buf->Data()+oint*BCHNS;
 				}
+
+				for(I ci = 0; ci < OCHNS; ++ci)
+					sig[ci][si] = fp[ci];
 			}
 		}	
 
@@ -252,16 +287,17 @@ V xplay::m_help()
 	post("\treset: checks buffer");
 	post("\trefresh: checks buffer and refreshes outlets");
 	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
-	post("\tinterp 0/1: turn interpolation off/on");
+	post("\tinterp 0/1/2: set interpolation to off/4-point/linear");
 	post("");
 }
 
 V xplay::m_print()
 {
+	const C *interp_txt[] = {"off","4-point","linear"};
 	// print all current settings
 	post("%s - current settings:",thisName());
 	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
-	post("out channels = %i, samples/unit = %.3f, interpolation = %s",outchns,(F)(1./s2u),interp?"yes":"no"); 
+	post("out channels = %i, samples/unit = %.3f, interpolation = %s",outchns,(F)(1./s2u),interp_txt[interp >= xsi_none && interp <= xsi_lin?interp:xsi_none]); 
 	post("");
 }
 

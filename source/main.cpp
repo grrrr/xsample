@@ -10,12 +10,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 #include "main.h"
 
-// Initialization for pd xsample library
-#ifdef PD
-extern "C" FLEXT_EXT V xsample_setup()
-#else //MAXMSP
-extern "C" FLEXT_EXT void main()    	    	    	    	
-#endif
+// Initialization function for xsample library
+V libsetup()
 {
 	post("xsample objects, version " XSAMPLE_VERSION ", (C)2001,2002 Thomas Grill");
 	post("xsample: xrecord~, xplay~, xgroove~ - send objects a 'help' message to get assistance");
@@ -25,10 +21,10 @@ extern "C" FLEXT_EXT void main()
 	FLEXT_TILDE_SETUP(xrecord);
 	FLEXT_TILDE_SETUP(xplay);
 	FLEXT_TILDE_SETUP(xgroove);
-
-	// setup the library
-	FLEXT_LIB_SETUP(xsample);
 }
+
+// setup the library
+FLEXT_LIB_SETUP(xsample,libsetup)
 
 // ------------------------------
 

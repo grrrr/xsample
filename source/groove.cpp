@@ -59,8 +59,8 @@ protected:
 	V outputmin() { ToOutFloat(outmin,curmin*s2u); }
 	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
 	
-	I bcnt,bframes;
-	F **bvecs;
+//	I bcnt,bframes;
+//	F **bvecs;
 
 private:
 	static V setup(t_class *c);
@@ -95,8 +95,6 @@ xgroove::xgroove(I argc,t_atom *argv):
 	curpos(0),
 	outchns(1)
 {
-	post("xgroove~ new: argc=%i, argv=%s",argc,GetString(argv[0]));
-
 	I argi = 0;
 #ifdef MAXMSP
 	if(argc > argi && IsFlint(argv[argi])) {
@@ -114,7 +112,7 @@ xgroove::xgroove(I argc,t_atom *argv):
 		if(argi == 1 && argc == 2 && IsFlint(argv[argi])) {
 			outchns = GetAFlint(argv[argi]);
 			argi++;
-			post("%s: old style command line suspected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
+			post("%s: old style command line detected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
 		}
 #endif
 	}
@@ -219,100 +217,167 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 	D o = curpos;
 
 	if(buf && doplay && plen > 0) {
-		const I maxo = smax-3;
 		register I si = 0;
 
-		if(interp && plen >= 4) {
+		if(interp == xsi_4p && plen >= 4) {
+			// 4-point interpolation
+
+			const I maxo = smax-1; // last sample in play region
+			const I maxi = smax-3; // last position for straight interpolation
+
 			for(I i = 0; i < n; ++i,++si) {	
-				const F spd = *(speed++);
+				const F spd = *(speed++);  // must be first because the vector is reused for output!
+				register I oint = (I)o;
+				I ointm,oint1,oint2;
 
-				// normalize offset
-				if(o >= smax) 
-					o = doloop?fmod(o-smin,plen)+smin:(D)smax-0.001;
-				else if(o < smin) 
-					o = doloop?fmod(o+(plen-smin),plen)+smin:smin;
-
-				*(pos++) = scale(o);
-
-				const I oint = (I)o;
-				register F a,b,c,d;
-
-				const F frac = o-oint;
-
-				for(I ci = 0; ci < OCHNS; ++ci) {
-					register const F *fp = buf->Data()+oint*BCHNS+ci;
-					if (oint <= smin) {
-						if(doloop) {
-							// oint is always == smin
-							a = buf->Data()[(smax-1)*BCHNS+ci];
-							b = fp[0*BCHNS];
-							c = fp[1*BCHNS];
-							d = fp[2*BCHNS];
+				if(doloop) {
+					if(oint <= smin) { 
+						if(oint < smin) { // position is before first sample -> roll over backwards
+							o = fmod(o+smax,plen)+smin;
+							// o is now somewhere at the end
+							oint = (I)o;
+							ointm = oint-1;
+							oint1 = oint >= maxo?smin:oint+1;
+							oint2 = oint1 >= maxo?smin+1:oint1+1;
 						}
 						else {
-							// offset is not normalized
-							if(oint == smin) {
-								a = b = fp[0*BCHNS];
-								c = fp[1*BCHNS];
-								d = fp[2*BCHNS];
-							}
-							else {
-								a = b = c = d = buf->Data()[smin*BCHNS+ci];
-							}
+							// position is first simple
+							ointm = smax-1; // last sample
+							oint1 = oint+1;
+							oint2 = oint1+1;
 						}
 					}
-					else if(oint > maxo) {
-						if(doloop) {
-							a = fp[-1*BCHNS];
-							b = fp[0*BCHNS];
-							if(oint == maxo+1) {
-								c = fp[1*BCHNS];
-								d = buf->Data()[smin*BCHNS+ci];
-							}
-							else {
-								c = buf->Data()[smin*BCHNS+ci];
-								d = buf->Data()[(smin+1)*BCHNS+ci];
-							}
+					else if(oint >= maxi) { 
+						if(oint >= smax) { // position > last sample -> roll over forwards
+							o = fmod(o,plen)+smin;
+							// o is now somewhere at the beginning
+							oint = (I)o;
+							ointm = oint > smin?oint-1:maxo;
+							oint1 = oint+1;
+							oint2 = oint1+1;
 						}
 						else {
-							// offset is not normalized
-							if(oint == maxo+1) {
-								a = fp[-1*BCHNS];
-								b = fp[0*BCHNS];
-								c = d = fp[1*BCHNS];	
-							}
-							else 
-							if(oint == maxo+2) {
-								a = fp[-1*BCHNS];
-								b = c = d = fp[0*BCHNS];
-							}
-							else { 
-								// >= (maxo+3 = smax-1)
-								a = b = c = d = buf->Data()[(smax-1)*BCHNS+ci];
-							}
-
+							ointm = oint-1;
+							oint1 = oint >= maxo?smin:oint+1;
+							oint2 = oint1 >= maxo?smin+1:oint1+1;
 						}
 					}
 					else {
-						a = fp[-1*BCHNS];
-						b = fp[0*BCHNS];
-						c = fp[1*BCHNS];
-						d = fp[2*BCHNS];
+						ointm = oint-1;
+						oint1 = oint+1;
+						oint2 = oint1+1;
 					}
+				}
+				else {
+					// no looping
+					
+					if(oint <= smin) { 
+						if(oint < smin) oint = smin,o = smin;
+						// position is first simple
+						ointm = smin; // first sample 
+						oint1 = oint+1;
+						oint2 = oint1+1;
+					}
+					else if(oint >= maxi) { 
+						if(oint >= smax) oint = maxo,o = smax;
+						ointm = oint-1;
+						oint1 = oint >= maxo?maxo:oint+1;
+						oint2 = oint1 >= maxo?maxo:oint1+1;
+					}
+					else {
+						ointm = oint-1;
+						oint1 = oint+1;
+						oint2 = oint1+1;
+					}
+				}	
 
-					const F cmb = c-b;
-					sig[ci][si] = b + frac*( 
-						cmb - 0.5f*(frac-1.) * ((a-d+3.0f*cmb)*frac + (b-a-cmb))
+				register F frac = o-oint;
+				
+				register F *fa = buf->Data()+ointm*BCHNS;
+				register F *fb = buf->Data()+oint*BCHNS;
+				register F *fc = buf->Data()+oint1*BCHNS;
+				register F *fd = buf->Data()+oint2*BCHNS;
+
+				for(I ci = 0; ci < OCHNS; ++ci) {
+					const F cmb = fc[ci]-fb[ci];
+					sig[ci][si] = fb[ci] + frac*( 
+						cmb - 0.5f*(frac-1.) * ((fa[ci]-fd[ci]+3.0f*cmb)*frac + (fb[ci]-fa[ci]-cmb))
 					);
 				}
+				
+				*(pos++) = scale(o);
+				o += spd;
+			}
+		}
+		else if(interp == xsi_lin && plen > 2) {
+			// linear interpolation
+		
+			const I maxo = smax-1; // last sample in play region
 
+			for(I i = 0; i < n; ++i,++si) {	
+				const F spd = *(speed++);  // must be first because the vector is reused for output!
+				register I oint = (I)o;
+
+				if(doloop) {
+					register I oint1;
+					if(oint < smin) { // position is before first sample -> roll over backwards
+						o = fmod(o+smax,plen)+smin;
+						// o is now somewhere at the end
+						oint = (I)o;
+						oint1 = oint >= maxo?smin:oint+1;
+					}
+					else if(oint >= maxo) { 
+						if(oint >= smax) { // position > last sample -> roll over forwards
+							o = fmod(o,plen)+smin;
+							// o is now somewhere at the beginning
+							oint1 = (oint = (I)o)+1;
+						}
+						else
+							oint1 = smin;
+					}
+					else oint1 = oint+1;
+					
+					*(pos++) = scale(o);
+
+					register F frac = o-oint;
+					register F *fp0 = buf->Data()+oint*BCHNS;
+					register F *fp1 = buf->Data()+oint1*BCHNS;
+					for(I ci = 0; ci < OCHNS; ++ci) 
+						sig[ci][si] = fp0[ci] + frac*(fp1[ci]-fp0[ci]);
+				}
+				else {
+					if(oint < smin) {
+						// position is before first sample -> take the first sample
+						o = smin;
+						register const F *fp = buf->Data()+smin*BCHNS;
+						for(I ci = 0; ci < OCHNS; ++ci) 
+							sig[ci][si] = fp[ci];
+					}
+					else if(oint >= maxo) {
+						// position >= last sample -> take the last sample
+						if(o > smax) o = smax;
+						register const F *fp = buf->Data()+maxo*BCHNS;
+						for(I ci = 0; ci < OCHNS; ++ci) 
+							sig[ci][si] = fp[ci]; 
+					}
+					else {
+						register F frac = o-oint;
+						register const F *fp0 = buf->Data()+oint*BCHNS;
+						register const F *fp1 = fp0+BCHNS;
+						for(I ci = 0; ci < OCHNS; ++ci) 
+							sig[ci][si] = fp0[ci] + frac*(fp1[ci]-fp0[ci]);
+					}
+				}
+				
+				*(pos++) = scale(o);
 				o += spd;
 			}
 		}
 		else {
+			// no interpolation
 			if(doloop) {
 				for(I i = 0; i < n; ++i,++si) {	
-					F spd = *(speed++);
+					const F spd = *(speed++);  // must be first because the vector is reused for output!
 
 					// normalize offset
 					if(o >= smax) 
@@ -321,32 +386,34 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 						o = fmod(o+smax,plen)+smin;
 
 					*(pos++) = scale(o);
+					register const F *fp = buf->Data()+(I)o*BCHNS;
 					for(I ci = 0; ci < OCHNS; ++ci) 
-						sig[ci][si] = buf->Data()[(I)o*BCHNS+ci];
+						sig[ci][si] = fp[ci];
 
 					o += spd;
 				}
 			}
 			else {
 				for(I i = 0; i < n; ++i,++si) {	
-					const F spd = *(speed++);
-
-					*(pos++) = scale(o);
-
+					const F spd = *(speed++);  // must be first because the vector is reused for output!
+					register F *fp;
 					const I oint = (I)o;
 					if(oint < smin) {
-						for(I ci = 0; ci < OCHNS; ++ci)
-							sig[ci][si] = buf->Data()[smin*BCHNS+ci];
+						o = smin;
+						fp = buf->Data()+smin*BCHNS;
 					}
 					else if(oint >= smax) {
-						for(I ci = 0; ci < OCHNS; ++ci)
-							sig[ci][si] = buf->Data()[smax*BCHNS+ci];
+						o = smax;
+						fp = buf->Data()+(smax-1)*BCHNS;
 					}
 					else {
-						for(I ci = 0; ci < OCHNS; ++ci)
-							sig[ci][si] = buf->Data()[oint*BCHNS+ci];
+						fp = buf->Data()+oint*BCHNS;
 					}
 
+					for(I ci = 0; ci < OCHNS; ++ci)
+						sig[ci][si] = fp[ci];
+
+					*(pos++) = scale(o);
 					o += spd;
 				}
 			}
@@ -361,11 +428,14 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 		const F oscl = scale(o);
 		for(I si = 0; si < n; ++si) {	
 			*(pos++) = oscl;
-			for(I ci = 0; ci < outchns; ++ci)	sig[ci][si] = 0;
+			for(I ci = 0; ci < outchns; ++ci) sig[ci][si] = 0;
 		}
 	}
 	
-	curpos = o;
+	// normalize and store current playing position
+	if(o < smin) curpos = smin;
+	else if(o >= smax) curpos = smax;
+	else curpos = o;
 }
 
 V xgroove::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
@@ -416,7 +486,7 @@ V xgroove::m_help()
 	post("\treset: reset min/max playing points and playing offset");
 	post("\tprint: print current settings");
 	post("\tloop 0/1: switches looping off/on");
-	post("\tinterp 0/1: interpolation off/on");
+	post("\tinterp 0/1/2: set interpolation to off/4-point/linear");
 	post("\tmin {unit}: set minimum playing point");
 	post("\tmax {unit}: set maximum playing point");
 	post("\tall: select entire buffer length");
@@ -427,17 +497,18 @@ V xgroove::m_help()
 	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
 	post("\tsclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
 	post("");
-}
+} 
 
 V xgroove::m_print()
 {
-	static const C sclmode_txt[][20] = {"units","units in loop","buffer","loop"};
+	static const C *sclmode_txt[] = {"units","units in loop","buffer","loop"};
+	static const C *interp_txt[] = {"off","4-point","linear"};
 
 	// print all current settings
 	post("%s - current settings:",thisName());
 	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
 	post("out channels = %i, samples/unit = %.3f, scale mode = %s",outchns,(F)(1./s2u),sclmode_txt[sclmode]); 
-	post("loop = %s, interpolation = %s",doloop?"yes":"no",interp?"yes":"no"); 
+	post("loop = %s, interpolation = %s",doloop?"yes":"no",interp_txt[interp >= xsi_none && interp <= xsi_lin?interp:xsi_none]); 
 	post("");
 }
 

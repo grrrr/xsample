@@ -1,5 +1,5 @@
 xsample - extended sample objects for Max/MSP and pd (pure data)
-version 0.2.2
+version 0.2.3
 
 Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
@@ -24,14 +24,16 @@ Package files:
 
 The package should at least compile (and is tested) with the following compilers:
 
-- pd - Windows:
+# pd - Windows:
 o Borland C++ 5.5 (free): edit & run "make -f makefile.bcc"
-o Microsoft Visual C++ 6: edit "xsample.dsp" project file - due to a compiler bug the optimization using templates is not functional
+o Microsoft Visual C++ 6: edit "xsample.dsp" project file
+> due to a compiler bug the optimization using templates is not functional
 
-- pd - linux:
-o GCC for linux: run "make -f makefile.pd-linux" - GCC 2.95.2 dies with template optimization turned on 
+# pd - linux:
+o GCC for linux: run "make -f makefile.pd-linux" and as root "make -f makefile.pd-linux install"
+> various version of GCC die during compile with template optimization turned on 
 
-- Max/MSP - MacOS:
+# Max/MSP - MacOS:
 o Metrowerks CodeWarrior V6: edit "xsample.cw" project file functions
 o Apple MPW-PR: edit & use the "flext.mpw" makefile
 
@@ -53,8 +55,10 @@ Goals/features of the package:
 Version history:
 
 0.2.3:
+- using flext 0.2.2 - xsample is now a library under MaxMSP
 - cleaner gcc makefile
 - xgroove~, xrecord~: added "all" message to select entire buffer length
+- xgroove~, xplay~: added linear interpolation (message to send: "interp 2") 
 
 0.2.2:
 - using flext 0.2.0
@@ -90,7 +94,7 @@ general:
 - example patches and MPW builds for MaxMSP@MacOS
 
 features:
-- crossfading loop zone for xgroove~
+- crossfading loop zone for xplay~ and xgroove~
 - multi-buffer handling (aka multi-channel for pd)
 - vasp handling
 - performance comparison to respective PD/Max objects
