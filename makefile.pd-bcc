@@ -1,5 +1,5 @@
 # xsample - extended sample objects for Max/MSP and pd (pure data)
-# Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
+# Copyright (c) 2001-2004 Thomas Grill (xovo@gmx.net)
 #
 # Makefile for BorlandC++ 
 #
@@ -9,7 +9,9 @@
 
 !include config-pd-bcc.txt
 
-NAME=xsample
+# all the source files from the package
+!include make-files.txt
+
 SETUPFUNCTION=$(NAME)_setup
 
 # flext stuff
@@ -22,14 +24,11 @@ LIBS=cw32.lib import32.lib C0D32.OBJ
 
 # compiler definitions and flags
 DEFS=-DFLEXT_SYS=2
-CFLAGS=-6 -O2 -OS -ff -tWD 
+CFLAGS=-tWD $(UFLAGS)
 
 
 # the rest can stay untouched
 # ----------------------------------------------
-
-# all the source files from the package
-!include make-files.txt
 
 # default target
 all: $(OUTPATH)\$(NAME).dll

@@ -1,5 +1,5 @@
 # xsample - extended sample objects for Max/MSP and pd (pure data)
-# Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
+# Copyright (c) 2001-2004 Thomas Grill (xovo@gmx.net)
 #
 
 # where is PD?
@@ -19,3 +19,6 @@ INSTALL=yes
 
 # where should the external be installed?
 INSTDIR=$(PDPATH)\extra
+
+# additional compiler flags
+UFLAGS=-6 -O2 -OS -ff 
