@@ -223,9 +223,12 @@ V xsample::m_dsp(I /*n*/,S *const * /*insigs*/,S *const * /*outsigs*/)
 	if(!m_refresh()) s_dsp();
 }
 
-
+/*
 V xsample::arrscale(I n,const S *src,S *dst,S add,S mul)
 {
+#if 1
+    flext::ScaleSamples(dst,src,mul,add*mul,n);
+#else
 	int n8 = n>>3;
 	n -= n8<<3;
 	while(n8--) {
@@ -241,10 +244,14 @@ V xsample::arrscale(I n,const S *src,S *dst,S add,S mul)
 	}
 	
 	while(n--) *(dst++) = (*(src++)+add)*mul; 
+#endif
 }
 
 V xsample::arrmul(I n,const S *src,S *dst,S mul)
 {
+#if 1
+    flext::MulSamples(dst,src,mul,n);
+#else
 	int n8 = n>>3;
 	n -= n8<<3;
 	while(n8--) {
@@ -260,8 +267,9 @@ V xsample::arrmul(I n,const S *src,S *dst,S mul)
 	}
 	
 	while(n--) *(dst++) = *(src++)*mul; 
+#endif
 }
-
+*/
 
 
 
