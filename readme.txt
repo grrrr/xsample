@@ -51,7 +51,7 @@ Goals/features of the package:
 Version history:
 
 0.2.2:
-- using flext 0.1.2
+- using flext 0.2.0
 - xrecord~ for PD: new flext brings better graphics update behavior
 - xrecord~: recording position doesn't jump to start when recording length is reached
 - fixed bug with refresh message (min/max reset)
@@ -59,7 +59,7 @@ Version history:
 - reset/refresh messages readjust dsp routines to current buffer format (e.g. channel count)
 - corrected Max/MSP assist method for multi-channel
 - fixed xplay~ help method 
-- changed syntax to x*~ [channels=1] [buffer] 
+- changed syntax to x*~ [channels=1] [buffer] for future enhancements
 
 0.2.1:
 - no leftmost float inlet for position setting - use pos method
