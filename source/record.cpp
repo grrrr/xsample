@@ -56,7 +56,7 @@ protected:
 	BL dorec,doloop,mixmode;
 	L curpos;  // in samples
 
-	t_outlet *outmin,*outmax; // float outlets	
+	outlet *outmin,*outmax; // float outlets	
 	
 	V outputmin() { to_out_float(outmin,curmin*s2u); }
 	V outputmax() { to_out_float(outmax,curmax*s2u); }
