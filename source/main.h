@@ -135,11 +135,13 @@ private:
 #ifdef SIGSTATIC
 	#ifdef TMPLOPT
 		#define TMPLFUN(FUN,BCHNS,IOCHNS) &thisType::st_##FUN<BCHNS,IOCHNS>
+		#define TMPLSTF(FUN,BCHNS,IOCHNS) &thisType::FUN<BCHNS,IOCHNS>
 		#define SIGFUN(FUN) &thisType::st_##FUN
 		#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
 		#define TMPLCALL <_BCHNS_,_IOCHNS_>
 	#else
 		#define TMPLFUN(FUN,BCHNS,IOCHNS) &thisType::st_##FUN
+		#define TMPLSTF(FUN,BCHNS,IOCHNS) &thisType::FUN
 		#define SIGFUN(FUN) &thisType::st_##FUN
 		#define TMPLDEF 
 		#define TMPLCALL
@@ -153,11 +155,18 @@ private:
 	TMPLDEF static V st_##NAME(thisType *obj,I n,S *const *in,S *const *out)  { obj->NAME TMPLCALL (n,in,out); } \
 	TMPLDEF V NAME(I n,S *const *in,S *const *out)
 
+	#define TMPLSTFUN(NAME) TMPLDEF static V NAME(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
+
+	#define SETSTFUN(VAR,FUN) VAR = FUN
 
 	#define DEFSIGCALL(NAME) \
 	inline V NAME(I n,S *const *in,S *const *out) { (*v_##NAME)(this,n,in,out); } \
 	V (*v_##NAME)(thisType *obj,I n,S *const *in,S *const *out) 
+
+	#define DEFSTCALL(NAME) \
+	V (*NAME)(const S *bdt,const I smin,const I smax,const F s2u,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
 
 #else
 	#ifdef TMPLOPT
@@ -171,6 +180,8 @@ private:
 		#define TMPLDEF 
 		#define TMPLCALL
 	#endif
+	
+	#define TMPLSTF(FUN,BCHNS,IOCHNS) TMPLFUN(FUN,BCHNS,IOCHNS) 
 
 	#define DEFSIGFUN(NAME)	V NAME(I n,S *const *in,S *const *out)
 	#define TMPLSIGFUN(NAME) TMPLDEF V NAME(I n,S *const *in,S *const *out)

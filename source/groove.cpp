@@ -272,7 +272,7 @@ V xgroove::m_xsymm(F xs)
 
 V xgroove::m_xshape(I argc,t_atom *argv) 
 { 
-	const F PI = 3.14159265358979F;
+	const F pi = 3.14159265358979f;
 	I i,sh = 0;
 	F param = 1;
 	if(argc >= 1 && CanbeInt(argv[0])) sh = GetAInt(argv[0]);
@@ -289,7 +289,7 @@ V xgroove::m_xshape(I argc,t_atom *argv)
 	switch(sh) {
 	case 1:
 		for(i = 0; i <= XZONE_TABLE; ++i) 
-			znmul[i] = sin(i*(PI/2./XZONE_TABLE))*param+i*(1./XZONE_TABLE)*(1-param);
+			znmul[i] = sin(i*(pi/2./XZONE_TABLE))*param+i*(1./XZONE_TABLE)*(1-param);
 		break;
 	case 0:
 	default:
@@ -575,24 +575,24 @@ V xgroove::s_dsp()
 
 				if(interp == xsi_4p) 
 					switch(outchns) {
-						case 1:	SETSTFUN(zonefun,TMPLFUN(st_play4,1,1)); break;
-						case 2:	SETSTFUN(zonefun,TMPLFUN(st_play4,1,2)); break;
-						case 4:	SETSTFUN(zonefun,TMPLFUN(st_play4,1,4)); break;
-						default: SETSTFUN(zonefun,TMPLFUN(st_play4,1,-1));
+						case 1:	SETSTFUN(zonefun,TMPLSTF(st_play4,1,1)); break;
+						case 2:	SETSTFUN(zonefun,TMPLSTF(st_play4,1,2)); break;
+						case 4:	SETSTFUN(zonefun,TMPLSTF(st_play4,1,4)); break;
+						default: SETSTFUN(zonefun,TMPLSTF(st_play4,1,-1));
 					}
 				else if(interp == xsi_lin) 
 					switch(outchns) {
-						case 1:	SETSTFUN(zonefun,TMPLFUN(st_play2,1,1)); break;
-						case 2:	SETSTFUN(zonefun,TMPLFUN(st_play2,1,2)); break;
-						case 4:	SETSTFUN(zonefun,TMPLFUN(st_play2,1,4)); break;
-						default: SETSTFUN(zonefun,TMPLFUN(st_play2,1,-1));
+						case 1:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,1)); break;
+						case 2:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,2)); break;
+						case 4:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,4)); break;
+						default: SETSTFUN(zonefun,TMPLSTF(st_play2,1,-1));
 					}
 				else 
 					switch(outchns) {
-						case 1:	SETSTFUN(zonefun,TMPLFUN(st_play1,1,1)); break;
-						case 2:	SETSTFUN(zonefun,TMPLFUN(st_play1,1,2)); break;
-						case 4:	SETSTFUN(zonefun,TMPLFUN(st_play1,1,4)); break;
-						default: SETSTFUN(zonefun,TMPLFUN(st_play1,1,-1));
+						case 1:	SETSTFUN(zonefun,TMPLSTF(st_play1,1,1)); break;
+						case 2:	SETSTFUN(zonefun,TMPLSTF(st_play1,1,2)); break;
+						case 4:	SETSTFUN(zonefun,TMPLSTF(st_play1,1,4)); break;
+						default: SETSTFUN(zonefun,TMPLSTF(st_play1,1,-1));
 					}
 			}
 			else

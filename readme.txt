@@ -66,6 +66,7 @@ Goals/features of the package:
 Version history:
 
 0.2.5:
+- added resources to MaxMSP build
 - xgroove~, xrecord~: introduced a loop/end bang outlet 
 - added MaxMSP buffer resize recognition
 - xgroove~: introduced a crossfading loop zone
