@@ -32,7 +32,9 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	#define TMPLOPT 
 #elif defined(__GNUC__)
 // GNUC 2.95.2 dies at compile with <int,int> templates
-//	#define TMPLOPT  // only workable with gcc >= 3.0
+#if __GNUC__ >= 3
+	#define TMPLOPT  // only workable with gcc >= 3.0
+#endif
 #elif defined(__MWERKS__)
 // CodeWarrior can't take address of a template member function 
 	#define TMPLOPT

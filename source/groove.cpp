@@ -338,13 +338,13 @@ V xgroove::do_xzone()
 			else if(o1 < 0) {
 				// min point is out of bounds (but enough space for mere shift)
 				I i1 = (I)o1;
-				smin -= o1,smax -= o1;
+				smin -= i1,smax -= i1;
 				znmin = smin+xzone*xsymm,znmax = smax+xzone*(xsymm-1);
 			}
 			else /* o2 < 0 */ { 
 				// max point is out of bounds (but enough space for mere shift)
 				I i2 = (I)o2;
-				smin += o2,smax += o2;
+				smin += i2,smax += i2;
 				znmin = smin+xzone*xsymm,znmax = smax+xzone*(xsymm-1);
 			}
 		}

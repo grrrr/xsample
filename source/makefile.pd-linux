@@ -14,7 +14,7 @@
 FLEXTPATH=/usr/local/lib/pd/flext
 
 # pd path 
-PDPATH=/usr/local/lib/pd/include
+#PDPATH=/usr/local/lib/pd/include
 
 # where to install  
 INSTDIR=/usr/local/lib/pd/extra
@@ -27,6 +27,7 @@ FLEXTLIB=$(FLEXTPATH)/flext.a
 TARGDIR=../pd-linux
 
 # compiler stuff
+CXX=g++-3.2
 INCLUDES=$(PDPATH)
 FLAGS=-DPD
 CFLAGS=-O6 -mcpu=pentiumpro -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions
