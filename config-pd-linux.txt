@@ -4,7 +4,6 @@
 
 # your c++ compiler (if not g++)
 #CXX=g++
-CXX=g++-3.2
 
 # where does the PD installation reside?
 PD=/usr/local/lib/pd
