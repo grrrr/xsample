@@ -11,7 +11,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #ifndef __XSAMPLE_H
 #define __XSAMPLE_H
 
-#define XSAMPLE_VERSION "0.2.4"
+#define XSAMPLE_VERSION "0.2.5pre"
 
  
 #include <flext.h>
