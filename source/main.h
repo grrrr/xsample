@@ -2,7 +2,7 @@
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001-2004 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -12,7 +12,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #define __XSAMPLE_H
 
 
-#define XSAMPLE_VERSION "0.3.0pre16"
+#define XSAMPLE_VERSION "0.3.0pre17"
 
 
 #define FLEXT_ATTRIBUTES 1 
@@ -161,7 +161,7 @@ protected:
 
 	BL bufchk();
 
-	V mg_buffer(AtomList &l) { if(buf) { l(1); SetSymbol(l[0],buf->Symbol()); } else l(); }
+	V mg_buffer(AtomList &l) { if(buf && buf->Symbol()) { l(1); SetSymbol(l[0],buf->Symbol()); } else l(); }
 	inline V ms_buffer(const AtomList &l) { m_set(l.Count(),l.Atoms()); }
 
 	inline V mg_min(F &v) const { v = curmin*s2u; }

@@ -2,7 +2,7 @@
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001-2004 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -806,7 +806,7 @@ V xgroove::m_help()
 #ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2003");
+	post("(C) Thomas Grill, 2001-2004");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
