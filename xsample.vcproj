@@ -148,7 +148,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="f:\prog\pd\pd-cvs\src,f:\prog\packs\pthreads;..\flext\source"
+				AdditionalIncludeDirectories="&quot;c:\data\prog\pd\pd-cvs\src&quot;;c:\data\prog\packs\pthreads;..\flext\source"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -165,7 +165,7 @@
 				OutputFile="$(outdir)\xsample.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="f:\prog\pd\pd-cvs\bin;..\flext\pd-msvc"
+				AdditionalLibraryDirectories="&quot;c:\data\prog\pd\pd-cvs\bin&quot;;&quot;..\flext\pd-msvc&quot;"
 				ImportLibrary=".\pd-msvc\s/xsample.lib"
 				TargetMachine="1"/>
 			<Tool
