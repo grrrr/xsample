@@ -598,7 +598,7 @@ V xgroove::s_dsp()
 		case xsl_once: SETSIGFUN(posfun,SIGFUN(s_pos_once)); break;
 		case xsl_loop: 
 			if(_xzone > 0) {
-                // xzone might not be set yet
+                // xzone might not be set yet (is done in do_xzone() )
 
 				const I blksz = Blocksize();
 
@@ -619,31 +619,12 @@ V xgroove::s_dsp()
 				SETSIGFUN(posfun,SIGFUN(s_pos_loopzn)); 
 
 				// linear interpolation should be just ok for fade zone, no?
-/*
-				if(interp == xsi_4p) 
-					switch(outchns) {
-						case 1:	SETSTFUN(zonefun,TMPLSTF(st_play4,1,1)); break;
-						case 2:	SETSTFUN(zonefun,TMPLSTF(st_play4,1,2)); break;
-						case 4:	SETSTFUN(zonefun,TMPLSTF(st_play4,1,4)); break;
-						default: SETSTFUN(zonefun,TMPLSTF(st_play4,1,-1));
-					}
-				else if(interp == xsi_lin) 
-*/
-					switch(outchns) {
-						case 1:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,1)); break;
-						case 2:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,2)); break;
-						case 4:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,4)); break;
-						default: SETSTFUN(zonefun,TMPLSTF(st_play2,1,-1));
-					}
-/*
-				else 
-					switch(outchns) {
-						case 1:	SETSTFUN(zonefun,TMPLSTF(st_play1,1,1)); break;
-						case 2:	SETSTFUN(zonefun,TMPLSTF(st_play1,1,2)); break;
-						case 4:	SETSTFUN(zonefun,TMPLSTF(st_play1,1,4)); break;
-						default: SETSTFUN(zonefun,TMPLSTF(st_play1,1,-1));
-					}
-*/
+				switch(outchns) {
+					case 1:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,1)); break;
+					case 2:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,2)); break;
+					case 4:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,4)); break;
+					default: SETSTFUN(zonefun,TMPLSTF(st_play2,1,-1));
+				}
 			}
 			else
 				SETSIGFUN(posfun,SIGFUN(s_pos_loop)); 
