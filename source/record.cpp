@@ -16,14 +16,14 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 
-class xrec_obj:
-	public xs_obj
+class xrecord:
+	public xsample
 {
-	FLEXT_HEADER(xrec_obj,xs_obj)
+	FLEXT_HEADER(xrecord,xsample)
 
 public:
-	xrec_obj(I argc,t_atom *argv);
-	~xrec_obj();
+	xrecord(I argc,t_atom *argv);
+	~xrecord();
 	
 #ifdef MAXMSP
 	virtual V m_loadbang() { m_refresh();	}
@@ -95,9 +95,9 @@ private:
 };
 
 
-FLEXT_NEW_WITH_GIMME("xrecord~",xrec_obj)
+FLEXT_NEW_WITH_GIMME("xrecord~",xrecord)
 
-V xrec_obj::cb_setup(t_class *c)
+V xrecord::cb_setup(t_class *c)
 {
 	add_float2(c,cb_min);
 	add_float3(c,cb_max);
@@ -118,7 +118,7 @@ V xrec_obj::cb_setup(t_class *c)
 	add_methodG(c,cb_draw,"draw");
 }
 
-xrec_obj::xrec_obj(I argc,t_atom *argv):
+xrecord::xrecord(I argc,t_atom *argv):
 	dorec(false),
 	sigmode(false),mixmode(false),
 	appmode(true),doloop(false),
@@ -137,29 +137,6 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 	inchns = 1;
 #endif
 
-/*
-#ifdef PD
-	I ci;
-	for(ci = 0; ci < inchns; ++ci)
-    	inlet_new(x_obj, &x_obj->ob_pd, &s_signal, &s_signal);  // sound in
-    	
-    inlet_new(x_obj, &x_obj->ob_pd, &s_float, gensym("ft2"));  
-    inlet_new(x_obj, &x_obj->ob_pd, &s_float, gensym("ft3"));  
-
-	newout_signal(x_obj);
-	outmin = newout_float(x_obj);
-	outmax = newout_float(x_obj);
-#elif defined(MAXMSP)
-	// inlets and outlets set up in reverse
-	floatin(x_obj,3);  // max record pos
-	floatin(x_obj,2);  // min record pos
-	dsp_setup(x_obj,inchns+1); // sound and on/off signal in
-
-	outmax = newout_float(x_obj);  // max record out
-	outmin = newout_float(x_obj);  // min record out
-	newout_signal(x_obj);  // pos signal out
-#endif
-*/
 	Inlet_signal(inchns);  // audio signals
 	Inlet_signal(); // on/off signal
 	Inlet_float(2);  // min & max
@@ -174,38 +151,38 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 	m_reset();
 }
 
-xrec_obj::~xrec_obj()
+xrecord::~xrecord()
 {
 	if(buf) delete buf;
 	if(invecs) delete[] invecs;
 }
 
 
-V xrec_obj::m_units(xs_unit mode)
+V xrecord::m_units(xs_unit mode)
 {
-	xs_obj::m_units(mode);
+	xsample::m_units(mode);
 
 	m_sclmode();
 	outputmin();
 	outputmax();
 }
 
-V xrec_obj::m_min(F mn)
+V xrecord::m_min(F mn)
 {
-	xs_obj::m_min(mn);
+	xsample::m_min(mn);
 	m_pos(curpos);
 	outputmin();
 }
 
-V xrec_obj::m_max(F mx)
+V xrecord::m_max(F mx)
 {
-	xs_obj::m_max(mx);
+	xsample::m_max(mx);
 	m_pos(curpos);
 	outputmax();
 }
 
 
-V xrec_obj::m_pos(F pos)
+V xrecord::m_pos(F pos)
 {
 	curpos = (L)(pos/s2u+.5);
 	if(curpos < curmin) curpos = curmin;
@@ -213,22 +190,22 @@ V xrec_obj::m_pos(F pos)
 }
 
 
-I xrec_obj::m_set(I argc,t_atom *argv)
+I xrecord::m_set(I argc,t_atom *argv)
 {
-	I r = xs_obj::m_set(argc,argv);
+	I r = xsample::m_set(argc,argv);
 	if(r < 0) m_reset(); // resets pos/min/max
 	if(r != 0) m_units();
 	return r;
 }
 
-V xrec_obj::m_start() 
+V xrecord::m_start() 
 { 
 	m_refresh(); 
 	dorec = true; 
 	buf->SetRefrIntv(drintv);
 }
 
-V xrec_obj::m_stop() 
+V xrecord::m_stop() 
 { 
 	dorec = false; 
 	if(!sigmode && !appmode) m_pos(0); 
@@ -236,13 +213,13 @@ V xrec_obj::m_stop()
 	buf->SetRefrIntv(0);
 }
 
-V xrec_obj::m_reset()
+V xrecord::m_reset()
 {
 	curpos = 0;
-	xs_obj::m_reset();
+	xsample::m_reset();
 }
 
-V xrec_obj::m_draw(I argc,t_atom *argv)
+V xrecord::m_draw(I argc,t_atom *argv)
 {
 	if(argc >= 1) {
 		drintv = atom_getflintarg(0,argc,argv);
@@ -255,15 +232,15 @@ V xrec_obj::m_draw(I argc,t_atom *argv)
 	
 #ifdef TMPLOPT  
 template<int _BCHNS_,int _ICHNS_>  
-t_int *xrec_obj::dspmeth(t_int *w)
+t_int *xrecord::dspmeth(t_int *w)
 { 
-	((xrec_obj *)w[1])->signal<_BCHNS_,_ICHNS_>((I)w[2],(const F *)w[3],(F *)w[4]); 
+	((xrecord *)w[1])->signal<_BCHNS_,_ICHNS_>((I)w[2],(const F *)w[3],(F *)w[4]); 
 	return w+5;
 }
 #else
-t_int *xrec_obj::dspmeth(t_int *w)
+t_int *xrecord::dspmeth(t_int *w)
 { 
-	((xrec_obj *)w[1])->signal((I)w[2],(const F *)w[3],(F *)w[4]); 
+	((xrecord *)w[1])->signal((I)w[2],(const F *)w[3],(F *)w[4]); 
 	return w+5;
 }
 #endif
@@ -271,7 +248,7 @@ t_int *xrec_obj::dspmeth(t_int *w)
 #ifdef TMPLOPT  
 template<int _BCHNS_,int _ICHNS_>  
 #endif
-V xrec_obj::signal(I n,const F *on,F *pos)
+V xrecord::signal(I n,const F *on,F *pos)
 {
 	if(enable) {	
 		// optimizer should recognize whether constant or not
@@ -414,7 +391,7 @@ V xrec_obj::signal(I n,const F *on,F *pos)
 	}
 }
 
-V xrec_obj::m_dsp(t_signal **sp)
+V xrecord::m_dsp(t_signal **sp)
 {
 	m_refresh();  // m_dsp hopefully called at change of sample rate ?!
 
@@ -457,7 +434,7 @@ V xrec_obj::m_dsp(t_signal **sp)
 
 
 
-V xrec_obj::m_help()
+V xrecord::m_help()
 {
 	post("%s - part of xsample objects",thisName());
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
@@ -491,7 +468,7 @@ V xrec_obj::m_help()
 	post("");
 }
 
-V xrec_obj::m_print()
+V xrecord::m_print()
 {
 	static const C sclmode_txt[][20] = {"units","units in loop","buffer","loop"};
 
@@ -505,7 +482,7 @@ V xrec_obj::m_print()
 
 
 #ifdef MAXMSP
-V xrec_obj::m_assist(L msg,L arg,C *s)
+V xrecord::m_assist(L msg,L arg,C *s)
 {
 	switch(msg) {
 	case 1: //ASSIST_INLET:
@@ -553,7 +530,7 @@ FLEXT_EXT V xrecord_tilde_setup()
 V main()
 #endif
 {
-	xrec_obj_setup();
+	xrecord_setup();
 }
 #ifdef __cplusplus
 }

@@ -18,14 +18,14 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 //#define DEBUG 
 
-class xgroove_obj:
-	public xs_obj
+class xgroove:
+	public xsample
 {
-	FLEXT_HEADER(xgroove_obj,xs_obj)
+	FLEXT_HEADER(xgroove,xsample)
 
 public:
-	xgroove_obj(I argc,t_atom *argv);
-	~xgroove_obj();
+	xgroove(I argc,t_atom *argv);
+	~xgroove();
 
 #ifdef MAXMSP
 	virtual V m_loadbang() { m_refresh(); }
@@ -87,9 +87,9 @@ private:
 
 
 
-FLEXT_NEW_WITH_GIMME("xgroove~",xgroove_obj)
+FLEXT_NEW_WITH_GIMME("xgroove~",xgroove)
 
-V xgroove_obj::cb_setup(t_class *c)
+V xgroove::cb_setup(t_class *c)
 {
 	add_float1(c,cb_min);
 	add_float2(c,cb_max);
@@ -105,7 +105,7 @@ V xgroove_obj::cb_setup(t_class *c)
 	add_method1(c,cb_pos, "pos", A_FLOAT);	
 }
 
-xgroove_obj::xgroove_obj(I argc,t_atom *argv):
+xgroove::xgroove(I argc,t_atom *argv):
 	doplay(false),doloop(true),
 	curpos(0),
 	outvecs(NULL)
@@ -122,29 +122,6 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 	outchns = 1;
 #endif
 
-/*
-#ifdef PD	
-    inlet_new(x_obj, &x_obj->ob_pd, &s_float, gensym("ft1"));  // min play pos
-    inlet_new(x_obj, &x_obj->ob_pd, &s_float, gensym("ft2"));  // max play pos
-    
-	int ci;
-	for(ci = 0; ci < outchns; ++ci) newout_signal(x_obj); // output
-	newout_signal(x_obj); // position
-	outmin = newout_float(x_obj); // play min
-	outmax = newout_float(x_obj); // play max
-#elif defined(MAXMSP)
-	// set up inlets and outlets in reverse
-	floatin(x_obj,2);  // max play pos
-	floatin(x_obj,1);  // min play pos
-	dsp_setup(x_obj,1); // speed sig
-	
-	outmax = newout_float(x_obj); // play max
-	outmin = newout_float(x_obj); // play min
-	newout_signal(x_obj); // position signal
-	int ci;
-	for(ci = 0; ci < outchns; ++ci) newout_signal(x_obj); // output
-#endif
-*/
 	Inlet_signal(); // speed signal
 	Inlet_float(2); // min & max play pos
 	Outlet_signal(outchns); // output
@@ -160,82 +137,82 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 	m_reset();
 }
 
-xgroove_obj::~xgroove_obj()
+xgroove::~xgroove()
 {
 	if(buf) delete buf;
 	if(outvecs) delete[] outvecs;
 }
 
 
-V xgroove_obj::m_units(xs_unit mode)
+V xgroove::m_units(xs_unit mode)
 {
-	xs_obj::m_units(mode);
+	xsample::m_units(mode);
 	
 	m_sclmode();
 	outputmin();
 	outputmax();
 }
 
-V xgroove_obj::m_min(F mn)
+V xgroove::m_min(F mn)
 {
-	xs_obj::m_min(mn);
+	xsample::m_min(mn);
 	m_pos(curpos);
 	outputmin();
 }
 
-V xgroove_obj::m_max(F mx)
+V xgroove::m_max(F mx)
 {
-	xs_obj::m_max(mx);
+	xsample::m_max(mx);
 	m_pos(curpos);
 	outputmax();
 }
 
 
-V xgroove_obj::m_pos(F pos)
+V xgroove::m_pos(F pos)
 {
 	curpos = pos/s2u;
 	if(curpos < curmin) curpos = curmin;
 	else if(curpos > curmax) curpos = curmax;
 }
 
-I xgroove_obj::m_set(I argc,t_atom *argv)
+I xgroove::m_set(I argc,t_atom *argv)
 {
-	I r = xs_obj::m_set(argc,argv);
+	I r = xsample::m_set(argc,argv);
 	if(r < 0) m_reset(); // resets pos/min/max
 	if(r != 0) m_units(); 
 	return r;
 }
 
-V xgroove_obj::m_start() 
+V xgroove::m_start() 
 { 
 	m_refresh(); 
 	doplay = true; 
 }
 
-V xgroove_obj::m_stop() 
+V xgroove::m_stop() 
 { 
 	doplay = false; 
 }
 
-V xgroove_obj::m_reset()
+V xgroove::m_reset()
 {
 	curpos = 0;
-	xs_obj::m_reset();
+	xsample::m_reset();
 }
 
 
 
 #ifdef TMPLOPT
 template <int _BCHNS_,int _OCHNS_>
-t_int *xgroove_obj::dspmeth(t_int *w) 
+t_int *xgroove::dspmeth(t_int *w) 
 { 
-	((xgroove_obj *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3],(F *)w[4]); 
+	((xgroove *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3],(F *)w[4]); 
 	return w+5;
 }
 #else
-t_int *xgroove_obj::dspmeth(t_int *w) 
+t_int *xgroove::dspmeth(t_int *w) 
 { 
-	((xgroove_obj *)w[1])->signal((I)w[2],(const F *)w[3],(F *)w[4]); 
+	((xgroove *)w[1])->signal((I)w[2],(const F *)w[3],(F *)w[4]); 
 	return w+5;
 }
 #endif
@@ -247,7 +224,7 @@ t_int *xgroove_obj::dspmeth(t_int *w)
 #ifdef TMPLOPT
 template <int _BCHNS_,int _OCHNS_>
 #endif
-V xgroove_obj::signal(I n,const F *speed,F *pos)
+V xgroove::signal(I n,const F *speed,F *pos)
 {
 	if(enable) {    
 #ifdef TMPLOPT
@@ -410,7 +387,7 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 	}   
 }
 
-V xgroove_obj::m_dsp(t_signal **sp)
+V xgroove::m_dsp(t_signal **sp)
 {
 	m_refresh();  // m_dsp hopefully called at change of sample rate ?!
 
@@ -450,7 +427,7 @@ V xgroove_obj::m_dsp(t_signal **sp)
 }
 
 
-V xgroove_obj::m_help()
+V xgroove::m_help()
 {
 	post("%s - part of xsample objects",thisName());
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
@@ -481,7 +458,7 @@ V xgroove_obj::m_help()
 	post("");
 }
 
-V xgroove_obj::m_print()
+V xgroove::m_print()
 {
 	static const C sclmode_txt[][20] = {"units","units in loop","buffer","loop"};
 
@@ -494,7 +471,7 @@ V xgroove_obj::m_print()
 }
 
 #ifdef MAXMSP
-V xgroove_obj::m_assist(long msg, long arg, char *s)
+V xgroove::m_assist(long msg, long arg, char *s)
 {
 	switch(msg) {
 	case 1: //ASSIST_INLET:
@@ -540,7 +517,7 @@ FLEXT_EXT V xgroove_tilde_setup()
 V main()
 #endif
 {
-	xgroove_obj_setup();
+	xgroove_setup();
 }
 #ifdef __cplusplus
 }

@@ -39,8 +39,8 @@ $(OUTPATH)\pd.lib: $(PDPATH)\bin\pd.dll
 $(NAME).dll:: $(OUTPATH)\pd.lib 
 
 $(NAME).dll:: $(OBJ) 
-	cd $(OUTPATH)
-	echo EXPORTS xsample_setup = _xsample_setup > xsample.def
+	@cd $(OUTPATH)
+	@echo EXPORTS xsample_setup = _xsample_setup > xsample.def
 	ilink32 -Tpd $(LIBPATH) $** ,$.,,$(LIBS) $(OUTPATH)\pd.lib ..\$(FLEXTPATH)\bcc\flext-$(TARGET).lib,xsample.def
 
 all: $(NAME).dll

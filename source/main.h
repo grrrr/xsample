@@ -30,13 +30,13 @@ FLEXT_EXT V xgroove_tilde_setup();
 #endif
 
 
-class xs_obj:
+class xsample:
 	public flext_dsp
 {
-	FLEXT_HEADER(xs_obj,flext_dsp)
+	FLEXT_HEADER(xsample,flext_dsp)
 	
 public:
-	xs_obj();
+	xsample();
 	
 	enum xs_unit {
 		xsu__ = -1,  // don't change

@@ -18,14 +18,14 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 //#define DEBUG 
 
 
-class xplay_obj:
-	public xs_obj
+class xplay:
+	public xsample
 {
-	FLEXT_HEADER(xplay_obj,xs_obj)
+	FLEXT_HEADER(xplay,xsample)
 
 public:
-	xplay_obj(I argc, t_atom *argv);
-	~xplay_obj();
+	xplay(I argc, t_atom *argv);
+	~xplay();
 	
 #ifdef MAXMSP
 	virtual V m_loadbang() { m_refresh(); }
@@ -63,10 +63,10 @@ private:
 	static t_int *dspmeth(t_int *w); 
 };
 
-FLEXT_NEW_WITH_GIMME("xplay~",xplay_obj)
+FLEXT_NEW_WITH_GIMME("xplay~",xplay)
 
 
-V xplay_obj::cb_setup(t_class *c)
+V xplay::cb_setup(t_class *c)
 {
 	add_bang(c,cb_start);
 	add_method0(c,cb_start,"start");
@@ -74,7 +74,7 @@ V xplay_obj::cb_setup(t_class *c)
 }
 
 
-xplay_obj::xplay_obj(I argc, t_atom *argv): 
+xplay::xplay(I argc, t_atom *argv): 
 	doplay(false),outvecs(NULL)
 {
 #ifdef DEBUG
@@ -84,17 +84,10 @@ xplay_obj::xplay_obj(I argc, t_atom *argv):
 #endif
 	
 #ifdef MAXMSP
-//	dsp_setup(x_obj,1); // pos signal in
 	outchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
 #else
 	outchns = 1;
 #endif
-
-/*
-	int ci;
-	for(ci = 0; ci < outchns; ++ci)
-		newout_signal(x_obj); // output
-*/
 
 	Inlet_signal();  // pos signal
 	Outlet_signal(outchns);
@@ -104,26 +97,26 @@ xplay_obj::xplay_obj(I argc, t_atom *argv):
 	m_reset();
 }
 
-xplay_obj::~xplay_obj()
+xplay::~xplay()
 {
 	if(buf) delete buf;
 	if(outvecs) delete[] outvecs;
 }
 
-I xplay_obj::m_set(I argc,t_atom *argv) 
+I xplay::m_set(I argc,t_atom *argv) 
 {
-	I r = xs_obj::m_set(argc,argv);
+	I r = xsample::m_set(argc,argv);
 	if(r != 0) m_units();
 	return r;
 }
 
-V xplay_obj::m_start() 
+V xplay::m_start() 
 { 
 	m_refresh(); 
 	doplay = true; 
 }
 
-V xplay_obj::m_stop() 
+V xplay::m_stop() 
 { 
 	doplay = false; 
 }
@@ -131,15 +124,15 @@ V xplay_obj::m_stop()
 
 #ifdef TMPLOPT
 template <int _BCHNS_,int _OCHNS_>
-t_int *xplay_obj::dspmeth(t_int *w) 
+t_int *xplay::dspmeth(t_int *w) 
 { 
-	((xplay_obj *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3]); 
+	((xplay *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3]); 
 	return w+4;
 }
 #else
-t_int *xplay_obj::dspmeth(t_int *w) 
+t_int *xplay::dspmeth(t_int *w) 
 { 
-	((xplay_obj *)w[1])->signal((I)w[2],(const F *)w[3]); 
+	((xplay *)w[1])->signal((I)w[2],(const F *)w[3]); 
 	return w+4;
 }
 #endif
@@ -148,7 +141,7 @@ t_int *xplay_obj::dspmeth(t_int *w)
 #ifdef TMPLOPT
 template <int _BCHNS_,int _OCHNS_>
 #endif
-V xplay_obj::signal(I n,const F *pos)
+V xplay::signal(I n,const F *pos)
 {
 	if(enable) {
 #ifdef TMPLOPT
@@ -238,7 +231,7 @@ V xplay_obj::signal(I n,const F *pos)
 	}
 }
 
-V xplay_obj::m_dsp(t_signal **sp)
+V xplay::m_dsp(t_signal **sp)
 {
 	m_refresh();  // m_dsp hopefully called at change of sample rate ?!
 
@@ -279,7 +272,7 @@ V xplay_obj::m_dsp(t_signal **sp)
 
 
 
-V xplay_obj::m_help()
+V xplay::m_help()
 {
 	post("%s - part of xsample objects",thisName());
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
@@ -304,7 +297,7 @@ V xplay_obj::m_help()
 	post("");
 }
 
-V xplay_obj::m_print()
+V xplay::m_print()
 {
 	// print all current settings
 	post("%s - current settings:",thisName());
@@ -315,7 +308,7 @@ V xplay_obj::m_print()
 
 
 #ifdef MAXMSP
-V xplay_obj::m_assist(L msg,L arg,C *s)
+V xplay::m_assist(L msg,L arg,C *s)
 {
 	switch(msg) {
 	case 1: //ASSIST_INLET:
@@ -347,7 +340,7 @@ FLEXT_EXT V xplay_tilde_setup()
 V main()
 #endif
 {
-	xplay_obj_setup();
+	xplay_setup();
 }
 #ifdef __cplusplus
 }
