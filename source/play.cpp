@@ -168,7 +168,7 @@ V xplay_obj::signal(I n,const F *pos)
 
 				for(I i = 0; i < n; ++i,++si) {	
 					F o = *(pos++)/s2u;
-					I oint = o;
+					I oint = (I)o;
 					register F a,b,c,d;
 
 					for(I ci = 0; ci < OCHNS; ++ci) {
@@ -214,7 +214,7 @@ V xplay_obj::signal(I n,const F *pos)
 			else {
 				// keine Interpolation
 				for(I i = 0; i < n; ++i,++si) {	
-					I o = *(pos++)/s2u;
+					I o = (I)(*(pos++)/s2u);
 					if(o < 0) {
 						for(I ci = 0; ci < OCHNS; ++ci)
 							sig[ci][si] = buf->Data()[0*BCHNS+ci];
@@ -354,3 +354,4 @@ V main()
 #ifdef __cplusplus
 }
 #endif
+

@@ -281,7 +281,7 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 
 					*(pos++) = scale(o);
 
-					const I oint = o;
+					const I oint = (I)o;
 					register F a,b,c,d;
 
 					const F frac = o-oint;
@@ -380,7 +380,7 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 
 						*(pos++) = scale(o);
 
-						const I oint = o;
+						const I oint = (I)o;
 						if(oint < smin) {
 							for(I ci = 0; ci < OCHNS; ++ci)
 								sig[ci][si] = buf->Data()[smin*BCHNS+ci];
@@ -548,4 +548,5 @@ V main()
 #ifdef __cplusplus
 }
 #endif
+
 
