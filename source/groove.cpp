@@ -159,7 +159,9 @@ S xgroove::fade_lin[XZONE_TABLE+1];
 S xgroove::fade_qsine[XZONE_TABLE+1];
 S xgroove::fade_hsine[XZONE_TABLE+1];
 
+#ifndef PI
 #define PI 3.14159265358979f
+#endif
 
 V xgroove::setup(t_classid c)
 {
@@ -709,7 +711,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 		}
 	
 		// rescale position vector
-		arrscale(n,pos,pos);
+		arrscale(n,pos,pos,(xz*0.5-sclmin)*sclmul,sclmul);
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);
