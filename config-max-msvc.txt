@@ -15,6 +15,7 @@ FLEXTPATH="%CommonProgramFiles%\Cycling '74\flext"
 
 
 # where should the external be built?
+# (path for temporary files)
 OUTPATH=max-msvc
 
 # where should the external be installed?
@@ -23,4 +24,5 @@ INSTPATH="%CommonProgramFiles%\Cycling '74\externals\flext"
 
 
 # some user-definable flags
+# (check if they match your system!)
 UFLAGS=/G6 /arch:SSE
