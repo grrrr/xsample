@@ -222,12 +222,11 @@ protected:
 	virtual V m_start();
 	virtual V m_stop();
 
-	virtual V m_interp(xs_intp u = xsi__);
+	V m_interp(xs_intp mode = xsi__) { interp = mode; s_dsp(); }
 
 	I outchns;
 	BL doplay;	
 	xs_intp interp;
-
 
 	TMPLSIGFUN(s_play0);
 	TMPLSIGFUN(s_play1);

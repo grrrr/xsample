@@ -45,13 +45,6 @@ V xinter::m_stop()
 }
 
 
-V xinter::m_interp(xs_intp mode) 
-{ 
-	interp = mode; 
-	s_dsp(); 
-}
-
-
 TMPLDEF V xinter::s_play0(I n,S *const *invecs,S *const *outvecs)
 {
 	// stopped

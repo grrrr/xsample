@@ -24,6 +24,7 @@ class xgroove:
 
 public:
 	xgroove(I argc,t_atom *argv);
+	~xgroove();
 
 #ifdef MAXMSP
 	virtual V m_assist(L msg,L arg,C *s);
@@ -41,18 +42,23 @@ public:
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
 	
+	V m_xzone(F xz) { xzone = xz < 0?0:xz/s2u; s_dsp(); }
+	V m_xsymm(F xs) { xsymm = xs < -1?-1:(xs > 1?1:xs); }
+
 	enum xs_loop {
 		xsl__ = -1,  // don't change
 		xsl_once = 0,xsl_loop,xsl_bidir
 	};
 	
-	virtual V m_loop(xs_loop lp = xsl__);
+	V m_loop(xs_loop lp = xsl__);
 	
 protected:
 
 	xs_loop loopmode;
 	D curpos;  // in samples
 	I bidir;
+	F xzone,xsymm;
+	S *znbuf,*znmul;
 
 	outlet *outmin,*outmax; // float outlets	
 	
@@ -74,6 +80,7 @@ private:
 	DEFSIGFUN(s_pos_off);
 	DEFSIGFUN(s_pos_once);
 	DEFSIGFUN(s_pos_loop);
+	DEFSIGFUN(s_pos_loopzn);
 	DEFSIGFUN(s_pos_bidir);
 
 	DEFSIGCALL(posfun);
@@ -83,6 +90,9 @@ private:
 	FLEXT_CALLBACK(m_all)
 	FLEXT_CALLBACK_F(m_min)
 	FLEXT_CALLBACK_F(m_max)
+	
+	FLEXT_CALLBACK_F(m_xzone)
+	FLEXT_CALLBACK_F(m_xsymm)
 
 	FLEXT_CALLBACK_1(m_loop,xs_loop)
 };
@@ -100,7 +110,9 @@ V xgroove::setup(t_class *)
 */
 
 xgroove::xgroove(I argc,t_atom *argv):
-	loopmode(xsl_loop),curpos(0),bidir(1)
+	loopmode(xsl_loop),curpos(0),
+	xzone(0),xsymm(0),znbuf(NULL),znmul(NULL),
+	bidir(1)
 {
 	I argi = 0;
 #ifdef MAXMSP
@@ -141,12 +153,20 @@ xgroove::xgroove(I argc,t_atom *argv):
 	FLEXT_ADDMETHOD_(0,"all",m_all);
 	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
 
+	FLEXT_ADDMETHOD_F(0,"xzone",m_xzone);
+	FLEXT_ADDMETHOD_F(0,"xsymm",m_xsymm);
+
 	outmin = GetOut(outchns+1);
 	outmax = GetOut(outchns+2);
 	
 	m_reset();
 }
 
+xgroove::~xgroove()
+{
+	if(znbuf) delete[] znbuf;
+	if(znmul) delete[] znmul;
+}
 
 V xgroove::m_units(xs_unit mode)
 {
@@ -267,6 +287,39 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 		s_pos_off(n,invecs,outvecs);
 }
 
+V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
+{
+	const S *speed = invecs[0];
+	S *pos = outvecs[outchns];
+
+	const I smin = curmin,smax = curmax,plen = curlen;
+
+	if(buf && plen > 0) {
+		register D o = curpos;
+
+		for(I i = 0; i < n; ++i) {	
+			const S spd = speed[i];  // must be first because the vector is reused for output!
+
+			// normalize offset
+			if(o >= smax) 
+				o = fmod(o-smin,plen)+smin;
+			else if(o < smin) 
+				o = fmod(o-smin,plen)+smax; 
+
+			F o = scale(o);
+			pos[i] = offs;
+			o += spd;
+		}
+		// normalize and store current playing position
+		setpos(o);
+
+		playfun(n,&pos,outvecs); 
+	*/
+	} 
+	else 
+		s_pos_off(n,invecs,outvecs);
+}
+
 V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 {
 	const S *speed = invecs[0];
@@ -307,10 +360,23 @@ V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 
 V xgroove::s_dsp()
 {
+	if(znbuf) { 
+		delete[] znbuf; znbuf = NULL; 
+		delete[] znmul; znmul = NULL; 
+	}
+
 	if(doplay) {
 		switch(loopmode) {
 		case xsl_once: SETSIGFUN(posfun,SIGFUN(s_pos_once)); break;
-		case xsl_loop: SETSIGFUN(posfun,SIGFUN(s_pos_loop)); break;
+		case xsl_loop: 
+			if(xzone > 0) {
+				znbuf = new S[Blocksize()];
+				znmul = new S[Blocksize()];
+				SETSIGFUN(posfun,SIGFUN(s_pos_loopzn)); 
+			}
+			else
+				SETSIGFUN(posfun,SIGFUN(s_pos_loop)); 
+			break;
 		case xsl_bidir: SETSIGFUN(posfun,SIGFUN(s_pos_bidir)); break;
 		}
 	}
@@ -353,6 +419,8 @@ V xgroove::m_help()
 	post("\trefresh: checks buffer and refreshes outlets");
 	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
 	post("\tsclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
+	post("\txzone {unit}: length of loop crossfade zone");
+	post("\txsymm -1...1: symmetry of crossfade zone");
 	post("");
 } 
 
@@ -367,6 +435,7 @@ V xgroove::m_print()
 	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
 	post("out channels = %i, samples/unit = %.3f, scale mode = %s",outchns,(F)(1./s2u),sclmode_txt[sclmode]); 
 	post("loop = %s, interpolation = %s",loop_txt[(I)loopmode],interp_txt[interp >= xsi_none && interp <= xsi_lin?interp:xsi_none]); 
+	post("loop crossfade zone = %.3f, symmetry = %f",(F)(xzone*s2u),xsymm); 
 	post("");
 }
 
