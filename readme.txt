@@ -32,7 +32,9 @@ o Microsoft Visual C++ 6: use "xsample.dsp" project file - due to a compiler bug
 o GCC for linux: run "make -f makefile.pd-linux" - GCC 2.95.2 dies with template optimization turned on 
 
 - Max/MSP - MacOS:
-o Metrowerks CodeWarrior V6: use "xsample" project file - using dsp method redirection via static functions
+o Metrowerks CodeWarrior V6: use "xsample.cw" project file - using dsp method redirection via static functions
+o Apple MPW-PR with STLPort: edit & use the "flext.mpw" makefile
+
 
 ----------------------------------------------------------------------------
 

@@ -441,28 +441,28 @@ V xrecord::m_assist(L msg,L arg,C *s)
 	case 1: //ASSIST_INLET:
 		if(arg < inchns) {
 			if(arg) 
-				strcpy(s,"Messages and Audio channel 1"); 
+				sprintf(s,"Messages and Audio channel 1"); 
 			else
 				sprintf(s,"Audio channel %li",arg+1); 
 		}
 		else
 			switch(arg-inchns) {
 			case 0:
-				strcpy(s,"On/Off/Fade/Mix signal (0..1)"); break;
+				sprintf(s,"On/Off/Fade/Mix signal (0..1)"); break;
 			case 1:
-				strcpy(s,"Starting point of recording"); break;
+				sprintf(s,"Starting point of recording"); break;
 			case 2:
-				strcpy(s,"Ending point of recording"); break;
+				sprintf(s,"Ending point of recording"); break;
 			}
 		break;
 	case 2: //ASSIST_OUTLET:
 		switch(arg) {
 		case 0:
-			strcpy(s,"Current position of recording"); break;
+			sprintf(s,"Current position of recording"); break;
 		case 1:
-			strcpy(s,"Starting point (rounded to sample)"); break;
+			sprintf(s,"Starting point (rounded to sample)"); break;
 		case 2:
-			strcpy(s,"Ending point (rounded to sample)"); break;
+			sprintf(s,"Ending point (rounded to sample)"); break;
 		}
 		break;
 	}

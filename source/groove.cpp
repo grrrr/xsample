@@ -431,11 +431,11 @@ V xgroove::m_assist(long msg, long arg, char *s)
 	case 1: //ASSIST_INLET:
 		switch(arg) {
 		case 0:
-			strcpy(s,"Signal of playing speed"); break;
+			sprintf(s,"Signal of playing speed"); break;
 		case 1:
-			strcpy(s,"Starting point"); break;
+			sprintf(s,"Starting point"); break;
 		case 2:
-			strcpy(s,"Ending point"); break;
+			sprintf(s,"Ending point"); break;
 		}
 		break;
 	case 2: //ASSIST_OUTLET:
@@ -444,11 +444,11 @@ V xgroove::m_assist(long msg, long arg, char *s)
 		else
 			switch(arg-outchns) {
 			case 0:
-				strcpy(s,"Position currently played"); break;
+				sprintf(s,"Position currently played"); break;
 			case 1:
-				strcpy(s,"Starting point (rounded to sample)"); break;
+				sprintf(s,"Starting point (rounded to sample)"); break;
 			case 2:
-				strcpy(s,"Ending point (rounded to sample)"); break;
+				sprintf(s,"Ending point (rounded to sample)"); break;
 			}
 		break;
 	}

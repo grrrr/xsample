@@ -270,7 +270,7 @@ V xplay::m_assist(L msg,L arg,C *s)
 	case 1: //ASSIST_INLET:
 		switch(arg) {
 		case 0:
-			strcpy(s,"Messages and Signal of playing position"); break;
+			sprintf(s,"Messages and Signal of playing position"); break;
 		}
 		break;
 	case 2: //ASSIST_OUTLET:

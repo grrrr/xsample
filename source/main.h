@@ -39,7 +39,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	#define TMPLOPT
 	#define TMPLINT
 	#define SIGSTATIC
-#elif
+#else
 // another compiler
 	#define TMPLOPT  // template optimation for much more speed
 	#define TMPLINT	 // if <int,int> templates are correctly handled 
