@@ -222,7 +222,7 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 				for(I i = 0; i < n; ++i,++si) {	
 					const F spd = *(speed++);
 
-					// Offset normalisieren
+					// normalize offset
 					if(o >= smax) 
 						o = doloop?fmod(o-smin,plen)+smin:(D)smax-0.001;
 					else if(o < smin) 
