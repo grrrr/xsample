@@ -18,7 +18,7 @@ static void xsample_main()
 	flext::post("  xrecord~, xplay~, xgroove~   ");
     flext::post("  (C)2001-2005 Thomas Grill    ");
 #ifdef FLEXT_DEBUG
-    flext::post("          DEBUG BUILD          ");
+    flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);
 #endif
 	flext::post("-------------------------------");
 
