@@ -3,10 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="xsample"
-	SccProjectName="xsample"
-	SccAuxPath=""
-	SccLocalPath=".."
-	SccProvider="MSSCCI:Jalindi Igloo">
+	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
