@@ -101,6 +101,7 @@ protected:
 	virtual V m_interp(xs_intp u = xsi__);
 	virtual V m_sclmode(xs_sclmd u = xss__);
 
+	virtual V m_all();
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
 

@@ -39,6 +39,7 @@ public:
 	virtual V m_units(xs_unit mode = xsu__);
 
 	virtual V m_pos(F pos);
+	virtual V m_all();
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
 	
@@ -69,6 +70,7 @@ private:
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is my dsp method
 
 	FLEXT_CALLBACK_F(m_pos)
+	FLEXT_CALLBACK(m_all)
 	FLEXT_CALLBACK_F(m_min)
 	FLEXT_CALLBACK_F(m_max)
 
@@ -126,6 +128,7 @@ xgroove::xgroove(I argc,t_atom *argv):
 	FLEXT_ADDMETHOD_F(0,"min",m_min); 
 	FLEXT_ADDMETHOD_F(0,"max",m_max);
 	FLEXT_ADDMETHOD_F(0,"pos",m_pos);
+	FLEXT_ADDMETHOD_(0,"all",m_all);
 
 	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
 
@@ -158,12 +161,18 @@ V xgroove::m_max(F mx)
 	outputmax();
 }
 
-
 V xgroove::m_pos(F pos)
 {
 	curpos = pos?pos/s2u:0;
 	if(curpos < curmin) curpos = curmin;
 	else if(curpos > curmax) curpos = curmax;
+}
+
+V xgroove::m_all()
+{
+	xsample::m_all();
+	outputmin();
+	outputmax();
 }
 
 I xgroove::m_set(I argc,t_atom *argv)
@@ -405,6 +414,7 @@ V xgroove::m_help()
 	post("\tinterp 0/1: interpolation off/on");
 	post("\tmin {unit}: set minimum playing point");
 	post("\tmax {unit}: set maximum playing point");
+	post("\tall: select entire buffer length");
 	post("\tpos {unit}: set playing position (obeying the current scale mode)");
 	post("\tbang/start: start playing");
 	post("\tstop: stop playing");

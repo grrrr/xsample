@@ -54,6 +54,7 @@ Version history:
 
 0.2.3:
 - cleaner gcc makefile
+- xgroove~, xrecord~: added "all" message to select entire buffer length
 
 0.2.2:
 - using flext 0.2.0

@@ -33,6 +33,7 @@ public:
 	virtual I m_set(I argc,t_atom *argv);
 
 	virtual V m_pos(F pos);
+	virtual V m_all();
 	virtual V m_start();
 	virtual V m_stop();
 
@@ -70,6 +71,7 @@ private:
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is the dsp method
 
 	FLEXT_CALLBACK_F(m_pos)
+	FLEXT_CALLBACK(m_all)
 	FLEXT_CALLBACK_F(m_min)
 	FLEXT_CALLBACK_F(m_max)
 
@@ -135,6 +137,7 @@ xrecord::xrecord(I argc,t_atom *argv):
 	FLEXT_ADDMETHOD(inchns+2,m_max);
 	FLEXT_ADDMETHOD_F(0,"min",m_min);
 	FLEXT_ADDMETHOD_F(0,"max",m_max);
+	FLEXT_ADDMETHOD_(0,"all",m_all);
 	
 	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
 	FLEXT_ADDMETHOD_B(0,"mixmode",m_mixmode);
@@ -171,6 +174,12 @@ V xrecord::m_max(F mx)
 	outputmax();
 }
 
+V xrecord::m_all()
+{
+	xsample::m_all();
+	outputmin();
+	outputmax();
+}
 
 V xrecord::m_pos(F pos)
 {
@@ -413,6 +422,7 @@ V xrecord::m_help()
 	post("\tmixmode 0/1: specify if audio signal should be mixed in");
 	post("\tmin {unit}: set minimum recording point");
 	post("\tmax {unit}: set maximum recording point");
+	post("\tall: select entire buffer length");
 	post("\tpos {unit}: set recording position (obeying the current scale mode)");
 	post("\tbang/start: start recording");
 	post("\tstop: stop recording");

@@ -158,5 +158,8 @@ V xsample::m_max(F mx)
 	m_sclmode();
 }
 
-
-
+V xsample::m_all()
+{
+	curlen = (curmax = buf->Frames())-(curmin = 0);
+	m_sclmode();
+}
