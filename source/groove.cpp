@@ -66,10 +66,10 @@ protected:
 	I bidir;
 
 	F _xzone,xzone,xsymm;
-    I znsmin,znsmax;
+    L znsmin,znsmax;
 	I xshape;
 	F xshparam;
-	F znmin,znmax;
+	D znmin,znmax;
 	BL xkeep;
 	S **znbuf;
 	S *znpos,*znmul,*znidx;
@@ -78,16 +78,16 @@ protected:
 	inline V outputmin() { ToOutFloat(outchns+1,curmin*s2u); }
 	inline V outputmax() { ToOutFloat(outchns+2,curmax*s2u); }
 	
-	inline V setpos(F pos)
+	inline V setpos(D pos)
 	{
 		if(pos < znsmin) curpos = znsmin;
 		else if(pos > znsmax) curpos = znsmax;
 		else curpos = pos;
 	}
 
-	inline V setposmod(F pos)
+	inline V setposmod(D pos)
 	{
-		F p = pos-znsmin;
+		D p = pos-znsmin;
 		if(p >= 0) curpos = znsmin+fmod(p,znsmax-znsmin);
 		else curpos = znsmax+fmod(p,znsmax-znsmin);
 	}
@@ -383,7 +383,7 @@ V xgroove::do_xzone()
 		// desired crossfade points
 		znmin = znsmin+xzone*xsymm,znmax = znsmax+xzone*(xsymm-1);
 		// extra space at beginning and end
-		F o1 = znmin-xzone,o2 = buf->Frames()-(znmax+xzone); 
+		D o1 = znmin-xzone,o2 = buf->Frames()-(znmax+xzone); 
 
 		if(o1 < 0 || o2 < 0) { // or (o1*o2 < 0)
 			if(o1+o2 < 0) {
@@ -615,8 +615,8 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const F xz = xzone,lmin = znmin,lmax = znmax,lsh = lmax+xz-lmin;
-	const F xf = (F)XZONE_TABLE/xz;
+	const F xz = xzone,xf = (F)XZONE_TABLE/xz;
+	const D lmin = znmin,lmax = znmax,lsh = lmax+xz-lmin;
 
     // adapt the playing bounds to the current cross-fade zone
     const I smin = znsmin,smax = znsmax,plen = smax-smin; //curlen;
@@ -651,7 +651,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 
 			if(o < lmin) {
 				// in early cross-fade zone
-				register F inp = xz-(lmin-o);  // 0 <= inp < xz
+				register F inp = xz-(F)(lmin-o);  // 0 <= inp < xz
 				znidx[i] = inp*xf;
 				znpos[i] = lmax+inp;
 				inzn = true;
