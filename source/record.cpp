@@ -69,7 +69,7 @@ private:
 
 	virtual V s_dsp();
 
-	TMPLDEF DEFSIGFUN(s_rec);
+	TMPLSIGFUN(s_rec);
 
 	DEFSIGCALL(recfun);
 	virtual V m_signal(I n,F *const *in,F *const *out) { recfun(n,in,out); }
@@ -377,15 +377,15 @@ TMPLDEF V xrecord::s_rec(I n,F *const *invecs,F *const *outvecs)
 V xrecord::s_dsp()
 {
 	switch(buf->Channels()*1000+inchns) {
-	case 1001:	SETSIGFUN(recfun,SIGFUN(s_rec,1,1));	break;
-	case 1002:	SETSIGFUN(recfun,SIGFUN(s_rec,1,2));	break;
-	case 2001:	SETSIGFUN(recfun,SIGFUN(s_rec,2,1));	break;
-	case 2002:	SETSIGFUN(recfun,SIGFUN(s_rec,2,2));	break;
+	case 1001:	SETSIGFUN(recfun,TMPLFUN(s_rec,1,1));	break;
+	case 1002:	SETSIGFUN(recfun,TMPLFUN(s_rec,1,2));	break;
+	case 2001:	SETSIGFUN(recfun,TMPLFUN(s_rec,2,1));	break;
+	case 2002:	SETSIGFUN(recfun,TMPLFUN(s_rec,2,2));	break;
 	case 4001:
 	case 4002:
-	case 4003:	SETSIGFUN(recfun,SIGFUN(s_rec,4,-1));	break;
-	case 4004:	SETSIGFUN(recfun,SIGFUN(s_rec,4,4));	break;
-	default:	SETSIGFUN(recfun,SIGFUN(s_rec,-1,-1));	break;
+	case 4003:	SETSIGFUN(recfun,TMPLFUN(s_rec,4,-1));	break;
+	case 4004:	SETSIGFUN(recfun,TMPLFUN(s_rec,4,4));	break;
+	default:	SETSIGFUN(recfun,TMPLFUN(s_rec,-1,-1));	break;
 	}
 }
 

@@ -131,17 +131,23 @@ private:
 // defines which are used in the derived classes
 #ifdef SIGSTATIC
 	#ifdef TMPLOPT
-		#define SIGFUN(FUN,BCHNS,IOCHNS) &thisType::st_##FUN<BCHNS,IOCHNS>
+		#define TMPLFUN(FUN,BCHNS,IOCHNS) &thisType::st_##FUN<BCHNS,IOCHNS>
+		#define SIGFUN(FUN) &thisType::st_##FUN
 		#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
 		#define TMPLCALL <_BCHNS_,_IOCHNS_>
 	#else
-		#define SIGFUN(FUN,BCHNS,IOCHNS) &thisType::st_##FUN
+		#define TMPLFUN(FUN,BCHNS,IOCHNS) &thisType::st_##FUN
+		#define SIGFUN(FUN) &thisType::st_##FUN
 		#define TMPLDEF 
 		#define TMPLCALL
 	#endif
 
 	#define DEFSIGFUN(NAME) \
-	static V st_##NAME(thisType *obj,I n,F *const *in,F *const *out)  { obj->NAME TMPLCALL (n,in,out); } \
+	static V st_##NAME(thisType *obj,I n,F *const *in,F *const *out)  { obj->NAME (n,in,out); } \
+	V NAME(I n,F *const *in,F *const *out)
+
+	#define TMPLSIGFUN(NAME) \
+	TMPLDEF static V st_##NAME(thisType *obj,I n,F *const *in,F *const *out)  { obj->NAME TMPLCALL (n,in,out); } \
 	V NAME(I n,F *const *in,F *const *out)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
@@ -152,23 +158,28 @@ private:
 
 #else
 	#ifdef TMPLOPT
-		#define SIGFUN(FUN,BCHNS,IOCHNS) &thisType::FUN<BCHNS,IOCHNS>
+		#define TMPLFUN(FUN,BCHNS,IOCHNS) &thisType::FUN<BCHNS,IOCHNS>
+		#define SIGFUN(FUN) &thisType::FUN
 		#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
 		#define TMPLCALL <_BCHNS_,_IOCHNS_>
 	#else
-		#define SIGFUN(FUN,BCHNS,IOCHNS) &thisType::FUN
+		#define TMPLFUN(FUN,BCHNS,IOCHNS) &thisType::FUN
+		#define SIGFUN(FUN) &thisType::FUN
 		#define TMPLDEF 
 		#define TMPLCALL
 	#endif
 
 	#define DEFSIGFUN(NAME)	V NAME(I n,F *const *in,F *const *out)
+	#define TMPLSIGFUN(NAME) TMPLDEF V NAME(I n,F *const *in,F *const *out)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
 
 	#define DEFSIGCALL(NAME) \
-	V (thisType::*v_##NAME)(I n,F *const *in,F *const *out);  \
-	inline V NAME(I n,F *const *in,F *const *out) { (this->*v_##NAME)(n,in,out); } 
+	inline V NAME(I n,F *const *in,F *const *out) { (this->*v_##NAME)(n,in,out); } \
+	V (thisType::*v_##NAME)(I n,F *const *in,F *const *out)
 #endif
+
+
 
 
 
@@ -217,10 +228,10 @@ protected:
 	xs_intp interp;
 
 
-	TMPLDEF DEFSIGFUN(s_play0);
-	TMPLDEF DEFSIGFUN(s_play1);
-	TMPLDEF DEFSIGFUN(s_play2);
-	TMPLDEF DEFSIGFUN(s_play4);
+	TMPLSIGFUN(s_play0);
+	TMPLSIGFUN(s_play1);
+	TMPLSIGFUN(s_play2);
+	TMPLSIGFUN(s_play4);
 
 	DEFSIGCALL(playfun);
 

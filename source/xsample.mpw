@@ -25,27 +25,31 @@ PPCCPlusOptions = {Includes} {Sym-PPC} {Defines} {Flags} {WarnOff}
 
 ### Source Files ###
 
-SrcFiles        =  main.cpp groove.cpp play.cpp record.cpp
+SrcFiles        =  main.cpp inter.cpp groove.cpp play.cpp record.cpp
 Headers			=  main.h
 
 ### Object Files ###
 
 Obj-groove    =  è
 				  "{ObjDir}main.cpp.x" è
+				  "{ObjDir}inter.cpp.x" è
 				  "{ObjDir}groove.cpp.x" 
 
 Obj-play      =  è
 				  "{ObjDir}main.cpp.x" è
+				  "{ObjDir}inter.cpp.x" è
 				  "{ObjDir}play.cpp.x" 
 
 Obj-record    =  è
 				  "{ObjDir}main.cpp.x" è
+				  "{ObjDir}inter.cpp.x" è
 				  "{ObjDir}record.cpp.x"
 				  
 Obj			  = è
 				  "{ObjDir}main.cpp.x" è
 				  "{ObjDir}record.cpp.x" è
 				  "{ObjDir}play.cpp.x" è
+				  "{ObjDir}inter.cpp.x" è
 				  "{ObjDir}groove.cpp.x" 
 
 

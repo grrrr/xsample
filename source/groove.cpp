@@ -307,13 +307,13 @@ V xgroove::s_dsp()
 {
 	if(doplay) {
 		switch(loopmode) {
-		case xsl_once: SETSIGFUN(posfun,s_pos_once); break;
-		case xsl_loop: SETSIGFUN(posfun,s_pos_loop); break;
-		case xsl_bidir: SETSIGFUN(posfun,s_pos_bidir); break;
+		case xsl_once: SETSIGFUN(posfun,SIGFUN(s_pos_once)); break;
+		case xsl_loop: SETSIGFUN(posfun,SIGFUN(s_pos_loop)); break;
+		case xsl_bidir: SETSIGFUN(posfun,SIGFUN(s_pos_bidir)); break;
 		}
 	}
 	else
-		SETSIGFUN(posfun,s_pos_off);
+		SETSIGFUN(posfun,SIGFUN(s_pos_off));
 	xinter::s_dsp();
 }
 
