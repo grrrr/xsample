@@ -97,7 +97,8 @@ xrecord::xrecord(I argc,t_atom *argv):
 	dorec(false),
 	sigmode(false),mixmode(false),
 	appmode(true),doloop(false),
-	drintv(0)
+	drintv(0),
+	inchns(1)
 {
 	I argi = 0;
 #ifdef MAXMSP
@@ -107,11 +108,18 @@ xrecord::xrecord(I argc,t_atom *argv):
 	}
 	else
 #endif
-	inchns = 1;
-
 	if(argc > argi && is_symbol(argv[argi])) {
 		buf = new buffer(get_symbol(argv[argi]),true);
 		argi++;
+
+#ifdef MAXMSP		
+		// oldstyle command line?
+		if(argi == 1 && argc == 2 && is_flint(argv[argi])) {
+			inchns = geta_flint(argv[argi]);
+			argi++;
+			post("%s: old style command line suspected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
+		}
+#endif
 	}
 	else
 		buf = new buffer(NULL,true);
@@ -142,12 +150,6 @@ xrecord::xrecord(I argc,t_atom *argv):
 
 	outmin = get_out(1);
 	outmax = get_out(2);
-	
-/*
-#ifdef PD
-	m_loadbang();  // in PD loadbang is not called upon object creation
-#endif
-*/
 }
 
 

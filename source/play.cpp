@@ -62,7 +62,8 @@ V xplay::cb_setup(t_class *c)
 
 
 xplay::xplay(I argc, t_atom *argv): 
-	doplay(false)
+	doplay(false),
+	outchns(1)
 {
 	I argi = 0;
 #ifdef MAXMSP
@@ -72,11 +73,19 @@ xplay::xplay(I argc, t_atom *argv):
 	}
 	else
 #endif
-	outchns = 1;
 
 	if(argc > argi && is_symbol(argv[argi])) {
 		buf = new buffer(get_symbol(argv[argi]),true);
 		argi++;
+		
+#ifdef MAXMSP
+		// oldstyle command line?
+		if(argi == 1 && argc == 2 && is_flint(argv[argi])) {
+			outchns = geta_flint(argv[argi]);
+			argi++;
+			post("%s: old style command line suspected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
+		}
+#endif
 	}
 	else
 		buf = new buffer(NULL,true);
@@ -88,12 +97,6 @@ xplay::xplay(I argc, t_atom *argv):
 	FLEXT_ADDBANG(0,m_start);
 	FLEXT_ADDMETHOD_(0,"start",m_start);
 	FLEXT_ADDMETHOD_(0,"stop",m_stop);
-
-/*
-#ifdef PD
-	m_loadbang();  // in PD loadbang is not called upon object creation
-#endif
-*/
 }
 
 
