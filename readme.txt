@@ -72,3 +72,4 @@ TODO list:
 - crossfading loop zone for xgroove~
 - multi-buffer handling (aka multi-channel for pd)
 - performance comparison to respective PD/Max objects
+- anti-alias filter? (possible?)
