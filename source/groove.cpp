@@ -300,7 +300,7 @@ V xgroove::m_max(F mx)
 
 V xgroove::m_pos(F pos)
 {
-	setpos(pos?pos/s2u:0);
+	setpos(pos && s2u?pos/s2u:0);
 }
 
 V xgroove::m_all()
@@ -329,7 +329,7 @@ V xgroove::ms_xfade(I xf)
 V xgroove::ms_xzone(F xz) 
 { 
 	bufchk();
-	_xzone = xz < 0?0:xz/s2u; 
+	_xzone = xz < 0 || !s2u?0:xz/s2u; 
 //	do_xzone();
 	s_dsp(); 
 }
@@ -666,7 +666,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 				lpbang = true;
 			}
 
-#if 0
+#if 1
 			if(o < lmin) {
 				register F inp;
 				if(o < lmin2) {
@@ -718,7 +718,10 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 			pos[i] = o;
 			o += spd;
 #else
-			if(o >= lmax) { o -= lsh; lpbang = true; }
+			if(o >= lmax) { 
+				o -= lsh; 
+				lpbang = true; 
+			}
 
 			if(o < lmin) {
 				register F inp = (F)(o-smin); // 0 <= inp < xz

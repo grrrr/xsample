@@ -60,7 +60,7 @@ xsample::xsample():
 	unitmode(xsu_sample),  // PD defaults to samples
 #endif
 	sclmode(xss_unitsinbuf),
-	curmin(0),curmax(1<<30)
+	curmin(0),curmax(1<<31)
 {}
 	
 xsample::~xsample()
@@ -98,6 +98,8 @@ BL xsample::m_refresh()
 	if(buf->Set()) { s_dsp(); ret = true; } // channel count may have changed
 	else ret = false;
 	
+	m_units();
+	m_sclmode();	
 	// realize positions... 2 times bufchk()!!
 	m_min((F)curmin*s2u); // also checks pos
 	m_max((F)curmax*s2u); // also checks pos
@@ -129,70 +131,72 @@ V xsample::m_units(xs_unit mode)
 {
 	if(mode != xsu__) unitmode = mode;
 
-	if(bufchk())
-		switch(unitmode) {
-			case xsu_sample: // samples
-				s2u = 1;
-				break;
-			case xsu_buffer: // buffer size
-				s2u = 1.f/buf->Frames();
-				break;
-			case xsu_ms: // ms
-				s2u = 1000.f/Samplerate();
-				break;
-			case xsu_s: // s
-				s2u = 1.f/Samplerate();
-				break;
-			default:
-				post("%s: Unknown unit mode",thisName());
-		}
+	switch(unitmode) {
+		case xsu_sample: // samples
+			s2u = 1;
+			break;
+		case xsu_buffer: // buffer size
+			s2u = bufchk()?1.f/buf->Frames():0;
+			break;
+		case xsu_ms: // ms
+			s2u = 1000.f/Samplerate();
+			break;
+		case xsu_s: // s
+			s2u = 1.f/Samplerate();
+			break;
+		default:
+			post("%s: Unknown unit mode",thisName());
+	}
 }
 
 V xsample::m_sclmode(xs_sclmd mode)
 {
 	if(mode != xss__) sclmode = mode;
 
-	if(bufchk())
-		switch(sclmode) {
-			case 0: // samples/units
-				sclmin = 0; sclmul = s2u;
-				break;
-			case 1: // samples/units from recmin to recmax
-				sclmin = curmin; sclmul = s2u;
-				break;
-			case 2: // unity between 0 and buffer size
-				sclmin = 0; sclmul = buf->Frames()?1.f/buf->Frames():0;
-				break;
-			case 3:	// unity between recmin and recmax
-				sclmin = curmin; sclmul = curmin != curmax?1.f/(curmax-curmin):0;
-				break;
-			default:
-				post("%s: Unknown scale mode",thisName());
-		}
+	switch(sclmode) {
+		case 0: // samples/units
+			sclmin = 0; sclmul = s2u;
+			break;
+		case 1: // samples/units from recmin to recmax
+			sclmin = curmin; sclmul = s2u;
+			break;
+		case 2: // unity between 0 and buffer size
+			sclmin = 0; sclmul = (bufchk() && buf->Frames())?1.f/buf->Frames():0;
+			break;
+		case 3:	// unity between recmin and recmax
+			sclmin = curmin; sclmul = curmin != curmax?1.f/(curmax-curmin):0;
+			break;
+		default:
+			post("%s: Unknown scale mode",thisName());
+	}
 }
 
 V xsample::m_min(F mn)
 {
-	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
+//	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
 
-	mn /= s2u;  // conversion to samples
-	if(mn < 0) mn = 0;
-	else if(mn > curmax) mn = (F)curmax;
-	curmin = (I)(mn+.5);
+	if(s2u) {
+		mn /= s2u;  // conversion to samples
+		if(mn < 0) mn = 0;
+		else if(mn > curmax) mn = (F)curmax;
+		curmin = (I)(mn+.5);
 
-	m_sclmode();
+		m_sclmode();
+	}
 }
 
 V xsample::m_max(F mx)
 {
-	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
+//	if(!bufchk()) return; // if invalid do nothing (actually, it should be delayed)
 
-	mx /= s2u;  // conversion to samples
-	if(mx > buf->Frames()) mx = (F)buf->Frames();
-	else if(mx < curmin) mx = (F)curmin;
-	curmax = (I)(mx+.5);
+	if(s2u) {
+		mx /= s2u;  // conversion to samples
+		if(mx > buf->Frames()) mx = (F)buf->Frames();
+		else if(mx < curmin) mx = (F)curmin;
+		curmax = (I)(mx+.5);
 
-	m_sclmode();
+		m_sclmode();
+	}
 }
 
 V xsample::m_all()
