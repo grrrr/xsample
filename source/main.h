@@ -30,23 +30,19 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #elif defined(__BORLANDC__) 
 // handles all optimizations
 	#define TMPLOPT 
-	#define TMPLINT
 #elif defined(__GNUC__)
 // GNUC 2.95.2 dies at compile with <int,int> templates
 	#define TMPLOPT
 #elif defined(__MWERKS__)
 // CodeWarrior can't take address of a template member function 
 	#define TMPLOPT
-	#define TMPLINT
 	#define SIGSTATIC
 #elif defined(__MRC__)
 // Apple MPW - MrCpp
 //	#define TMPLOPT  // template optimation for more speed
-//	#define TMPLINT	 // if <int,int> templates are correctly handled 
 #else
 // another compiler
 //	#define TMPLOPT  // template optimation for more speed (about 10%)
-//	#define TMPLINT	 // if <int,int> templates are correctly handled 
 	//#define SIGSTATIC  // another redirection to avoid addresses of class member functions
 #endif
 
@@ -98,16 +94,23 @@ protected:
 	virtual V m_loadbang();
 
 	virtual V m_units(xs_unit u = xsu__);
-	virtual V m_interp(xs_intp u = xsi__);
+//	virtual V m_iunits(xs_unit u = xsu__);
+//	virtual V m_ounits(xs_unit u = xsu__);
 	virtual V m_sclmode(xs_sclmd u = xss__);
+//	virtual V m_isclmode(xs_sclmd u = xss__);
+//	virtual V m_osclmode(xs_sclmd u = xss__);
+	virtual V m_interp(xs_intp u = xsi__);
 
 	virtual V m_all();
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
 
-	xs_unit unitmode;
+	virtual V m_dsp(I n,F *const *insigs,F *const *outsigs);
+	virtual V s_dsp() = 0;
+
+	xs_unit unitmode; //iunitmode,ounitmode;
+	xs_sclmd sclmode; //isclmode,osclmode;
 	xs_intp interp;
-	xs_sclmd sclmode;
 
 	I curmin,curmax,curlen;  // in samples
 	I sclmin; // in samples
@@ -127,41 +130,33 @@ private:
 	FLEXT_CALLBACK(m_reset)
 
 	FLEXT_CALLBACK_1(m_units,xs_unit)
-	FLEXT_CALLBACK_1(m_interp,xs_intp)
+//	FLEXT_CALLBACK_1(m_iunits,xs_unit)
+//	FLEXT_CALLBACK_1(m_ounits,xs_unit)
 	FLEXT_CALLBACK_1(m_sclmode,xs_sclmd)
+//	FLEXT_CALLBACK_1(m_isclmode,xs_sclmd)
+//	FLEXT_CALLBACK_1(m_osclmode,xs_sclmd)
+	FLEXT_CALLBACK_1(m_interp,xs_intp)
 };
 
 
 // defines which are used in the derived classes
 #ifdef SIGSTATIC
 	#ifdef TMPLOPT
-		#ifdef TMPLINT
-			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::st_signal<BCHNS,IOCHNS>
-			#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
-			#define TMPLCALL <_BCHNS_,_IOCHNS_>
-		#else 
-			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::st_signal<C[BCHNS+1],C[IOCHNS+1]>
-			#define TMPLDEF template <class BCL,class IOCL>
-			#define TMPLCALL <BCL,IOCL>
-		#endif
+		#define SIGFUN(CL,FUN,BCHNS,IOCHNS) &CL::st_##FUN<BCHNS,IOCHNS>
+		#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
+		#define TMPLCALL <_BCHNS_,_IOCHNS_>
 	#else
-		#define SIGFUN(CL,BCHNS,IOCHNS) &CL::st_signal
+		#define SIGFUN(CL,FUN,BCHNS,IOCHNS) &CL::st_##FUN
 		#define TMPLDEF 
 		#define TMPLCALL
 	#endif
 #else
 	#ifdef TMPLOPT
-		#ifdef TMPLINT
-			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::signal<BCHNS,IOCHNS>
-			#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
-			#define TMPLCALL <_BCHNS_,_IOCHNS_>
-		#else
-			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::signal<C[BCHNS+1],C[IOCHNS+1]>
-			#define TMPLDEF template <class BCL,class IOCL>
-			#define TMPLCALL <BCL,IOCL>
-		#endif
+		#define SIGFUN(CL,FUN,BCHNS,IOCHNS) &CL::FUN<BCHNS,IOCHNS>
+		#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
+		#define TMPLCALL <_BCHNS_,_IOCHNS_>
 	#else
-		#define SIGFUN(CL,BCHNS,IOCHNS) &CL::signal
+		#define SIGFUN(CL,FUN,BCHNS,IOCHNS) &CL::FUN
 		#define TMPLDEF 
 		#define TMPLCALL
 	#endif
@@ -191,25 +186,21 @@ private:
 // in the signal functions
 #ifdef TMPLOPT
 	// optimization by using constants for channel numbers
-#ifdef TMPLINT
-#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)  \
-	const I BCHNS = _BCHNS_ == 0?(bchns):_BCHNS_;  \
-	const I IOCHNS = _IOCHNS_ == 0?MIN(iochns,BCHNS):MIN(_IOCHNS_,BCHNS)
-#else
-	// the same but using classes to calculate channel numbers
-	// bad trick...
-#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)   \
-	const I BCHNS = sizeof(BCL) == 1?(bchns):sizeof(BCL)-1;  \
-	const I IOCHNS = sizeof(IOCL) == 1?MIN(iochns,BCHNS):MIN(sizeof(IOCL)-1,BCHNS)
-#endif
+	#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)  \
+		const I BCHNS = _BCHNS_ < 0?(bchns):_BCHNS_;  \
+		const I IOCHNS = _IOCHNS_ < 0?MIN(iochns,BCHNS):MIN(_IOCHNS_,BCHNS)
 #else 
 	// no template optimization
-#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)   \
-	const I BCHNS = bchns;  \
-	const I IOCHNS = MIN(iochns,BCHNS)
+	#ifdef PD // only mono buffers
+		#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)   \
+			const I BCHNS = 1;  \
+			const I IOCHNS = MIN(iochns,BCHNS)
+	#else // MAXMSP
+		#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)   \
+			const I BCHNS = bchns;  \
+			const I IOCHNS = MIN(iochns,BCHNS)
+	#endif
 #endif
-
-
 
 
 #endif

@@ -43,10 +43,14 @@ protected:
 private:
 	static V setup(t_class *c);
 
-	virtual V m_dsp(I n,F *const *in,F *const *out);
-	
+	virtual V s_dsp();
+
 	DEFSIGFUN(xplay)
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is the dsp method
+	TMPLDEF V signal0(I n,F *const *in,F *const *out);  // this is the dsp method
+	TMPLDEF V signal1(I n,F *const *in,F *const *out);  // this is the dsp method
+	TMPLDEF V signal2(I n,F *const *in,F *const *out);  // this is the dsp method
+	TMPLDEF V signal4(I n,F *const *in,F *const *out);  // this is the dsp method
 };
 
 FLEXT_LIB_TILDE_G("xplay~",xplay)
@@ -104,16 +108,17 @@ I xplay::m_set(I argc,t_atom *argv)
 
 V xplay::m_start() 
 { 
-	m_refresh(); 
 	doplay = true; 
+	s_dsp(); 
 }
 
 V xplay::m_stop() 
 { 
 	doplay = false; 
+	s_dsp(); 
 }
 
-
+/*
 TMPLDEF V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 {
 	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
@@ -234,31 +239,211 @@ TMPLDEF V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 			for(I si = 0; si < n; ++si) sig[ci][si] = 0;
 	}
 }
+*/
 
-V xplay::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
+TMPLDEF V xplay::signal0(I n,F *const *invecs,F *const *outvecs)
 {
-	// this is hopefully called at change of sample rate ?!
+	// stopped
+	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
 
-	m_refresh();  
+	const F *pos = invecs[0];
+	F *const *sig = outvecs;
+	
+	for(I ci = 0; ci < outchns; ++ci) 
+		for(I si = 0; si < n; ++si) sig[ci][si] = 0;
+}
 
-	switch(buf->Channels()*1000+outchns) {
-		case 1001: 
-			sigfun = SIGFUN(xplay,1,1); break;
-		case 1002:
-			sigfun = SIGFUN(xplay,1,2); break;
-		case 2001:
-			sigfun = SIGFUN(xplay,2,1); break;
-		case 2002:
-			sigfun = SIGFUN(xplay,2,2); break;
-		case 4001:
-		case 4002:
-		case 4003:
-			sigfun = SIGFUN(xplay,4,0); break;
-		case 4004:
-			sigfun = SIGFUN(xplay,4,4); break;
-		default:
-			sigfun = SIGFUN(xplay,0,0);
+TMPLDEF V xplay::signal4(I n,F *const *invecs,F *const *outvecs)
+{
+	const I smin = 0,smax = buf->Frames(),plen = smax-smin;
+	if(plen < 4) {
+		if(plen < 2) xplay::signal1(n,invecs,outvecs);
+		else xplay::signal2(n,invecs,outvecs);
+		return;
 	}
+
+	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
+
+	const F *pos = invecs[0];
+	F *const *sig = outvecs;
+	register I si = 0;
+	
+	// 4-point interpolation
+	// ---------------------
+	const I maxo = smax-1; // last sample in play region
+
+	for(I i = 0; i < n; ++i,++si) {	
+		F o = *(pos++)/s2u;
+		register I oint = (I)o,ointm,oint1,oint2;
+
+		if(oint <= smin) { 
+			if(oint < smin) oint = smin,o = smin;
+			// position is first simple
+			ointm = smin; // first sample 
+			oint1 = oint+1;
+			oint2 = oint1+1;
+		}
+		else if(oint >= maxo-2) { 
+			if(oint > maxo) oint = maxo,o = smax;
+			ointm = oint-1;
+			oint1 = oint >= maxo?maxo:oint+1;
+			oint2 = oint1 >= maxo?maxo:oint1+1;
+		}
+		else {
+			ointm = oint-1;
+			oint1 = oint+1;
+			oint2 = oint1+1;
+		}
+
+		register F frac = o-oint;
+		
+		register F *fa = buf->Data()+ointm*BCHNS;
+		register F *fb = buf->Data()+oint*BCHNS;
+		register F *fc = buf->Data()+oint1*BCHNS;
+		register F *fd = buf->Data()+oint2*BCHNS;
+
+		for(I ci = 0; ci < OCHNS; ++ci) {
+			const F cmb = fc[ci]-fb[ci];
+			sig[ci][si] = fb[ci] + frac*( 
+				cmb - 0.5f*(frac-1.) * ((fa[ci]-fd[ci]+3.0f*cmb)*frac + (fb[ci]-fa[ci]-cmb))
+			);
+		}
+	}
+
+	// clear rest of output channels (if buffer has less channels)
+	for(I ci = OCHNS; ci < outchns; ++ci) 
+		for(si = 0; si < n; ++si) sig[ci][si] = 0;
+}
+
+TMPLDEF V xplay::signal2(I n,F *const *invecs,F *const *outvecs)
+{
+	const I smin = 0,smax = buf->Frames(),plen = smax-smin;
+	if(plen < 2) {
+		xplay::signal1(n,invecs,outvecs);
+		return;
+	}
+
+	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
+
+	const F *pos = invecs[0];
+	F *const *sig = outvecs;
+	register I si = 0;
+	
+	// linear interpolation
+	// --------------------
+
+	const I maxo = smax-1;  // last sample in buffer
+
+	for(I i = 0; i < n; ++i,++si) {	
+		const F o = *(pos++)/s2u;
+		register const I oint = (I)o;
+
+		if(oint < smin) {
+			// position is before first sample -> take the first sample
+			register const F *const fp = buf->Data()+smin*BCHNS;
+			for(I ci = 0; ci < OCHNS; ++ci) 
+				sig[ci][si] = fp[ci]; 
+		}
+		else if(oint >= maxo) {
+			// position is past last sample -> take the last sample
+			register const F *const fp = buf->Data()+maxo*BCHNS;
+			for(I ci = 0; ci < OCHNS; ++ci) 
+				sig[ci][si] = fp[ci]; 
+		}
+		else {
+			// normal interpolation
+			register const F frac = o-oint;
+			register const F *const fp0 = buf->Data()+oint*BCHNS;
+			register const F *const fp1 = fp0+BCHNS;
+			for(I ci = 0; ci < OCHNS; ++ci) 
+				sig[ci][si] = fp0[ci]+frac*(fp1[ci]-fp0[ci]);
+		}
+	}
+
+	// clear rest of output channels (if buffer has less channels)
+	for(I ci = OCHNS; ci < outchns; ++ci) 
+		for(si = 0; si < n; ++si) sig[ci][si] = 0;
+}
+
+TMPLDEF V xplay::signal1(I n,F *const *invecs,F *const *outvecs)
+{
+	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
+
+	const F *pos = invecs[0];
+	F *const *sig = outvecs;
+	register I si = 0;
+	const I smin = 0,smax = buf->Frames(),plen = smax-smin;
+	
+	// no interpolation
+	// ----------------
+	
+	for(I i = 0; i < n; ++i,++si) {	
+		register const I oint = (I)(*(pos++)/s2u);
+		register F *fp;
+		if(oint < smin) {
+			// position < 0 ... take only 0th sample
+			fp = buf->Data()+smin*BCHNS;
+		}
+		else if(oint >= smax) {
+			// position > last sample ... take only last sample
+			fp = buf->Data()+(smax-1)*BCHNS;
+		}
+		else {
+			// normal
+			fp = buf->Data()+oint*BCHNS;
+		}
+
+		for(I ci = 0; ci < OCHNS; ++ci)
+			sig[ci][si] = fp[ci];
+	}
+
+	// clear rest of output channels (if buffer has less channels)
+	for(I ci = OCHNS; ci < outchns; ++ci) 
+		for(si = 0; si < n; ++si) sig[ci][si] = 0;
+}
+
+V xplay::s_dsp()
+{
+	if(doplay) {
+		if(interp == xsi_4p) 
+			switch(buf->Channels()*1000+outchns) {
+				case 1001:	sigfun = SIGFUN(xplay,signal4,1,1); break;
+				case 1002:	sigfun = SIGFUN(xplay,signal4,1,2); break;
+				case 2001:	sigfun = SIGFUN(xplay,signal4,2,1); break;
+				case 2002:	sigfun = SIGFUN(xplay,signal4,2,2); break;
+				case 4001:
+				case 4002:
+				case 4003:	sigfun = SIGFUN(xplay,signal4,4,-1); break;
+				case 4004:	sigfun = SIGFUN(xplay,signal4,4,4); break;
+				default:	sigfun = SIGFUN(xplay,signal4,-1,-1);
+			}
+		else if(interp == xsi_lin) 
+			switch(buf->Channels()*1000+outchns) {
+				case 1001:	sigfun = SIGFUN(xplay,signal2,1,1); break;
+				case 1002:	sigfun = SIGFUN(xplay,signal2,1,2); break;
+				case 2001:	sigfun = SIGFUN(xplay,signal2,2,1); break;
+				case 2002:	sigfun = SIGFUN(xplay,signal2,2,2); break;
+				case 4001:
+				case 4002:
+				case 4003:	sigfun = SIGFUN(xplay,signal2,4,-1); break;
+				case 4004:	sigfun = SIGFUN(xplay,signal2,4,4); break;
+				default:	sigfun = SIGFUN(xplay,signal2,-1,-1);
+			}
+		else 
+			switch(buf->Channels()*1000+outchns) {
+				case 1001:	sigfun = SIGFUN(xplay,signal1,1,1); break;
+				case 1002:	sigfun = SIGFUN(xplay,signal1,1,2); break;
+				case 2001:	sigfun = SIGFUN(xplay,signal1,2,1); break;
+				case 2002:	sigfun = SIGFUN(xplay,signal1,2,2); break;
+				case 4001:
+				case 4002:
+				case 4003:	sigfun = SIGFUN(xplay,signal1,4,-1); break;
+				case 4004:	sigfun = SIGFUN(xplay,signal1,4,4); break;
+				default:	sigfun = SIGFUN(xplay,signal1,-1,-1);
+			}
+	}
+	else
+		sigfun = SIGFUN(xplay,signal0,-1,-1);
 }
 
 

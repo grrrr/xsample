@@ -50,6 +50,7 @@ public:
 	virtual V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
 
 	virtual V m_draw(I argc,t_atom *argv);	
+
 protected:
 	I inchns;
 	BL sigmode,appmode;
@@ -66,8 +67,8 @@ protected:
 private:
 	static V setup(t_class *c);
 
-	virtual V m_dsp(I n,F *const *in,F *const *out);
-	
+	virtual V s_dsp();
+
 	DEFSIGFUN(xrecord)
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is the dsp method
 
@@ -206,6 +207,7 @@ V xrecord::m_start()
 	m_refresh(); 
 	dorec = true; 
 	buf->SetRefrIntv(drintv);
+	s_dsp();
 }
 
 V xrecord::m_stop() 
@@ -213,6 +215,7 @@ V xrecord::m_stop()
 	dorec = false; 
 	buf->Dirty(true);
 	buf->SetRefrIntv(0);
+	s_dsp();
 }
 
 V xrecord::m_reset()
@@ -369,29 +372,25 @@ TMPLDEF V xrecord::signal(I n,F *const *invecs,F *const *outvecs)
 	}
 }
 
-V xrecord::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
+V xrecord::s_dsp()
 {
-	// this is hopefully called at change of sample rate ?!
-
-	m_refresh();  
-
 	switch(buf->Channels()*1000+inchns) {
 		case 1001:
-			sigfun = SIGFUN(xrecord,1,1);	break;
+			sigfun = SIGFUN(xrecord,signal,1,1);	break;
 		case 1002:
-			sigfun = SIGFUN(xrecord,1,2);	break;
+			sigfun = SIGFUN(xrecord,signal,1,2);	break;
 		case 2001:
-			sigfun = SIGFUN(xrecord,2,1);	break;
+			sigfun = SIGFUN(xrecord,signal,2,1);	break;
 		case 2002:
-			sigfun = SIGFUN(xrecord,2,2);	break;
+			sigfun = SIGFUN(xrecord,signal,2,2);	break;
 		case 4001:
 		case 4002:
 		case 4003:
-			sigfun = SIGFUN(xrecord,4,0);	break;
+			sigfun = SIGFUN(xrecord,signal,4,-1);	break;
 		case 4004:
-			sigfun = SIGFUN(xrecord,4,4);	break;
+			sigfun = SIGFUN(xrecord,signal,4,4);	break;
 		default:
-			sigfun = SIGFUN(xrecord,0,0);	break;
+			sigfun = SIGFUN(xrecord,signal,-1,-1);	break;
 	}
 }
 

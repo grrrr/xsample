@@ -59,6 +59,7 @@ Version history:
 - cleaner gcc makefile
 - xgroove~, xrecord~: added "all" message to select entire buffer length
 - xgroove~, xplay~: revisited dsp methods, restructured the code, added linear interpolation (message to send: "interp 2") 
+- enabled 0 output channels -> xgroove~: position output only
 
 0.2.2:
 - using flext 0.2.0

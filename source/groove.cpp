@@ -65,7 +65,7 @@ protected:
 private:
 	static V setup(t_class *c);
 
-	virtual V m_dsp(I n,F *const *in,F *const *out);
+	virtual V s_dsp();
 
 	DEFSIGFUN(xgroove)	
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is my dsp method
@@ -190,11 +190,13 @@ V xgroove::m_start()
 { 
 	m_refresh(); 
 	doplay = true; 
+	s_dsp();
 }
 
 V xgroove::m_stop() 
 { 
 	doplay = false; 
+	s_dsp();
 }
 
 V xgroove::m_reset()
@@ -430,31 +432,31 @@ TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 	else curpos = o;
 }
 
-V xgroove::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
+V xgroove::s_dsp()
 {
-	// this is hopefully called at change of sample rate ?!
-
-	m_refresh();  
-
 	switch(buf->Channels()*1000+outchns) {
+		case 1000:
+			// position only
+			sigfun = SIGFUN(xgroove,signal,1,0);	break;
 		case 1001:
-			sigfun = SIGFUN(xgroove,1,1);	break;
+			sigfun = SIGFUN(xgroove,signal,1,1);	break;
 		case 1002:
-			sigfun = SIGFUN(xgroove,1,2);	break;
+			sigfun = SIGFUN(xgroove,signal,1,2);	break;
 		case 2001: 
-			sigfun = SIGFUN(xgroove,2,1);	break;
+			sigfun = SIGFUN(xgroove,signal,2,1);	break;
 		case 2002:
-			sigfun = SIGFUN(xgroove,2,2);	break;
+			sigfun = SIGFUN(xgroove,signal,2,2);	break;
 		case 4001:
 		case 4002:
 		case 4003:
-			sigfun = SIGFUN(xgroove,4,0);	break;
+			sigfun = SIGFUN(xgroove,signal,4,-1);	break;
 		case 4004:
-			sigfun = SIGFUN(xgroove,4,4);	break;
+			sigfun = SIGFUN(xgroove,signal,4,4);	break;
 		default:
-			sigfun = SIGFUN(xgroove,0,0);
+			sigfun = SIGFUN(xgroove,signal,-1,-1);
 	}
 }
+
 
 
 V xgroove::m_help()

@@ -14,12 +14,13 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 V lib_setup()
 {
 	post("xsample objects, version " XSAMPLE_VERSION ", (C)2001,2002 Thomas Grill");
-	post("xsample: xrecord~, xplay~, xgroove~ - send objects a 'help' message to get assistance");
+	post("xsample: xrecord~, xplay~, xspeed~ - send objects a 'help' message to get assistance");
 	post("");
 
 	// call the objects' setup routines
 	FLEXT_TILDE_SETUP(xrecord);
 	FLEXT_TILDE_SETUP(xplay);
+	FLEXT_TILDE_SETUP(xspeed);
 	FLEXT_TILDE_SETUP(xgroove);
 }
 
@@ -67,8 +68,7 @@ I xsample::m_set(I argc, t_atom *argv)
 
 V xsample::m_refresh()
 {
-	if(buf->Set())	
-		m_dsp(0,NULL,NULL); // channel count may have changed
+	if(buf->Set())	s_dsp(); // channel count may have changed
 	
 	m_min((F)curmin*s2u); // also checks pos
 	m_max((F)curmax*s2u); // also checks pos
@@ -76,8 +76,7 @@ V xsample::m_refresh()
 
 V xsample::m_reset()
 {
-	if(buf->Set())	
-		m_dsp(0,NULL,NULL); // channel count may have changed
+	if(buf->Set())	s_dsp(); // channel count may have changed
 	
 	m_units();
 	m_sclmode();	
@@ -111,7 +110,11 @@ V xsample::m_units(xs_unit mode)
 	}
 }
 
-V xsample::m_interp(xs_intp mode) { interp = mode; }
+V xsample::m_interp(xs_intp mode) 
+{ 
+	interp = mode; 
+	s_dsp(); 
+}
 
 V xsample::m_sclmode(xs_sclmd mode)
 {
@@ -161,3 +164,14 @@ V xsample::m_all()
 	curlen = (curmax = buf->Frames())-(curmin = 0);
 	m_sclmode();
 }
+
+V xsample::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
+{
+	// this is hopefully called at change of sample rate ?!
+
+	m_refresh();  
+	s_dsp();
+}
+
+
+
