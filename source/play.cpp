@@ -60,7 +60,7 @@ private:
 
 	static t_int *dspmeth(t_int *w) 
 	{ 
-		thisClass(w+1)->signal((I)w[2],(const F *)w[3],(F *)w[4]); 
+		((xplay_obj *)w[1])->signal((I)w[2],(const F *)w[3],(F *)w[4]); 
 		return w+5;
 	}
 };
@@ -174,7 +174,7 @@ V xplay_obj::signal(I n,const F *pos,F *sig)
 V xplay_obj::m_dsp(t_signal **sp)
 {
 	m_units();  // method_dsp hopefully called at change of sample rate ?!
-	dsp_add(dspmeth, 4,x_obj,sp[0]->s_n,sp[0]->s_vec,sp[1]->s_vec);
+	dsp_add(dspmeth, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1]->s_vec);
 }
 
 

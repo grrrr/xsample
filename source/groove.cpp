@@ -71,7 +71,7 @@ private:
 
 	static t_int *dspmeth(t_int *w) 
 	{ 
-		thisClass(w+1)->signal((I)w[2],(const F *)w[3],(F *)w[4],(F *)w[5]); 
+		((xgroove_obj *)w[1])->signal((I)w[2],(const F *)w[3],(F *)w[4],(F *)w[5]); 
 		return w+6;
 	}
 
@@ -341,7 +341,7 @@ V xgroove_obj::signal(I n,const F *speed,F *sig,F *pos)
 V xgroove_obj::m_dsp(t_signal **sp)
 {
 	setbuf();  // method_dsp hopefully called at change of sample rate ?!
-	dsp_add(dspmeth, 5,x_obj,sp[0]->s_n,sp[0]->s_vec,sp[1]->s_vec,sp[2]->s_vec);
+	dsp_add(dspmeth, 5,this,sp[0]->s_n,sp[0]->s_vec,sp[1]->s_vec,sp[2]->s_vec);
 }
 
 
