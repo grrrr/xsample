@@ -39,7 +39,7 @@ public:
 	virtual BL m_reset();
 
 	virtual V m_pos(F pos);
-	V m_posmod(F pos); 
+	inline V m_posmod(F pos) { setposmod(pos?pos/s2u:0); } // motivated by Tim Blechmann
 	virtual V m_all();
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
@@ -218,7 +218,7 @@ xgroove::xgroove(I argc,const t_atom *argv):
 	
 	znbuf = new S *[outchns];
 	for(I i = 0; i < outchns; ++i) znbuf[i] = new S[0];
-	znpos = new S[0]; // don't know vector size yet -> m_dsp
+	znpos = new S[0]; // don't know vector size yet -> wait for m_dsp
 	znidx = new S[0];
 	znmul = new S[XZONE_TABLE+1];
 	m_xshape();
@@ -248,9 +248,9 @@ BL xgroove::Init()
 		
 V xgroove::m_units(xs_unit mode)
 {
-	xsample::m_units(mode);
+	xsample::m_units(mode);  // calls bufchk()
 	
-	m_sclmode();
+	m_sclmode();  // calls bufchk() again.... \todo optimize that!!
 	outputmin();
 	outputmax();
 }
@@ -274,12 +274,6 @@ V xgroove::m_max(F mx)
 V xgroove::m_pos(F pos)
 {
 	setpos(pos?pos/s2u:0);
-}
-
-// motivated by Tim Blechmann
-V xgroove::m_posmod(F pos)
-{
-	setposmod(pos?pos/s2u:0);
 }
 
 V xgroove::m_all()
