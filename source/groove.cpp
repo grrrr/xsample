@@ -39,6 +39,7 @@ public:
 	virtual BL m_reset();
 
 	virtual V m_pos(F pos);
+	V m_posmod(F pos);
 	virtual V m_all();
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
@@ -79,9 +80,16 @@ protected:
 	
 	inline V setpos(F pos)
 	{
-		if(pos < znsmin) pos = znsmin;
-		else if(pos > znsmax) pos = znsmax;
-		curpos = pos;
+		if(pos < znsmin) curpos = znsmin;
+		else if(pos > znsmax) curpos = znsmax;
+		else curpos = pos;
+	}
+
+	inline V setposmod(F pos)
+	{
+		F p = pos-znsmin;
+		if(p >= 0) curpos = znsmin+fmod(p,znsmax-znsmin);
+		else curpos = znsmax+fmod(p,znsmax-znsmin);
 	}
 
 	inline V mg_pos(F &v) const { v = curpos*s2u; }
@@ -116,6 +124,7 @@ private:
 	}
 
 	FLEXT_CALLBACK_F(m_pos)
+	FLEXT_CALLBACK_F(m_posmod)
 	FLEXT_CALLBACK_F(m_min)
 	FLEXT_CALLBACK_F(m_max)
 	FLEXT_CALLBACK(m_all)
@@ -150,6 +159,7 @@ V xgroove::setup(t_classid c)
 	FLEXT_CADDATTR_VAR(c,"min",mg_min,m_min); 
 	FLEXT_CADDATTR_VAR(c,"max",mg_max,m_max);
 	FLEXT_CADDATTR_VAR(c,"pos",mg_pos,m_pos);
+	FLEXT_CADDMETHOD_(c,0,"posmod",m_posmod);
 
 	FLEXT_CADDATTR_VAR_E(c,"loop",loopmode,m_loop);
 
@@ -264,6 +274,11 @@ V xgroove::m_max(F mx)
 V xgroove::m_pos(F pos)
 {
 	setpos(pos?pos/s2u:0);
+}
+
+V xgroove::m_posmod(F pos)
+{
+	setposmod(pos?pos/s2u:0);
 }
 
 V xgroove::m_all()
@@ -810,6 +825,7 @@ V xgroove::m_help()
 	post("\t@max {unit}: set maximum playing point");
 	post("\tall: select entire buffer length");
 	post("\tpos {unit}: set playing position (obeying the current scale mode)");
+	post("\tposmod {unit}: set playing position (modulo into min/max range)");
 	post("\tbang/start: start playing");
 	post("\tstop: stop playing");
 	post("\trefresh: checks buffer and refreshes outlets");
