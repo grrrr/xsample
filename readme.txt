@@ -12,22 +12,21 @@ Visit https://www.paypal.com/xclick/business=t.grill%40gmx.net&item_name=xsample
 IMPORTANT INFORMATION for all MaxMSP users:
 
 1) 
-For OSX it is best to put the xsample file somewhere in your Max/MSP search path and drop the file 
-xsample-objectmappings.txt into the folder /Library/Application Support/Cycling '74/init .
+For Mac OSX it is best to put the max-osx/xsample.mxd file into the folder 
+/Library/Application Support/Cycling '74/externals
+and the file maxmsp/xsample-objectmappings.txt into the folder 
+/Library/Application Support/Cycling '74/init .
 
-For Windows put the xsample file somewhere in your Max/MSP search path and drop the file
-xsample-objectmappings-win.txt in
+For Windows put the max-msvc\xsample.mxe file into the folder
+C:\program files\common files\Cycling '74\externals (english version)
+and the file maxmsp/xsample-objectmappings.txt in
 C:\program files\common files\Cycling '74\init (english version)
-or
-C:\Programme\Gemeinsame Dateien\Cycling '74\init (german version)
+
+Put the maxmsp/xsample.help file into the max-help folder.
 
 2) 
-Otherwise (or for OS9) it is advisable to put the xsample shared library file into the "max-startup" folder. 
-Hence it will be loaded at Max startup.
-
-3) 
-If you want to load the xsample library on demand, use the "install" option of the Max file menu
-and point it to the xsample file or create a [xsample] object in Max/MSP.
+Alternatively (or for OS9) it is advisable to put the xsample.mxd or xsample.mxe file 
+into the "max-startup" folder. Hence it will be loaded at Max startup.
 
 ----------------------------------------------------------------------------
 
@@ -46,7 +45,7 @@ see http://www.parasitaere-kapazitaeten.net/ext
 Package files:
 - readme.txt: this one
 - gpl.txt,license.txt: GPL license stuff
-- main.h,main.cpp,inter.cpp,inter.ci: base class definition for all the other objects
+- main.h,main.cpp,inter.cpp,inter.h: base class definition for all the other objects
 - record.cpp: xrecord~
 - play.cpp: xplay~
 - groove.cpp: xgroove~
@@ -60,15 +59,15 @@ The package should at least compile (and is tested) with the following compilers
 
 pd - Windows:
 -------------
-o Microsoft Visual C++ 6 command line: edit "config-pd-msvc.txt" and run "build-pd-msvc.bat"
-
-o Microsoft Visual C++ 6 IDE: edit "xsample.dsp" project file
-> due to a compiler bug the optimization using templates is not functional
+o Microsoft Visual C++ 6 or .NET command line: edit "config-pd-msvc.txt" and run "build-pd-msvc.bat"
 
 o BCC: edit "config-pd-bcc.txt" and run "build-pd-bcc.bat"
 
 o Cygwin GCC: edit "config-pd-cygwin.txt" and run "sh ./build-pd-cygwin.sh"
 > various versions of GCC die during compile with template optimization turned on 
+
+o MinGW: edit "config-pd-mingw.txt" and run "build-pd-mingw.bat"
+> MinGW binary folder must be included in the system path!
 
 pd - linux:
 -----------
@@ -82,13 +81,17 @@ o GCC: edit "config-pd-darwin.txt" and run "sh ./build-pd-darwin.sh"
 
 Max/MSP - MacOS9:
 ----------------
-o Metrowerks CodeWarrior: edit "xsample.cw" project file functions
+o Metrowerks CodeWarrior: "xsample.cw" project file
 
 o Apple MPW-PR: edit & use the "flext.mpw" makefile
 
 Max/MSP - MacOSX:
 ----------------
-o Metrowerks CodeWarrior: edit "xsample.cw" project file functions
+o Metrowerks CodeWarrior: "xsample.cw" project file
+
+Max/MSP - Windows:
+----------------
+o Microsoft Visual C++ 6 or .NET command line: edit "config-max-msvc.txt" and run "build-max-msvc.bat"
 
 
 ----------------------------------------------------------------------------
@@ -102,7 +105,7 @@ Goals/features of the package:
 - multi-channel capability 
 - live update of respective buffer/array content
 - switchable 4-point or linear interpolation for xplay~/xgroove~ object
-- cross-fading loop zone (inside or outside to loop) for xgroove~
+- cross-fading loop zone for xgroove~
 
 ----------------------------------------------------------------------------
 

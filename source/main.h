@@ -12,15 +12,15 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #define __XSAMPLE_H
 
 
-#define XSAMPLE_VERSION "0.3.0pre20"
+#define XSAMPLE_VERSION "0.3.0"
 
 
 #define FLEXT_ATTRIBUTES 1 
 
 #include <flext.h>
 
-#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 405)
-#error You need at least flext version 0.4.5
+#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 406)
+#error You need at least flext version 0.4.6
 #endif
 
 

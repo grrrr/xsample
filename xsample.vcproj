@@ -289,11 +289,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="maxapi.lib maxext.lib maxaudio.lib "
+				AdditionalDependencies="maxapi.lib  maxaudio.lib "
 				OutputFile="max-msvc\d\xsample.mxe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="&quot;F:\prog\audio\MaxWinSDK\c74support\max-includes\win-includes\debug&quot;;&quot;F:\prog\audio\MaxWinSDK\c74support\msp-includes\win-includes\debug&quot;;..\flext\max-msvc"
+				AdditionalLibraryDirectories="&quot;F:\prog\audio\MaxWinSDK\c74support\max-includes&quot;;&quot;F:\prog\audio\MaxWinSDK\c74support\msp-includes&quot;;..\flext\max-msvc"
 				GenerateDebugInformation="TRUE"
 				TargetMachine="1"/>
 			<Tool
@@ -342,7 +342,7 @@
 				AdditionalIncludeDirectories="F:\prog\audio\MaxWinSDK\c74support\max-includes,F:\prog\audio\MaxWinSDK\c74support\msp-includes,f:\prog\packs\pthreads;..\flext\source"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1"
 				StringPooling="TRUE"
-				RuntimeLibrary="4"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
@@ -352,11 +352,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="maxapi.lib maxext.lib maxaudio.lib "
+				AdditionalDependencies="maxapi.lib  maxaudio.lib "
 				OutputFile="max-msvc\xsample.mxe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="&quot;F:\prog\audio\MaxWinSDK\c74support\max-includes\win-includes\release&quot;;&quot;F:\prog\audio\MaxWinSDK\c74support\msp-includes\win-includes\release&quot;;..\flext\max-msvc"
+				AdditionalLibraryDirectories="&quot;F:\prog\audio\MaxWinSDK\c74support\max-includes&quot;;&quot;F:\prog\audio\MaxWinSDK\c74support\msp-includes&quot;;&quot;..\flext\max-msvc&quot;"
 				ImportLibrary=".\max-msvc\r/xsample.lib"
 				TargetMachine="1"/>
 			<Tool

@@ -28,13 +28,6 @@ static V xsample_main()
 	FLEXT_DSP_SETUP(xrecord);
 	FLEXT_DSP_SETUP(xplay);
 	FLEXT_DSP_SETUP(xgroove);
-	
-#if FLEXT_SYS == FLEXT_SYS_MAX
-	finder_addclass((C *)"MSP Sampling",(C *)"xgroove~");
-	finder_addclass((C *)"MSP Sampling",(C *)"xplay~");
-	finder_addclass((C *)"MSP Sampling",(C *)"xrecord~");
-#endif
-
 }
 
 // setup the library

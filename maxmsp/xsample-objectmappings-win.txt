@@ -1,3 +1,0 @@
-max objectfile xgroove~ xsample;
-max objectfile xplay~ xsample;
-max objectfile xrecord~ xsample;
