@@ -13,7 +13,7 @@
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="Release|Win32"
+			Name="PD Release|Win32"
 			OutputDirectory=".\pd-msvc\r"
 			IntermediateDirectory=".\pd-msvc\r"
 			ConfigurationType="2"
@@ -30,6 +30,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
+				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\pd-msvc\r/xsample.pch"
 				AssemblerListingLocation=".\pd-msvc\r/"
@@ -80,7 +81,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Debug|Win32"
+			Name="PD Debug|Win32"
 			OutputDirectory=".\pd-msvc\d"
 			IntermediateDirectory=".\pd-msvc\d"
 			ConfigurationType="2"
@@ -147,6 +148,209 @@
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
+		<Configuration
+			Name="PD Shared Release|Win32"
+			OutputDirectory=".\pd-msvc\s"
+			IntermediateDirectory=".\pd-msvc\s"
+			ConfigurationType="2"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				OptimizeForProcessor="2"
+				AdditionalIncludeDirectories="f:\prog\pd\pd-cvs\src,f:\prog\packs\pthreads;..\flext\source"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\pd-msvc\r/xsample.pch"
+				AssemblerListingLocation=".\pd-msvc\r/"
+				ObjectFile=".\pd-msvc\r/"
+				ProgramDataBaseFileName=".\pd-msvc\r/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="pd.lib"
+				OutputFile="pd-msvc\s\xsample.dll"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="f:\prog\pd\pd-cvs\bin;..\flext\pd-msvc"
+				ProgramDatabaseFile=".\pd-msvc\r/xsample.pdb"
+				ImportLibrary=".\pd-msvc\s/xsample.lib"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="TRUE"
+				SuppressStartupBanner="TRUE"
+				TargetEnvironment="1"
+				TypeLibraryName=".\pd-msvc\r/xsample.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="3079"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Max Shared Release|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				OptimizeForProcessor="2"
+				AdditionalIncludeDirectories="F:\prog\audio\MaxWinSDK\c74support\max-includes,F:\prog\audio\MaxWinSDK\c74support\msp-includes,f:\prog\packs\pthreads;..\flext\source"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1;FLEXT_SHARED"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\pd-msvc\r/xsample.pch"
+				AssemblerListingLocation=".\pd-msvc\r/"
+				ObjectFile=".\pd-msvc\r/"
+				ProgramDataBaseFileName=".\pd-msvc\r/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="maxapi.lib maxext.lib maxaudio.lib "
+				OutputFile="max-msvc\s\xsample.mxe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="&quot;F:\prog\audio\MaxWinSDK\c74support\max-includes\win-includes\release&quot;;&quot;F:\prog\audio\MaxWinSDK\c74support\msp-includes\win-includes\release&quot;;..\flext\max-msvc"
+				ProgramDatabaseFile=".\max-msvc\d/xsample.pdb"
+				ImportLibrary=".\max-msvc\d/xsample.lib"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="TRUE"
+				SuppressStartupBanner="TRUE"
+				TargetEnvironment="1"
+				TypeLibraryName=".\pd-msvc\r/xsample.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="3079"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Max Debug|Win32"
+			OutputDirectory=".\max-msvc\d"
+			IntermediateDirectory=".\max-msvc\d"
+			ConfigurationType="2"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				InlineFunctionExpansion="0"
+				OptimizeForProcessor="2"
+				AdditionalIncludeDirectories="F:\prog\audio\MaxWinSDK\c74support\max-includes,F:\prog\audio\MaxWinSDK\c74support\msp-includes,f:\prog\packs\pthreads;..\flext\source"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1"
+				StringPooling="TRUE"
+				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\pd-msvc\r/xsample.pch"
+				AssemblerListingLocation=".\pd-msvc\r/"
+				ObjectFile=".\pd-msvc\r/"
+				ProgramDataBaseFileName=".\pd-msvc\r/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="3"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="maxapi.lib maxext.lib maxaudio.lib "
+				OutputFile="max-msvc\d\xsample.mxe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="&quot;F:\prog\audio\MaxWinSDK\c74support\max-includes\win-includes\debug&quot;;&quot;F:\prog\audio\MaxWinSDK\c74support\msp-includes\win-includes\debug&quot;;..\flext\max-msvc"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile=".\pd-msvc\r/xsample.pdb"
+				ImportLibrary=".\max-msvc\s/xsample.lib"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="TRUE"
+				SuppressStartupBanner="TRUE"
+				TargetEnvironment="1"
+				TypeLibraryName=".\pd-msvc\r/xsample.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="3079"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -164,7 +368,7 @@
 		<File
 			RelativePath="source\groove.cpp">
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="PD Release|Win32">
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
@@ -172,7 +376,7 @@
 					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;$(NoInherit)"/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="PD Debug|Win32">
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
@@ -180,12 +384,36 @@
 					PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;$(NoInherit)"
 					BasicRuntimeChecks="3"
 					BrowseInformation="1"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="PD Shared Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Max Shared Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Max Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1"/>
 			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="source\inter.cpp">
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="PD Release|Win32">
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
@@ -193,7 +421,7 @@
 					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;$(NoInherit)"/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="PD Debug|Win32">
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
@@ -201,6 +429,30 @@
 					PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;$(NoInherit)"
 					BasicRuntimeChecks="3"
 					BrowseInformation="1"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="PD Shared Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Max Shared Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Max Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1"/>
 			</FileConfiguration>
 		</File>
 		<File
@@ -209,7 +461,7 @@
 		<File
 			RelativePath="source\main.cpp">
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="PD Release|Win32">
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
@@ -217,7 +469,7 @@
 					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;$(NoInherit)"/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="PD Debug|Win32">
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
@@ -225,6 +477,30 @@
 					PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;$(NoInherit)"
 					BasicRuntimeChecks="3"
 					BrowseInformation="1"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="PD Shared Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Max Shared Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Max Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1"/>
 			</FileConfiguration>
 		</File>
 		<File
@@ -233,7 +509,7 @@
 		<File
 			RelativePath="source\play.cpp">
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="PD Release|Win32">
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
@@ -241,7 +517,7 @@
 					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;$(NoInherit)"/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="PD Debug|Win32">
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
@@ -249,12 +525,36 @@
 					PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;$(NoInherit)"
 					BasicRuntimeChecks="3"
 					BrowseInformation="1"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="PD Shared Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Max Shared Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Max Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1"/>
 			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="source\record.cpp">
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="PD Release|Win32">
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
@@ -262,7 +562,7 @@
 					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;$(NoInherit)"/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="PD Debug|Win32">
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
@@ -270,6 +570,30 @@
 					PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;$(NoInherit)"
 					BasicRuntimeChecks="3"
 					BrowseInformation="1"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="PD Shared Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Max Shared Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;FLEXT_SYS=2;FLEXT_SHARED"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Max Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1"/>
 			</FileConfiguration>
 		</File>
 	</Files>
