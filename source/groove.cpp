@@ -490,8 +490,8 @@ static V method_help(extobject *x)
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001 - version " VERSION " compiled on " __DATE__ " " __TIME__);
 	post("Arguments: " OBJNAME " [buffer] [units = %i] [sclmode = %i] [loop = 0] [interp = 1]",(I)DEF_UNITS,(I)DEF_SCLMODE);
-	post("Inlets: 1:Messages/Speed signal, 2:Min position, 3: Max position");
-	post("Outlets: 1:Audio signal, 2:Position signal");	
+	post("Inlets: 1:Messages/Speed signal, 2:Min position, 3:Max position");
+	post("Outlets: 1:Audio signal, 2:Position signal, 3:Min position (rounded), 4:Max position (rounded)");	
 	post("Methods:");
 	post("\thelp: shows this help");
 	post("\tset [name]: set buffer or reinit");

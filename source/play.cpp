@@ -143,7 +143,7 @@ V extobject::setbuf(t_symbol *s)
 				post(OBJNAME ": buffer object '%s' - ???:%i samples:%i channels:%i buflen:%i",bufname->s_name,p->b_valid,p->b_frames,p->b_nchans,p->b_size);
 #endif
 				buf = p->b_samples;
-				bchns = p->b_chans;
+				bchns = p->b_nchans;
 				buflen = p->b_size;
 			}
 		}
