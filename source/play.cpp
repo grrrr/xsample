@@ -24,6 +24,8 @@ class xplay:
 public:
 	xplay(I argc, t_atom *argv);
 	
+	virtual BL Init();
+		
 #ifdef MAXMSP
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
@@ -80,11 +82,20 @@ xplay::xplay(I argc, t_atom *argv)
 
 	AddInSignal();  // pos signal
 	AddOutSignal(outchns);
-	SetupInOut();
 	
 	m_reset();
 }
 
+BL xplay::Init()
+{
+	if(xinter::Init()) {
+		m_reset();
+		return true;
+	}
+	else
+		return false;
+}
+		
 
 
 V xplay::m_help()

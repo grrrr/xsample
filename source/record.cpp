@@ -24,6 +24,8 @@ class xrecord:
 public:
 	xrecord(I argc,t_atom *argv);
 	
+	virtual BL Init();
+		
 #ifdef MAXMSP
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
@@ -140,7 +142,6 @@ xrecord::xrecord(I argc,t_atom *argv):
 	AddOutSignal();  // pos signal
 	AddOutFloat(2); // min & max
 	AddOutBang();  // loop bang
-	SetupInOut();
 
 	FLEXT_ADDMETHOD_F(0,"pos",m_pos);
 	FLEXT_ADDMETHOD(inchns+1,m_min);
@@ -155,14 +156,22 @@ xrecord::xrecord(I argc,t_atom *argv):
 	FLEXT_ADDMETHOD_B(0,"append",m_append);
 	
 	FLEXT_ADDMETHOD_(0,"draw",m_draw);
-
-	outmin = GetOut(1);
-	outmax = GetOut(2);
-	
-	m_reset();
 }
 
 
+BL xrecord::Init()
+{
+	if(xsample::Init()) {
+		outmin = GetOut(1);
+		outmax = GetOut(2);
+		
+		m_reset();
+		return true;
+	}
+	else
+		return false;
+}
+		
 V xrecord::m_units(xs_unit mode)
 {
 	xsample::m_units(mode);

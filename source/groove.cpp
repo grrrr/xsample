@@ -29,6 +29,8 @@ public:
 	xgroove(I argc,t_atom *argv);
 	~xgroove();
 
+	virtual BL Init();
+		
 #ifdef MAXMSP
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
@@ -166,7 +168,6 @@ xgroove::xgroove(I argc,t_atom *argv):
 	AddOutSignal(); // position
 	AddOutFloat(2); // play min & max	
 	AddOutBang();  // loop bang
-	SetupInOut();
 	
 	FLEXT_ADDMETHOD(1,m_min);
 	FLEXT_ADDMETHOD(2,m_max);
@@ -181,16 +182,11 @@ xgroove::xgroove(I argc,t_atom *argv):
 	FLEXT_ADDMETHOD_(0,"xshape",m_xshape);
 	FLEXT_ADDMETHOD_B(0,"xkeep",m_xkeep);
 
-	outmin = GetOut(outchns+1);
-	outmax = GetOut(outchns+2);
-
 	znbuf = new S *[outchns];
 	for(I i = 0; i < outchns; ++i) znbuf[i] = new S[0];
 	znpos = new S[0];
 	znidx = new S[0];
 	m_xshape();
-
-	m_reset();
 }
 
 xgroove::~xgroove()
@@ -205,6 +201,19 @@ xgroove::~xgroove()
 	if(znidx) delete[] znidx;
 }
 
+BL xgroove::Init()
+{
+	if(xinter::Init()) {
+		outmin = GetOut(outchns+1);
+		outmax = GetOut(outchns+2);
+
+		m_reset();
+		return true;
+	}
+	else
+		return false;
+}
+		
 V xgroove::m_units(xs_unit mode)
 {
 	xsample::m_units(mode);
