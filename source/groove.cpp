@@ -66,9 +66,9 @@ private:
 	DEFSIGFUN(xgroove)	
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is my dsp method
 
-	FLEXT_CALLBACK_1(m_pos,F)
-	FLEXT_CALLBACK_1(m_min,F)
-	FLEXT_CALLBACK_1(m_max,F)
+	FLEXT_CALLBACK_F(m_pos)
+	FLEXT_CALLBACK_F(m_min)
+	FLEXT_CALLBACK_F(m_max)
 
 	FLEXT_CALLBACK_B(m_loop)
 };
@@ -121,11 +121,11 @@ xgroove::xgroove(I argc,t_atom *argv):
 
 	FLEXT_ADDMETHOD(1,m_min);
 	FLEXT_ADDMETHOD(2,m_max);
-	FLEXT_ADDMETHOD_1(0,"min",m_min,F); 
-	FLEXT_ADDMETHOD_1(0,"max",m_max,F);
-	FLEXT_ADDMETHOD_1(0,"pos",m_pos,F);
+	FLEXT_ADDMETHOD_F(0,"min",m_min); 
+	FLEXT_ADDMETHOD_F(0,"max",m_max);
+	FLEXT_ADDMETHOD_F(0,"pos",m_pos);
 
-	FLEXT_ADDMETHOD_1(0,"loop",m_loop,BL);
+	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
 
 
 	outmin = get_out(outchns+1);

@@ -111,9 +111,9 @@ private:
 	FLEXT_CALLBACK(m_refresh)
 	FLEXT_CALLBACK(m_reset)
 
-	FLEXT_CALLBACK_E(m_units,xs_unit)
-	FLEXT_CALLBACK_E(m_interp,xs_intp)
-	FLEXT_CALLBACK_E(m_sclmode,xs_sclmd)
+	FLEXT_CALLBACK_1(m_units,xs_unit)
+	FLEXT_CALLBACK_1(m_interp,xs_intp)
+	FLEXT_CALLBACK_1(m_sclmode,xs_sclmd)
 };
 
 

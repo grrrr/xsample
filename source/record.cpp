@@ -67,9 +67,9 @@ private:
 	DEFSIGFUN(xrecord)
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is the dsp method
 
-	FLEXT_CALLBACK_1(m_pos,F)
-	FLEXT_CALLBACK_1(m_min,F)
-	FLEXT_CALLBACK_1(m_max,F)
+	FLEXT_CALLBACK_F(m_pos)
+	FLEXT_CALLBACK_F(m_min)
+	FLEXT_CALLBACK_F(m_max)
 
 	FLEXT_CALLBACK_B(m_loop)
 	FLEXT_CALLBACK_B(m_mixmode)
@@ -128,16 +128,16 @@ xrecord::xrecord(I argc,t_atom *argv):
 	add_out_float(2); // min & max
 	setup_inout();
 
-	FLEXT_ADDMETHOD_1(0,"pos",m_pos,F);
+	FLEXT_ADDMETHOD_F(0,"pos",m_pos);
 	FLEXT_ADDMETHOD(inchns+1,m_min);
 	FLEXT_ADDMETHOD(inchns+2,m_max);
-	FLEXT_ADDMETHOD_1(0,"min",m_min,F);
-	FLEXT_ADDMETHOD_1(0,"max",m_max,F);
+	FLEXT_ADDMETHOD_F(0,"min",m_min);
+	FLEXT_ADDMETHOD_F(0,"max",m_max);
 	
-	FLEXT_ADDMETHOD_1(0,"loop",m_loop,BL);
-	FLEXT_ADDMETHOD_1(0,"mixmode",m_mixmode,BL);
-	FLEXT_ADDMETHOD_1(0,"sigmode",m_sigmode,BL);
-	FLEXT_ADDMETHOD_1(0,"append",m_append,BL);
+	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
+	FLEXT_ADDMETHOD_B(0,"mixmode",m_mixmode);
+	FLEXT_ADDMETHOD_B(0,"sigmode",m_sigmode);
+	FLEXT_ADDMETHOD_B(0,"append",m_append);
 	
 	FLEXT_ADDMETHOD_(0,"draw",m_draw);
 

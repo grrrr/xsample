@@ -10,8 +10,6 @@
 MAKEFILE        = xsample.mpw
 ÄMondoBuildÄ    = {MAKEFILE}  # Make blank to avoid rebuilds when makefile is modified
 
-Name			= xsample
-
 ObjDir          = ::MPW:
 MaxSDK			= HD Daten:Prog Stuff:Max/MSP SDK:SDK Examples
 flext			= :::flext:
@@ -19,7 +17,7 @@ Includes        = -i :,"{flext}","{MaxSDK}:Max Includes","{MaxSDK}:MSP Includes"
 Defines			= -d MAXMSP
 
 Sym-PPC         = -sym off
-Flags			= -bool on -includes unix -opt speed 
+Flags			= -bool on -includes unix -opt speed,unroll,unswitch  
 WarnOff			= -w 35
 
 PPCCPlusOptions = {Includes} {Sym-PPC} {Defines} {Flags} {WarnOff}
@@ -33,8 +31,8 @@ Headers			=  main.h
 ### Object Files ###
 
 Obj-groove    =  è
-				  "{ObjDir}groove.cpp.x" è
-				  "{ObjDir}main.cpp.x" 
+				  "{ObjDir}main.cpp.x" è
+				  "{ObjDir}groove.cpp.x" 
 
 Obj-play      =  è
 				  "{ObjDir}main.cpp.x" è
@@ -44,12 +42,12 @@ Obj-record    =  è
 				  "{ObjDir}main.cpp.x" è
 				  "{ObjDir}record.cpp.x"
 
+### Libraries ###
+
 LibFiles-Ext    =  è
 				  "{flext}MPW:flext.o" è
 				  "{MaxSDK}:Max Includes:MaxLib" è
 				  "{MaxSDK}:MSP Includes:MaxAudioLib"
-
-### Libraries ###
 
 LibFiles-PPC    =  è
 				  "{SharedLibraries}StdCLib" è
@@ -69,29 +67,40 @@ LibFiles-PPC    =  è
 
 ### Build Rules ###
 
-{Name} ü Folder {ObjDir}xgroove~ {ObjDir}xplay~ {ObjDir}xrecord~
+all ü Folder {ObjDir}xgroove~ {ObjDir}xplay~ {ObjDir}xrecord~
 
 Folder ü
 	if !`Exists {ObjDir}` ; NewFolder {ObjDir} ; end
 
-{ObjDir}xgroove~  üü  {Obj-groove} {LibFiles-Ext} {LibFiles-PPC} 
+{ObjDir}xgroove~  üü  {Obj-groove}  {LibFiles-Ext} 
 	PPCLink è
-		-o {Targ} -export main è
-		{Deps} è
+		-o {Targ} è
+		{deps} è
+		{LibFiles-PPC} è
 		{Sym-PPC} è
-		-mf -d -t 'iLaF' -c 'max2' -xm s
+		-mf -d è
+		-t 'iLaF' -c 'max2' è
+		-xm s è
+		-export main -main main
 
-{ObjDir}xplay~  üü  {Obj-play} {LibFiles-Ext} {LibFiles-PPC} 
+{ObjDir}xplay~  üü  {Obj-play}  {LibFiles-Ext} 
 	PPCLink è
-		-o {Targ} -export main è
-		{Deps} è
+		-o {Targ} è
+		{deps} è
+		{LibFiles-PPC} è
 		{Sym-PPC} è
-		-mf -d -t 'iLaF' -c 'max2' -xm s
+		-mf -d è
+		-t 'iLaF' -c 'max2' è
+		-xm s è
+		-export main -main main
 
-{ObjDir}xrecord~  üü  {Obj-record} {LibFiles-Ext} {LibFiles-PPC} 
+{ObjDir}xrecord~  üü  {Obj-record}  {LibFiles-Ext} 
 	PPCLink è
-		-o {Targ} -export main è
-		{Deps} è
+		-o {Targ} è
+		{deps} è
+		{LibFiles-PPC} è
 		{Sym-PPC} è
-		-mf -d -t 'iLaF' -c 'max2' -xm s
-
+		-mf -d è
+		-t 'iLaF' -c 'max2' è
+		-xm s è
+		-export main -main main
