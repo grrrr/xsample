@@ -69,7 +69,7 @@ protected:
 	I xshape;
 	F xshparam;
 	F znmin,znmax;
-	I xkeep;
+	BL xkeep;
 	S **znbuf;
 	S *znpos,*znmul,*znidx;
 	I pblksz;

@@ -14,15 +14,15 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 // Initialization function for xsample library
 static V xsample_main()
 {
-	post("-------------------------------");
-	post("xsample objects, version " XSAMPLE_VERSION);
-    post("");
-	post("  xrecord~, xplay~, xgroove~   ");
-    post("  (C)2001-2003 Thomas Grill    ");
+	flext::post("-------------------------------");
+	flext::post("xsample objects, version " XSAMPLE_VERSION);
+    flext::post("");
+	flext::post("  xrecord~, xplay~, xgroove~   ");
+    flext::post("  (C)2001-2003 Thomas Grill    ");
 #ifdef FLEXT_DEBUG
-    post("          DEBUG BUILD          ");
+    flext::post("          DEBUG BUILD          ");
 #endif
-	post("-------------------------------");
+	flext::post("-------------------------------");
 
 	// call the objects' setup routines
 	FLEXT_DSP_SETUP(xrecord);
