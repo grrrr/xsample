@@ -1,4 +1,4 @@
-/* 
+/*
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
@@ -16,8 +16,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
  
 #include <flext.h>
 
-#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 202)
-#error You need at least flext version 0.2.2
+#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 300)
+#error You need at least flext version 0.3.0
 #endif
 
 
@@ -32,7 +32,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	#define TMPLOPT 
 #elif defined(__GNUC__)
 // GNUC 2.95.2 dies at compile with <int,int> templates
-	#define TMPLOPT
+//	#define TMPLOPT  // only workable with gcc >= 3.0
 #elif defined(__MWERKS__)
 // CodeWarrior can't take address of a template member function 
 	#define TMPLOPT
@@ -119,7 +119,7 @@ private:
 	FLEXT_CALLBACK(m_start)
 	FLEXT_CALLBACK(m_stop)
 
-	FLEXT_CALLBACK_G(m_set)
+	FLEXT_CALLBACK_V(m_set)
 	FLEXT_CALLBACK(m_print)
 	FLEXT_CALLBACK(m_refresh)
 	FLEXT_CALLBACK(m_reset)

@@ -1,4 +1,4 @@
-/* 
+/*
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
@@ -43,7 +43,7 @@ private:
 	}
 };
 
-FLEXT_LIB_TILDE_G("xplay~",xplay)
+FLEXT_LIB_DSP_V("xplay~",xplay)
 
 /*
 V xplay::setup(t_class *)

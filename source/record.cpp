@@ -1,4 +1,4 @@
-/* 
+/*
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
@@ -90,11 +90,11 @@ private:
 	FLEXT_CALLBACK_B(m_sigmode)
 	FLEXT_CALLBACK_B(m_append)
 
-	FLEXT_CALLBACK_G(m_draw)
+	FLEXT_CALLBACK_V(m_draw)
 };
 
 
-FLEXT_LIB_TILDE_G("xrecord~",xrecord)
+FLEXT_LIB_DSP_V("xrecord~",xrecord)
 
 /*
 V xrecord::setup(t_class *)

@@ -1,4 +1,4 @@
-/* 
+/*
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
@@ -18,9 +18,9 @@ V lib_setup()
 	post("");
 
 	// call the objects' setup routines
-	FLEXT_TILDE_SETUP(xrecord);
-	FLEXT_TILDE_SETUP(xplay);
-	FLEXT_TILDE_SETUP(xgroove);
+	FLEXT_DSP_SETUP(xrecord);
+	FLEXT_DSP_SETUP(xplay);
+	FLEXT_DSP_SETUP(xgroove);
 }
 
 // setup the library

@@ -1,4 +1,4 @@
-/* 
+/*
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
@@ -104,7 +104,7 @@ private:
 };
 
 
-FLEXT_LIB_TILDE_G("xgroove~",xgroove)
+FLEXT_LIB_DSP_V("xgroove~",xgroove)
 
 /*
 V xgroove::setup(t_class *)
