@@ -1,5 +1,5 @@
 # xsample - extended sample objects for Max/MSP and pd (pure data)
-# Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
+# Copyright (c) 2001-2004 Thomas Grill (xovo@gmx.net)
 #
 # Makefile for gcc @ OSX (darwin)
 #
@@ -13,21 +13,28 @@ CONFIG=config-pd-darwin.txt
 
 include ${CONFIG}
 
-FLEXTLIB=$(FLEXTPATH)/libflext.a
-
 # compiler stuff
 INCLUDES=$(PDINC) 
 FLAGS=-DFLEXT_SYS=2
-CFLAGS=${UFLAGS} -dynamic -O2 -Wno-unused -Wno-parentheses -Wno-switch -Wstrict-prototypes -funroll-loops -fmove-all-movables -frerun-loop-opt -fno-rtti -fno-exceptions  
+CFLAGS=-O2 ${UFLAGS} -Wno-unused -Wno-parentheses -Wno-switch -Wstrict-prototypes -funroll-loops -fmove-all-movables -frerun-loop-opt -fno-rtti -fno-exceptions  
 LIBS=m gcc
-LDFLAGS=$(FLEXTLIB) -bundle -bundle_loader $(PDBIN)
+LDFLAGS=-bundle -bundle_loader $(PDBIN)
 FRAMEWORKS=Carbon veclib
+
+ifdef FLEXT_SHARED
+CFLAGS+=-DFLEXT_SHARED
+LDFLAGS+=-L$(FLEXTPATH)
+FLEXTLIB=-lflext
+
+else
+
+FLEXTLIB=$(FLEXTPATH)/libflext.a
+
+endif
 
 # ----------------------------------------------
 # the rest can stay untouched
 # ----------------------------------------------
-
-NAME=xsample
 
 include make-files.txt
 
@@ -48,7 +55,7 @@ $(TARGDIR)/%.o : $(SRCDIR)/%.cpp
 	$(CXX) -c $(CFLAGS) $(FLAGS) $(patsubst %,-I%,$(INCLUDES) $(FLEXTPATH)) $< -o $@
 
 $(TARGET) : $(patsubst %.cpp,$(TARGDIR)/%.o,$(SRCS)) 
-	$(CXX) $(LDFLAGS) $^ $(patsubst %,-framework %,$(FRAMEWORKS)) $(patsubst %,-L%,$(LIBPATH)) $(patsubst %,-l%,$(LIBS))  -o $@ 
+	$(CXX) $(LDFLAGS) $^ $(patsubst %,-framework %,$(FRAMEWORKS)) $(patsubst %,-L%,$(LIBPATH)) $(patsubst %,-l%,$(LIBS)) $(FLEXTLIB) -o $@ 
 	chmod 755 $@
 
 

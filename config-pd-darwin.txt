@@ -11,7 +11,7 @@ PD=/usr/local/lib/pd
 # where are the PD header files?
 # leave it blank if it is a system directory (like /usr/local/include), 
 # 	since gcc 3.2 complains about it
-PDINC=${PD}/src
+#PDINC=${PD}/src
 
 # where is the PD executable?
 PDBIN=/usr/local/bin/pd
@@ -33,4 +33,7 @@ HELPDIR=${PD}/doc/5.reference
 # additional compiler flags
 # (check whether they fit your system!)
 UFLAGS=-malign-power -maltivec -faltivec
+
+# build with shared flext library
+FLEXT_SHARED=1
 
