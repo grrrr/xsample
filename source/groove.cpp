@@ -43,11 +43,12 @@ public:
 	virtual V m_all();
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
-	
+
+	V ms_xfade(I xf);
+
 	V ms_xzone(F xz);
 	V mg_xzone(F &xz) { xz = _xzone*s2u; }
 
-	V m_xsymm(F xz);
 	V m_xshape(I argc = 0,const t_atom *argv = NULL);
 	inline V ms_xshape(const AtomList &ret) { m_xshape(ret.Count(),ret.Atoms()); }
 	V mg_xshape(AtomList &ret) const;
@@ -56,7 +57,12 @@ public:
 		xsl__ = -1,  // don't change
 		xsl_once = 0,xsl_loop,xsl_bidir
 	};
-	
+
+	enum xs_fade {
+		xsf__ = -1,  // don't change
+		xsf_keeplooppos = 0,xsf_keeplooplen,xsf_keepfade,xsf_inside
+	};
+
 	V m_loop(xs_loop lp = xsl__);
 	
 protected:
@@ -65,8 +71,9 @@ protected:
 	D curpos;  // in samples
 	I bidir;
 
-	F _xzone,xzone,xsymm;
+	F _xzone,xzone;
     L znsmin,znsmax;
+	xs_fade xfade;
 	I xshape;
 	F xshparam;
 	D znmin,znmax;
@@ -128,10 +135,10 @@ private:
 	FLEXT_CALLBACK_F(m_max)
 	FLEXT_CALLBACK(m_all)
 
+	FLEXT_CALLSET_I(ms_xfade)
+	FLEXT_ATTRGET_I(xfade)
 	FLEXT_CALLSET_F(ms_xzone)
 	FLEXT_CALLGET_F(mg_xzone)
-	FLEXT_CALLSET_F(m_xsymm)
-	FLEXT_ATTRGET_F(xsymm)
 	FLEXT_CALLVAR_V(mg_xshape,ms_xshape)
 
 	FLEXT_CALLVAR_F(mg_pos,m_pos)
@@ -160,15 +167,15 @@ V xgroove::setup(t_classid c)
 
 	FLEXT_CADDATTR_VAR_E(c,"loop",loopmode,m_loop);
 
+	FLEXT_CADDATTR_VAR(c,"xfade",xfade,ms_xfade);
 	FLEXT_CADDATTR_VAR(c,"xzone",mg_xzone,ms_xzone);
-	FLEXT_CADDATTR_VAR(c,"xsymm",xsymm,m_xsymm);
 	FLEXT_CADDATTR_VAR(c,"xshape",mg_xshape,ms_xshape);
 }
 
 xgroove::xgroove(I argc,const t_atom *argv):
 	loopmode(xsl_loop),curpos(0),
-	_xzone(0),xzone(0),xsymm(0.5),pblksz(0),
-	xshape(0),xshparam(1),
+	_xzone(0),xzone(0),pblksz(0),
+	xfade(xsf_keeplooppos),xshape(0),xshparam(1),
 	znbuf(NULL),znmul(NULL),znidx(NULL),znpos(NULL),
 	bidir(1)
 {
@@ -292,25 +299,19 @@ BL xgroove::m_reset()
 	return xsample::m_reset();
 }
 
+V xgroove::ms_xfade(I xf) 
+{ 
+	xfade = (xs_fade)xf;
+	//	do_xzone();
+	s_dsp(); 
+}
+
 V xgroove::ms_xzone(F xz) 
 { 
 	bufchk();
 	_xzone = xz < 0?0:xz/s2u; 
 //	do_xzone();
 	s_dsp(); 
-}
-
-V xgroove::m_xsymm(F xs) 
-{ 
-	if(xs < 0) 
-		xsymm = 0;
-	else if(xs > 1) 
-		xsymm = 1;
-	else 
-		xsymm = xs;
-
-	//	do_xzone();
-	s_dsp();
 }
 
 V xgroove::m_xshape(I argc,const t_atom *argv) 
@@ -361,13 +362,72 @@ V xgroove::do_xzone()
 	if(!s2u) return; // this can happen if DSP is off
 
 	xzone = _xzone; // make a copy for changing it
-	znsmin = curmin,znsmax = curmax;
-    L plen = znsmax-znsmin; //curlen;
 
-	if(xzone > plen-1) xzone = plen?plen-1:0;
+	if(xfade == xsf_inside) { // fade zone goes inside the loop -> loop gets shorter
+		const L maxfd = (curmax-curmin)/2;
+		if(xzone > maxfd) xzone = maxfd;
 
-	znmin = znsmin+xzone*xsymm;
-	znmax = znsmax+xzone*(xsymm-1);
+		znsmin = curmin,znsmax = curmax;
+	}
+	else if(xfade == xsf_keepfade) { 
+		// try to keep fade zone
+		// shifting of loop bounds may happen
+
+		// restrict xzone to half of buffer
+		const L maxfd = buf->Frames()/2;
+		if(xzone > maxfd) xzone = maxfd;
+
+		znsmin = curmin-xzone/2;
+		znsmax = curmax+xzone/2;
+
+		// check buffer limits and shift bounds if necessary
+		if(znsmin < 0) {
+			znsmax -= znsmin;
+			znsmin = 0;
+		}
+		if(znsmax > buf->Frames())
+			znsmax = buf->Frames();
+	}
+	else if(xfade == xsf_keeplooplen) { 
+		// try to keep loop length
+		// shifting of loop bounds may happen
+
+		const L maxfd = buf->Frames()-(curmax-curmin);
+		if(xzone > maxfd) xzone = maxfd;
+
+		znsmin = curmin-xzone/2;
+		znsmax = curmax+xzone/2;
+
+		// check buffer limits and shift bounds if necessary
+		// both cases can't happen because of xzone having been limited above
+		if(znsmin < 0) {
+			znsmax -= znsmin;
+			znsmin = 0;
+		}
+		else if(znsmax > buf->Frames()) {
+			znsmin -= znsmax-buf->Frames();
+			znsmax = buf->Frames();
+		}
+	}
+	else if(xfade == xsf_keeplooppos) { 
+		// try to keep loop position and length
+
+		znsmin = curmin-xzone/2;
+		znsmax = curmax+xzone/2;
+
+		L ovr = znsmax-buf->Frames();
+		if(-znsmin > ovr) ovr = -znsmin;
+		if(ovr > 0) {
+			znsmin += ovr;
+			znsmax -= ovr;
+			xzone -= ovr*2;
+		}
+	}
+
+	znmin = znsmin+xzone;
+	znmax = znsmax-xzone;
+
+	FLEXT_ASSERT(znsmin <= znsmax && (znsmax-znsmin) >= xzone*2);
 }
 
 V xgroove::m_loop(xs_loop lp) 
@@ -403,7 +463,7 @@ V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
 		for(I i = 0; i < n; ++i) {	
 			const S spd = speed[i];  // must be first because the vector is reused for output!
 			
-			if(o >= smax) { o = smax; lpbang = true; }
+			if(!(o < smax)) { o = smax; lpbang = true; }
 			else if(o < smin) { o = smin; lpbang = true; }
 			
 			pos[i] = o;
@@ -435,7 +495,7 @@ V xgroove::s_pos_c_once(I n,S *const *invecs,S *const *outvecs)
 		register D o = curpos;
 
 		for(I i = 0; i < n; ++i) {	
-			if(o >= smax) { o = smax; lpbang = true; }
+			if(!(o < smax)) { o = smax; lpbang = true; }
 			else if(o < smin) { o = smin; lpbang = true; }
 			
 			pos[i] = o;
@@ -571,7 +631,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	FLEXT_ASSERT(xzone);
 
 	const F xz = xzone,xf = (F)XZONE_TABLE/xz;
-	const D lmin = znmin,lmax = znmax,lsh = lmax+xz-lmin;
+	const D lmin = znmin,lmax = znmax,lsh = lmax-lmin+xz;
 
     // adapt the playing bounds to the current cross-fade zone
     const L smin = znsmin,smax = znsmax,plen = smax-smin;
@@ -584,7 +644,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
  			// \TODO: exploit relationships: smin <= lmin, smax >= lmax
  		
 			// normalize offset
-			if(o >= smax) {
+			if(!(o < smax)) {
 				o = fmod(o-smin,plen)+smin;
 				lpbang = true;
 			}
@@ -593,20 +653,15 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 				lpbang = true;
 			}
 
-            // now: smin <= o < smax
-
             if(o >= lmax) {
                 // in late cross-fade zone
+				o -= lsh;
+			}
 
-                // shift it into early zone
-				o -= lsh; 
-            }
-
-            // now: lmin-xz <= o < lmax
-
+            // now: smin <= o < smax
 			if(o < lmin) {
 				// in early cross-fade zone
-				register F inp = xz-(F)(lmin-o);  // 0 <= inp < xz
+				register F inp = xz+(F)(o-lmin);  // 0 <= inp < xz
 				znidx[i] = inp*xf;
 				znpos[i] = lmax+inp;
 				inzn = true;
@@ -672,7 +727,7 @@ V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 			const S spd = speed[i];  // must be first because the vector is reused for output!
 
 			// normalize offset
-			if(o >= smax) {
+			if(!(o < smax)) {
 				o = smax-fmod(o-smin,plen); // mirror the position at smax
 				bd = -bd;
 				lpbang = true;
