@@ -1,22 +1,33 @@
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
+Copyright (c)2001-2003 Thomas Grill (t.grill@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
 Donations for further development of the package are highly appreciated.
+Visit https://www.paypal.com/xclick/business=t.grill%40gmx.net&item_name=xsample&no_note=1&tax=0&currency_code=EUR
 
 ----------------------------------------------------------------------------
 
 IMPORTANT INFORMATION for all MaxMSP users:
 
-1) For OSX it is best to put the xsample file somewhere in your Max/MSP search path and drop the file 
+1) 
+For OSX it is best to put the xsample file somewhere in your Max/MSP search path and drop the file 
 xsample-objectmappings.txt into the folder /Library/Application Support/Cycling '74/init .
 
-2) Otherwise (or for OS9) it is advisable to put the xsample shared library file into the "max-startup" folder. 
+For Windows put the xsample file somewhere in your Max/MSP search path and drop the file
+xsample-objectmappings-win.txt in
+C:\program files\common files\Cycling '74\init (english version)
+or
+C:\Programme\Gemeinsame Dateien\Cycling '74\init (german version)
+
+2) 
+Otherwise (or for OS9) it is advisable to put the xsample shared library file into the "max-startup" folder. 
 Hence it will be loaded at Max startup.
 
-3) If you want to load the xsample library on demand, create a [xsample] object in Max/MSP.
+3) 
+If you want to load the xsample library on demand, use the "install" option of the Max file menu
+and point it to the xsample file or create a [xsample] object in Max/MSP.
 
 ----------------------------------------------------------------------------
 
@@ -101,7 +112,7 @@ Version history:
 - added resources to MaxMSP build
 - xgroove~, xrecord~: introduced a loop/end bang outlet 
 - added MaxMSP buffer resize recognition
-- xgroove~: introduced a crossfading loop zone
+- xgroove~: introduced crossfading loop zones
 - adapted source for flext 0.4.1 - most methods within class scope
 - introduced attributes
 - restructured make procedures
