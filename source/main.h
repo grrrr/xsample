@@ -1,11 +1,9 @@
 /*
-
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2004 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001-2005 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
-
 */
 
 #ifndef __XSAMPLE_H
@@ -51,17 +49,6 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 
-// lazy me
-#define F float
-#define D double
-#define I int
-#define L long
-#define C char
-#define V void
-#define BL bool
-#define S t_sample
-
-
 #if defined(__MWERKS__) && !defined(__MACH__)
 	#define STD std
 #else
@@ -92,6 +79,32 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	}
 #endif
 
+#ifdef __GNUC__
+template<typename I,typename F> inline I CASTINT(F o) { return lrintf(o); }
+#elif FLEXT_CPU == FLEXT_CPU_INTEL && defined(_MSC_VER)
+template<typename I,typename F>
+inline I CASTINT(F x) {
+//  by Laurent de Soras (http://ldesoras.free.fr)
+//    assert (x > static_cast <double> (INT_MIN / 2) – 1.0);
+//    assert (x < static_cast <double> (INT_MAX / 2) + 1.0);
+    const float round_towards_m_i = -0.5f;
+    I i;
+    __asm
+    {
+        fld x
+        fadd st,st
+        fabs
+        fadd round_towards_m_i
+        fistp i
+        sar i, 1
+    }
+    if(x < 0) i = -i;
+    return i;
+}
+#else
+template<typename I,typename F> inline I CASTINT(F o) { return static_cast<I>(o); }
+#endif
+
 
 class xsample:
 	public flext_dsp
@@ -103,76 +116,92 @@ public:
 	~xsample();
     
     enum xs_change {
-        xsc__ = 0;
+        xsc__ = 0,
         xsc_units = 0x0001,
         xsc_play = 0x0002,
-        xsc_sclmd = 0x0004,
         xsc_pos = 0x0008,
         xsc_range = 0x0010,
         xsc_transport = 0x0020,
+        xsc_fade = 0x0040,
         
         xsc_intp = xsc_play,
-        xsc_srate = xsc_play,
+        xsc_srate = xsc_play|xsc_units,
         xsc_chns = xsc_play,
+        xsc_loop = xsc_play,
         xsc_startstop = xsc_play|xsc_transport,
-        xsc_buffer = xsc_units|xsc_sclmd|xsc_pos|xsc_range|xsc_play,
+        xsc_buffer = xsc_units|xsc_pos|xsc_range|xsc_play,
+        xsc_reset = xsc_buffer,
         xsc_all = 0xffff
     };
 	
-	enum xs_unit {
-//		xsu__ = -1,  // don't change
-		xsu_sample = 0,xsu_buffer,xsu_ms,xsu_s
-	};
+	enum xs_unit { 
+        xsu_sample = 0,xsu_buffer,xsu_ms,xsu_s 
+    };
 	
 	enum xs_intp {
-//		xsi__ = -1,  // don't change
 		xsi_none = 0,xsi_4p,xsi_lin
 	};
 	
 	enum xs_sclmd {
-//		xss__ = -1,  // don't change
 		xss_unitsinbuf = 0,xss_unitsinloop,xss_buffer,xss_loop
 	};
 	
 protected:
-    virtual bool Init();
-	virtual void m_loadbang();
+    virtual bool Finalize();
 
 	buffer buf;
 
-//    void m_start();
-//	void m_stop();
-	void m_reset() { m_refresh(); m_all(); }
+	void m_reset() 
+    { 
+        ChkBuffer(true);
+        DoReset(); 
+        Refresh(); 
+    }
 
-  	virtual int m_set(I argc,const t_atom *argv);
-	virtual void m_print() = 0;
-    void m_refresh() { Update(xsc_buffer); DoUpdate(); }
+  	void m_set(int argc,const t_atom *argv);
 
-	void m_units(xs_unit u /*= xsu__*/);
-	void m_sclmode(xs_sclmd u /*= xss__*/);
+    void m_refresh() 
+    { 
+        Update(xsc_buffer,true);
+    }
 
-	void m_all();
-	void m_min(F mn);
-	void m_max(F mx);
+    void m_units(xs_unit mode)
+    {
+        unitmode = mode;
+        Update(xsc_units,true);
+    }
 
-	virtual void m_dsp(I n,S *const *insigs,S *const *outsigs);
-	virtual void s_dsp() = 0;
+    void m_sclmode(xs_sclmd mode)
+    {
+        sclmode = mode;
+        Update(xsc_units,true);
+    }
 
-	xs_unit unitmode; //iunitmode,ounitmode;
-	xs_sclmd sclmode; //isclmode,osclmode;
+    void m_all() 
+    { 
+        ChkBuffer(true); 
+        ResetRange(); 
+        Refresh(); 
+    }
+
+	void m_min(float mn);
+	void m_max(float mx);
+
+	xs_unit unitmode;
+	xs_sclmd sclmode;
 
 	long curmin,curmax; //,curlen;  // in samples
-	int sclmin; // in samples
+	long sclmin; // in samples
 	float sclmul;
 	float s2u;  // sample to unit conversion factor
 
-	inline float scale(F smp) const { return (smp-sclmin)*sclmul; }
+	inline float scale(float smp) const { return (smp-sclmin)*sclmul; }
 	
-    static void arrscale(I n,const S *in,S *out,S add,S mul) { flext::ScaleSamples(out,in,mul,add,n); }
-	inline void arrscale(I n,const S *in,S *out) const { arrscale(n,in,out,-sclmin*sclmul,sclmul); }
+    static void arrscale(int n,const t_sample *in,t_sample *out,t_sample add,t_sample mul) { flext::ScaleSamples(out,in,mul,add,n); }
+	inline void arrscale(int n,const t_sample *in,t_sample *out) const { arrscale(n,in,out,-sclmin*sclmul,sclmul); }
 	
-	static void arrmul(I n,const S *in,S *out,S mul) { flext::MulSamples(out,in,mul,n); }
-	inline void arrmul(I n,const S *in,S *out) const { arrmul(n,in,out,(S)(1./s2u)); }
+	static void arrmul(int n,const t_sample *in,t_sample *out,t_sample mul) { flext::MulSamples(out,in,mul,n); }
+	inline void arrmul(int n,const t_sample *in,t_sample *out) const { arrmul(n,in,out,(t_sample)(1.f/s2u)); }
 
 	void mg_buffer(AtomList &l) { if(buf.Symbol()) { l(1); SetSymbol(l[0],buf.Symbol()); } }
 	inline void ms_buffer(const AtomList &l) { m_set(l.Count(),l.Atoms()); }
@@ -180,17 +209,25 @@ protected:
 	inline void mg_min(float &v) const { v = curmin*s2u; }
 	inline void mg_max(float &v) const { v = curmax*s2u; }
     
-    virtual void DoUpdate();
-    void Update() { if(update) DoUpdate();
-    void Update(unsigned int f) { update |= f; }
+    void Refresh() { if(update && !Initing()) { DoUpdate(update); update = xsc__; } }
+    void Update(unsigned int f,bool refr = false) { update |= f; if(refr) Refresh(); }
 
-	bool ChkBuffer();
-//    virtual void SetBuffer();
+    //! return 0...invalid, 1...changed, -1...unchanged
+	int ChkBuffer(bool refr = false);
 
-    virtual void SetUnits();
-    virtual void SetSclmode();
-    virtual void SetRange();
-    virtual void SetPlay();
+    void ResetRange() 
+    { 
+	    curmin = 0; 
+        curmax = buf.Frames();
+        Update(xsc_range);
+    }
+
+    virtual void DoReset();
+    virtual void DoUpdate(unsigned int flags);
+
+	virtual void m_loadbang();
+	virtual void m_print() = 0;
+	virtual void m_dsp(int n,t_sample *const *insigs,t_sample *const *outsigs);
 
 private:
 
@@ -235,25 +272,25 @@ protected:
 	#endif
 
 	#define DEFSIGFUN(NAME) \
-	static V st_##NAME(thisType *obj,I n,S *const *in,S *const *out)  { obj->NAME (n,in,out); } \
-	V NAME(I n,S *const *in,S *const *out)
+	static void st_##NAME(thisType *obj,int n,t_sample *const *in,t_sample *const *out)  { obj->NAME (n,in,out); } \
+	void NAME(int n,t_sample *const *in,t_sample *const *out)
 
 	#define TMPLSIGFUN(NAME) \
-	TMPLDEF static V st_##NAME(thisType *obj,I n,S *const *in,S *const *out)  { obj->NAME TMPLCALL (n,in,out); } \
-	TMPLDEF V NAME(I n,S *const *in,S *const *out)
+	TMPLDEF static void st_##NAME(thisType *obj,int n,t_sample *const *in,t_sample *const *out)  { obj->NAME TMPLCALL (n,in,out); } \
+	TMPLDEF void NAME(int n,t_sample *const *in,t_sample *const *out)
 
-	#define TMPLSTFUN(NAME) TMPLDEF static V NAME(const S *bdt,const I smin,const I smax,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+	#define TMPLSTFUN(NAME) TMPLDEF static void NAME(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
 
 	#define SETSTFUN(VAR,FUN) VAR = FUN
 
 	#define DEFSIGCALL(NAME) \
-	inline V NAME(I n,S *const *in,S *const *out) { (*v_##NAME)(this,n,in,out); } \
-	V (*v_##NAME)(thisType *obj,I n,S *const *in,S *const *out) 
+	inline void NAME(int n,t_sample *const *in,t_sample *const *out) { (*v_##NAME)(this,n,in,out); } \
+	void (*v_##NAME)(thisType *obj,int n,t_sample *const *in,t_sample *const *out) 
 
 	#define DEFSTCALL(NAME) \
-	V (*NAME)(const S *bdt,const I smin,const I smax,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+	void (*NAME)(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs)
 
 #else
 	#ifdef TMPLOPT
@@ -270,20 +307,20 @@ protected:
 	
 	#define TMPLSTF(FUN,BCHNS,IOCHNS) TMPLFUN(FUN,BCHNS,IOCHNS) 
 
-	#define DEFSIGFUN(NAME)	V NAME(I n,S *const *in,S *const *out)
-	#define TMPLSIGFUN(NAME) TMPLDEF V NAME(I n,S *const *in,S *const *out)
-	#define TMPLSTFUN(NAME) TMPLDEF static V NAME(const S *bdt,const I smin,const I smax,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+	#define DEFSIGFUN(NAME)	void NAME(int n,t_sample *const *in,t_sample *const *out)
+	#define TMPLSIGFUN(NAME) TMPLDEF void NAME(int n,t_sample *const *in,t_sample *const *out)
+	#define TMPLSTFUN(NAME) TMPLDEF static void NAME(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
 
 	#define DEFSIGCALL(NAME) \
-	inline V NAME(I n,S *const *in,S *const *out) { (this->*v_##NAME)(n,in,out); } \
-	V (thisType::*v_##NAME)(I n,S *const *invecs,S *const *outvecs)
+	inline void NAME(int n,t_sample *const *in,t_sample *const *out) { (this->*v_##NAME)(n,in,out); } \
+	void (thisType::*v_##NAME)(int n,t_sample *const *invecs,t_sample *const *outvecs)
 
 	#define SETSTFUN(VAR,FUN) VAR = FUN
 
 	#define DEFSTCALL(NAME) \
-	V (*NAME)(const S *bdt,const I smin,const I smax,const I n,const I inchns,const I outchns,S *const *invecs,S *const *outvecs)
+	void (*NAME)(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
 #endif
 
 
@@ -298,18 +335,18 @@ protected:
 #ifdef TMPLOPT
 	// optimization by using constants for channel numbers
 	#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)  \
-		const I BCHNS = _BCHNS_ < 0?(bchns):_BCHNS_;  \
-		const I IOCHNS = _IOCHNS_ < 0?MIN(iochns,BCHNS):MIN(_IOCHNS_,BCHNS)
+		const int BCHNS = _BCHNS_ < 0?(bchns):_BCHNS_;  \
+		const int IOCHNS = _IOCHNS_ < 0?MIN(iochns,BCHNS):MIN(_IOCHNS_,BCHNS)
 #else 
 	// no template optimization
 	#if FLEXT_SYS == FLEXT_SYS_PD // only mono buffers
 		#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)   \
-			const I BCHNS = 1;  \
-			const I IOCHNS = MIN(iochns,BCHNS)
+			const int BCHNS = 1;  \
+			const int IOCHNS = MIN(iochns,BCHNS)
 	#else // MAXMSP
 		#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)   \
-			const I BCHNS = bchns;  \
-			const I IOCHNS = MIN(iochns,BCHNS)
+			const int BCHNS = bchns;  \
+			const int IOCHNS = MIN(iochns,BCHNS)
 	#endif
 #endif
 
@@ -320,19 +357,42 @@ class xinter:
 	FLEXT_HEADER_S(xinter,xsample,setup)
 	
 public:
-	xinter(): outchns(1),doplay(false),interp(xsi_4p) {}
+
+	enum xs_loop {
+		xsl_once = 0,xsl_loop,xsl_bidir
+	};
+
+    xinter()
+        : outchns(1),doplay(false)
+        , interp(xsi_4p),loopmode(xsl_loop)
+    {}
 	
+    void m_start() 
+    { 
+	    ChkBuffer();
+        doplay = true;
+        Update(xsc_startstop,true);
+    }
+
+    void m_stop() 
+    { 
+	    ChkBuffer();
+        doplay = false;
+        Update(xsc_startstop,true);
+    }
+
+	void m_interp(xs_intp mode)
+    { 
+        interp = mode; 
+        Update(xsc_intp,true);
+    }
+
 protected:
-//	virtual I m_set(I argc,const t_atom *argv);
 
-	void m_start();
-	void m_stop();
-
-	inline V m_interp(xs_intp mode /*= xsi__*/) { interp = mode; Update(xsc_intp); DoUpdate(); }
-
-	I outchns;
-	BL doplay;	
+	int outchns;
+	bool doplay;	
 	xs_intp interp;
+	xs_loop loopmode;
 
 	TMPLSIGFUN(s_play0);
 	TMPLSIGFUN(s_play1);
@@ -347,16 +407,18 @@ protected:
 	DEFSIGCALL(playfun);
 	DEFSIGCALL(zerofun);
 
-	virtual void SetPlay();
-
-private:
-	static V setup(t_classid c);
+	virtual void DoUpdate(unsigned int flags);
 
 	FLEXT_CALLBACK(m_start)
 	FLEXT_CALLBACK(m_stop)
 
 	FLEXT_CALLSET_E(m_interp,xs_intp)
 	FLEXT_ATTRGET_E(interp,xs_intp)
+
+	FLEXT_ATTRGET_E(loopmode,xs_loop)
+
+private:
+	static void setup(t_classid c);
 };
 
 #ifdef TMPLOPT
@@ -364,5 +426,3 @@ private:
 #endif
 
 #endif
-
-

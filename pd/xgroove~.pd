@@ -1,7 +1,6 @@
-#N canvas 69 62 929 594 12;
+#N canvas 69 62 941 606 12;
 #X obj 215 253 hsl 128 15 0.001 3 1 1 empty empty speed 0 -8 0 10 -225271
--1 -1 10800 1;
-#X floatatom 212 271 8 0 0 0 - - -;
+-1 -1 10400 1;
 #X msg 603 169 loop \$1;
 #X obj 28 72 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1
 -1;
@@ -10,7 +9,7 @@
 #X array \$0-buf 10000 float 0;
 #X coords 0 1 9999 -1 300 150 1;
 #X restore 573 269 graph;
-#X obj 44 529 dac~;
+#X obj 17 556 dac~;
 #X msg 120 73 reset;
 #X text 299 321 min/max points;
 #X text 50 69 start;
@@ -30,27 +29,27 @@
 #X text 244 142 s;
 #X text 377 127 buffer;
 #X text 377 142 loop;
-#X obj 491 223 bng 15 250 50 0 empty empty empty 0 -6 0 8 -228992 -1
+#X obj 487 208 bng 15 250 50 0 empty empty empty 0 -6 0 8 -228992 -1
 -1;
 #X obj 335 349 print A;
 #N canvas 0 0 450 300 graph2 0;
 #X array \$0-scp 300 float 0;
 #X coords 0 1 299 -1 300 100 1;
 #X restore 573 447 graph;
-#X obj 53 498 *~;
-#X obj 89 486 hsl 128 15 0.0001 1 1 0 empty empty volume -2 -6 0 8
--261689 -1 -1 10900 1;
-#X obj 86 504 nbx 5 14 -1e+037 1e+037 0 0 empty empty empty 0 -6 0
-10 -261689 -1 -1 0.271063 256;
+#X obj 26 525 *~;
+#X obj 82 491 hsl 128 15 0.0001 1 1 0 empty empty volume -2 -6 0 8
+-261689 -1 -1 0 1;
+#X obj 79 509 nbx 5 14 -1e+037 1e+037 0 0 empty empty empty 0 -6 0
+10 -261689 -1 -1 0 256;
 #X msg 25 249 pos \$1;
 #X msg 63 220 200;
 #X msg 25 221 100;
-#X obj 511 224 nbx 5 14 0 1e+037 0 1 empty empty frq 0 -6 0 10 -228992
--1 -1 144 256;
-#N canvas 19 334 415 321 loopzone 0;
+#X obj 507 209 nbx 5 14 0 1e+037 0 1 empty empty frq 0 -6 0 10 -228992
+-1 -1 220 256;
+#N canvas 19 334 427 333 loopzone 0;
 #X msg 28 84 xzone \$1;
 #X obj 31 43 hsl 128 15 0 300 0 0 empty empty empty -2 -6 0 8 -262131
--1 -1 12700 1;
+-1 -1 0 1;
 #X floatatom 28 64 5 0 0 0 - - -;
 #X msg 203 207 xfade \$1;
 #X obj 203 142 vdl 15 0 0 4 empty empty empty 0 -6 0 8 -262144 -1 -1
@@ -79,21 +78,21 @@
 #X connect 9 0 19 0;
 #X connect 10 0 9 0;
 #X restore 23 414 pd loopzone;
-#X text 118 137 set buffer;
+#X text 64 147 set buffer;
 #X text 23 383 settings for;
 #X text 22 395 cross-fading loop zone;
 #X text 399 349 print attributes;
-#X obj 300 393 bng 15 250 50 0 empty empty loop_bang 0 -6 0 8 -262131
+#X obj 357 394 bng 15 250 50 0 empty empty loop_bang 0 -6 0 8 -262131
 -1 -1;
 #X text 357 60 scale mode;
 #X text 354 75 (pos message and position outlet);
 #X text 622 148 bidirectional;
 #X text 244 111 buffer size;
 #X obj 574 419 hsl 300 15 0 10000 0 0 empty bufpos empty -2 -6 0 8
--262144 -1 -1 20832 1;
+-262144 -1 -1 0 1;
 #X obj 236 527 nbx 5 14 -1e+037 1e+037 0 0 empty empty position 0 -6
-0 10 -228992 -1 -1 6967.26 256;
-#N canvas 0 0 470 320 watch 0;
+0 10 -228992 -1 -1 0 256;
+#N canvas 0 0 474 324 watch 0;
 #X obj 163 18 loadbang;
 #X obj 88 80 snapshot~;
 #X obj 164 44 metro 50;
@@ -123,17 +122,17 @@
 #X connect 2 0 3 0;
 #X connect 2 1 1 0;
 #X connect 4 0 3 0;
-#X restore 491 244 pd genosc;
+#X restore 487 229 pd genosc;
 #X text 600 97 loop mode;
 #X text 23 201 set position;
 #X obj 299 426 nbx 5 14 0 1e+037 0 1 empty empty min 0 -6 0 10 -262131
--1 -1 0 256;
+-1 -1 1004 256;
 #X obj 356 426 nbx 5 14 0 1e+037 0 1 empty empty max 0 -6 0 10 -262131
--1 -1 10000 256;
+-1 -1 8996 256;
 #X obj 298 309 nbx 5 14 0 1e+037 0 1 empty empty min 0 -6 0 10 -225271
--1 -1 0 256;
+-1 -1 1004 256;
 #X obj 355 309 nbx 5 14 0 1e+037 0 1 empty empty max 0 -6 0 10 -225271
--1 -1 30000 256;
+-1 -1 8996 256;
 #X text 244 95 frames (def.);
 #X text 377 96 units in buffer (def.);
 #X text 622 132 forward (def.);
@@ -178,10 +177,9 @@
 #X connect 20 0 24 0;
 #X restore 24 343 pd attributes;
 #X text 23 324 attribute stuff;
-#X text 490 264 generate;
+#X text 484 177 generate;
 #X obj 26 10 cnv 15 850 40 empty empty xgroove~ 10 22 0 24 -260818
 -1 0;
-#X text 227 29 http://www.parasitaere-kapazitaeten.net;
 #X msg 105 221 1000;
 #X msg 96 249 posmod \$1;
 #X text 146 227 modulo;
@@ -195,52 +193,55 @@
 -1 0;
 #X obj 358 99 vradio 15 1 0 4 empty empty empty 0 -6 0 8 -225271 -1
 -1 0;
-#X obj 136 168 s to-g;
+#X obj 65 164 s to-g;
 #X obj 298 197 s to-g;
 #X obj 61 278 s to-g;
 #X obj 180 304 r to-g;
 #X obj 704 201 s to-g;
 #X obj 191 349 xgroove~ \$0-buf;
-#X msg 26 136 set \$0-buf;
-#X msg 25 161 set \$0-buf2;
-#X text 227 10 varispeed sample player \, (C)2001-2004 Thomas Grill
+#X text 227 29 http://grrrr.org/ext;
+#X obj 79 550 line~;
+#X msg 79 527 \$1 50;
+#X obj 212 271 nbx 5 14 -1e+037 1e+037 0 0 empty empty empty 0 -6 0
+10 -225271 -1 -1 0.703731 256;
+#X text 227 10 varispeed sample player \, (C)2001-2005 Thomas Grill
 ;
-#X connect 0 0 1 0;
-#X connect 1 0 80 0;
-#X connect 2 0 79 0;
-#X connect 3 0 75 0;
-#X connect 4 0 75 0;
-#X connect 7 0 75 0;
-#X connect 11 0 75 0;
-#X connect 13 0 79 0;
-#X connect 14 0 80 0;
-#X connect 20 0 76 0;
-#X connect 21 0 76 0;
-#X connect 26 0 50 0;
-#X connect 29 0 6 0;
-#X connect 29 0 6 1;
-#X connect 30 0 29 1;
-#X connect 30 0 31 0;
-#X connect 32 0 77 0;
-#X connect 33 0 32 0;
-#X connect 34 0 32 0;
-#X connect 35 0 50 0;
-#X connect 48 0 47 0;
-#X connect 55 0 80 1;
-#X connect 56 0 80 2;
-#X connect 66 0 67 0;
-#X connect 67 0 77 0;
-#X connect 71 0 2 0;
-#X connect 72 0 13 0;
-#X connect 73 0 20 0;
-#X connect 74 0 21 0;
-#X connect 78 0 80 0;
-#X connect 80 0 29 0;
-#X connect 80 0 48 0;
-#X connect 80 1 48 1;
-#X connect 80 2 53 0;
-#X connect 80 3 54 0;
-#X connect 80 4 41 0;
-#X connect 80 5 27 0;
-#X connect 81 0 75 0;
-#X connect 82 0 75 0;
+#X connect 0 0 82 0;
+#X connect 1 0 77 0;
+#X connect 2 0 73 0;
+#X connect 3 0 73 0;
+#X connect 6 0 73 0;
+#X connect 10 0 73 0;
+#X connect 12 0 77 0;
+#X connect 13 0 78 0;
+#X connect 19 0 74 0;
+#X connect 20 0 74 0;
+#X connect 25 0 49 0;
+#X connect 28 0 5 0;
+#X connect 28 0 5 1;
+#X connect 29 0 30 0;
+#X connect 30 0 81 0;
+#X connect 31 0 75 0;
+#X connect 32 0 31 0;
+#X connect 33 0 31 0;
+#X connect 34 0 49 0;
+#X connect 47 0 46 0;
+#X connect 54 0 78 1;
+#X connect 55 0 78 2;
+#X connect 64 0 65 0;
+#X connect 65 0 75 0;
+#X connect 69 0 1 0;
+#X connect 70 0 12 0;
+#X connect 71 0 19 0;
+#X connect 72 0 20 0;
+#X connect 76 0 78 0;
+#X connect 78 0 28 0;
+#X connect 78 0 47 0;
+#X connect 78 1 47 1;
+#X connect 78 2 52 0;
+#X connect 78 3 53 0;
+#X connect 78 4 40 0;
+#X connect 78 5 26 0;
+#X connect 80 0 28 1;
+#X connect 81 0 80 0;
+#X connect 82 0 78 0;

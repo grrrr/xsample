@@ -1,6 +1,6 @@
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c)2001-2004 Thomas Grill (t.grill@gmx.net)
+Copyright (c)2001-2005 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -126,6 +126,8 @@ Version history:
 - different initialization on buffer absence
 - renew units and scalemode on buffer change
 - fixed looped recording bug (thanks to Tatama Suomo)
+- reconsidered all state changes
+- more optimizations for interpolation functions
 
 0.3.0:
 - added resources to MaxMSP build

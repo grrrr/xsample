@@ -1,12 +1,12 @@
-#N canvas 165 149 700 428 12;
+#N canvas 165 149 716 444 12;
 #X obj 21 75 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1
 -1;
 #X msg 21 95 stop;
 #X msg 107 99 reset;
 #X text 43 72 start;
 #X text 60 93 stop;
-#X obj 158 219 *~ 300;
-#X text 164 240 position signal;
+#X obj 159 217 *~ 300;
+#X text 161 239 position signal;
 #X msg 107 75 help;
 #N canvas 0 0 450 300 graph7 0;
 #X array \$0-buf 300 float 1;
@@ -54,19 +54,18 @@
 #X coords 0 1 299 -1 300 200 1;
 #X restore 370 80 graph;
 #X obj 162 174 hsl 128 15 1 100 1 1 empty empty speed 0 -8 0 10 -225271
--1 -1 4200 1;
+-1 -1 9300 1;
 #X msg 107 123 print;
 #X obj 159 194 phasor~ 100;
-#X obj 198 280 print A;
-#X obj 28 373 dac~;
-#X obj 37 342 *~;
-#X obj 73 330 hsl 128 15 0.0001 1 1 0 empty empty volume -2 -6 0 8
+#X obj 180 311 print A;
+#X obj 37 389 dac~;
+#X obj 46 358 *~;
+#X obj 87 360 hsl 128 15 0.0001 1 1 0 empty empty volume -2 -6 0 8
 -261689 -1 -1 0 1;
-#X obj 70 348 nbx 5 14 -1e+037 1e+037 0 0 empty empty empty 0 -6 0
+#X obj 84 378 nbx 5 14 -1e+037 1e+037 0 0 empty empty empty 0 -6 0
 10 -261689 -1 -1 0 256;
 #X obj 21 10 cnv 15 650 40 empty empty xplay~ 10 22 0 24 -260818 -1
 0;
-#X text 180 29 http://www.parasitaere-kapazitaeten.net;
 #N canvas 0 0 450 300 graph2 0;
 #X array \$0-scp 300 float 0;
 #X coords 0 1 299 -1 300 100 1;
@@ -79,7 +78,7 @@
 #X connect 0 0 1 0;
 #X connect 1 0 3 0;
 #X connect 2 0 3 0;
-#X restore 205 376 pd watch;
+#X restore 90 310 pd watch;
 #N canvas 33 327 454 231 attributes 0;
 #X msg 85 60 getattributes;
 #X obj 22 181 s to;
@@ -101,23 +100,24 @@
 #X restore 22 210 pd attributes;
 #X text 21 192 attributes;
 #X obj 21 154 s to-p;
-#X obj 81 257 r to-p;
+#X obj 21 250 r to-p;
 #X obj 81 280 xplay~ \$0-buf;
-#X text 180 10 buffer-based sample player \, (C)2001-2004 Thomas Grill
+#X text 180 29 http://grrrr.org/ext;
+#X text 179 11 buffer-based sample player \, (C)2001-2005 Thomas Grill
 ;
-#X connect 0 0 23 0;
-#X connect 1 0 23 0;
-#X connect 2 0 23 0;
-#X connect 5 0 25 0;
-#X connect 7 0 23 0;
+#X connect 0 0 22 0;
+#X connect 1 0 22 0;
+#X connect 2 0 22 0;
+#X connect 5 0 24 0;
+#X connect 7 0 22 0;
 #X connect 9 0 11 0;
-#X connect 10 0 23 0;
+#X connect 10 0 22 0;
 #X connect 11 0 5 0;
 #X connect 14 0 13 0;
 #X connect 14 0 13 1;
-#X connect 15 0 14 1;
 #X connect 15 0 16 0;
-#X connect 24 0 25 0;
-#X connect 25 0 14 0;
-#X connect 25 0 20 0;
-#X connect 25 1 12 0;
+#X connect 16 0 14 1;
+#X connect 23 0 24 0;
+#X connect 24 0 14 0;
+#X connect 24 0 19 0;
+#X connect 24 1 12 0;

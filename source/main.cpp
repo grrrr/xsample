@@ -1,24 +1,22 @@
 /*
-
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2004 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001-2005 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
-
 */
 
 #include "main.h"
 
 
 // Initialization function for xsample library
-static V xsample_main()
+static void xsample_main()
 {
 	flext::post("-------------------------------");
 	flext::post("xsample objects, version " XSAMPLE_VERSION);
     flext::post("");
 	flext::post("  xrecord~, xplay~, xgroove~   ");
-    flext::post("  (C)2001-2004 Thomas Grill    ");
+    flext::post("  (C)2001-2005 Thomas Grill    ");
 #ifdef FLEXT_DEBUG
     flext::post("          DEBUG BUILD          ");
 #endif
@@ -56,7 +54,7 @@ xsample::xsample():
 	unitmode(xsu_sample),  // PD defaults to samples
 #endif
 	sclmode(xss_unitsinbuf),
-	curmin(0),curmax(1<<31)
+	curmin(0),curmax(1<<(sizeof(curmax)*8-2))
 {}
 	
 xsample::~xsample()
@@ -64,164 +62,137 @@ xsample::~xsample()
 //	m_enable(false); // switch off DSP
 }
 
-bool xsample::Init()
+bool xsample::Finalize()
 {
-    if(!flext_dsp::Init()) return false;
-    DoUpdate();
+    if(!flext_dsp::Finalize()) return false;
+
+    // flags have been set in constructor
+    Refresh();
     return true;
 }
 
-bool xsample::ChkBuffer() 
-{ 
-	if(!buf.Valid()) return false;
-        
-    if(buf.Update() || buf.Set())) {
+int xsample::ChkBuffer(bool refresh) 
+{        
+    if(buf.Update()) {
         Update(xsc_buffer);
-        s_dsp(); // channel count may have changed
-        return true;
-	}
-    return false;
+        if(refresh) Refresh();
+        return buf.Valid()?1:0;
+    }
+    else
+        return -1;
 }
 
 /* called after all buffer objects have been created in the patch */
 void xsample::m_loadbang() 
 {
-	m_reset();
+    ChkBuffer(true);
 }
 
-void xsample::m_set(I argc,const t_atom *argv)
+void xsample::m_set(int argc,const t_atom *argv)
 {
 	const t_symbol *sym = argc >= 1?GetASymbol(argv[0]):NULL;
-	int r = buf->Set(sym);
-	if(sym) {
-        if(r < 0) post("%s - can't find buffer %s",thisName(),GetString(sym));
-        else ChkBuffer();
-    }
-    DoUpdate();
+	int r = buf.Set(sym);
+	if(sym && r < 0) 
+        post("%s - can't find buffer %s",thisName(),GetString(sym));
+    Update(xsc_buffer,true);
 }
 
-V xsample::m_units(xs_unit mode)
+void xsample::m_min(float mn)
 {
-    unitmode = mode;
-    Update(xsc_units);
-    DoUpdate();
-}
-
-V xsample::m_sclmode(xs_sclmd mode)
-{
-    sclmode = mode;
-    Update(xsc_sclmd);
-    DoUpdate();
-}
-
-V xsample::m_min(F mn)
-{
-    ChkBuffer();
-    DoUpdate();
+    ChkBuffer(true);
 
 	if(s2u) {
-		mn /= s2u;  // conversion to samples
-		if(mn < 0) mn = 0;
-		else if(mn > curmax) mn = (F)curmax;
-		curmin = (I)(mn+.5);
+		long cmn = CASTINT<long>(mn/s2u+0.5f);  // conversion to samples
 
-        Update(xsc_range);
-        DoUpdate();
+		if(cmn < 0) 
+            curmin = 0;
+		else if(cmn > curmax) 
+            curmin = curmax;
+		else
+            curmin = cmn;
+
+        Update(xsc_range,true);
 	}
 }
 
-V xsample::m_max(F mx)
+void xsample::m_max(float mx)
 {
-    ChkBuffer();
-    DoUpdate();
+    ChkBuffer(true);
 
 	if(s2u) {
-		mx /= s2u;  // conversion to samples
-		if(mx > buf.Frames()) mx = (F)buf.Frames();
-		else if(mx < curmin) mx = (F)curmin;
-		curmax = (I)(mx+.5);
+		long cmx = CASTINT<long>(mx/s2u+0.5f);  // conversion to samples
 
-        Update(xsc_range);
-        DoUpdate();
+		if(cmx > buf.Frames()) 
+            curmax = buf.Frames();
+		else if(cmx < curmin) 
+            curmax = curmin;
+        else
+		    curmax = cmx;
+
+        Update(xsc_range,true);
 	}
 }
 
-V xsample::m_all()
-{
-    ChkBuffer();
-    DoUpdate();
-    
-	curmin = 0; 
-    curmax = buf.Frames();
-
-    Update(xsc_range);
-    DoUpdate();
-}
-
-V xsample::m_dsp(I /*n*/,S *const * /*insigs*/,S *const * /*outsigs*/)
+void xsample::m_dsp(int /*n*/,t_sample *const * /*insigs*/,t_sample *const * /*outsigs*/)
 {
 	// this is hopefully called at change of sample rate ?!
 
-    ChkBuffer();
-    Update(xsc_srate);
-    DoUpdate();
+    // for PD at least this is also called if a table has been deleted...
+    // then we must reset the buffer
+
+    Update(xsc_srate|xsc_buffer,true);
 }
 
-void xsample::DoUpdate()
+void xsample::DoReset() 
 {
-    if(update&xsc_units) SetUnits();
-    if(update&xsc_sclmd) SetSclmd();
-
-    if(update&xsc_range) SetRange();
-    if(update&xsc_play) SetPlay();
-    
-    update = xsc__;
+    ResetRange();
 }
 
-/*! buffer must have been checked beforehand */
-void xsample::SetUnits()
+void xsample::DoUpdate(unsigned int flags)
 {
-	switch(unitmode) {
-		case xsu_sample: // samples
-			s2u = 1;
-			break;
-		case xsu_buffer: // buffer size
-			s2u = bufchk()?1.f/buf.Frames():0;
-			break;
-		case xsu_ms: // ms
-			s2u = 1000.f/Samplerate();
-			break;
-		case xsu_s: // s
-			s2u = 1.f/Samplerate();
-			break;
-		default:
-			throw "Unknown unit mode";
-	}
-}
+    if(flags&xsc_buffer)
+        buf.Set();
 
-/*! buffer must have been checked beforehand 
-    units must have been set beforehand
-*/
-void xsample::SetSclmd()
-{
-	switch(sclmode) {
-		case 0: // samples/units
-			sclmin = 0; sclmul = s2u;
-			break;
-		case 1: // samples/units from recmin to recmax
-			sclmin = curmin; sclmul = s2u;
-			break;
-		case 2: // unity between 0 and buffer size
-			sclmin = 0; sclmul = (bufchk() && buf.Frames())?1.f/buf.Frames():0;
-			break;
-		case 3:	// unity between recmin and recmax
-			sclmin = curmin; sclmul = curmin != curmax?1.f/(curmax-curmin):0;
-			break;
-		default:
-			throw "Unknown scale mode";
-	}
-}
+    if(flags&xsc_range) {
+        if(buf.Valid()) {
+            if(curmin < 0) curmin = 0;
+		    if(curmax > buf.Frames()) curmax = buf.Frames();
+        }
+    }
 
-void xsample::SetPlay()
-{
+    if(flags&xsc_units) {
+	    switch(unitmode) {
+		    case xsu_sample: // samples
+			    s2u = 1;
+			    break;
+		    case xsu_buffer: // buffer size
+			    s2u = buf.Frames()?1.f/buf.Frames():0;
+			    break;
+		    case xsu_ms: // ms
+			    s2u = 1000.f/Samplerate();
+			    break;
+		    case xsu_s: // s
+			    s2u = 1.f/Samplerate();
+			    break;
+		    default:
+			    post("%s - Unknown unit mode",thisName());
+	    }
+
+	    switch(sclmode) {
+		    case xss_unitsinbuf: // samples/units
+			    sclmin = 0; sclmul = s2u;
+			    break;
+		    case xss_unitsinloop: // samples/units from recmin to recmax
+			    sclmin = curmin; sclmul = s2u;
+			    break;
+		    case xss_buffer: // unity between 0 and buffer size
+			    sclmin = 0; sclmul = buf.Frames()?1.f/buf.Frames():0;
+			    break;
+		    case xss_loop:	// unity between recmin and recmax
+			    sclmin = curmin; sclmul = curmin < curmax?1.f/(curmax-curmin):0;
+			    break;
+		    default:
+			    post("%s - Unknown scale mode",thisName());
+	    }
+    }
 }
