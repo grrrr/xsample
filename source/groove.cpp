@@ -79,8 +79,8 @@ protected:
 	
 	inline V setpos(F pos)
 	{
-		if(pos < curmin) pos = curmin;
-		else if(pos > curmax) pos = curmax;
+		if(pos < znsmin) pos = znsmin;
+		else if(pos > znsmax) pos = znsmax;
 		curpos = pos;
 	}
 
@@ -315,21 +315,30 @@ V xgroove::m_xshape(I argc,const t_atom *argv)
 	if(argc >= 1 && CanbeInt(argv[0])) xshape = GetAInt(argv[0]);
 	if(argc >= 2 && CanbeFloat(argv[1])) {
 		xshparam = GetAFloat(argv[1]);
+/*
 		// clip to 0..1
 		if(xshparam < 0) xshparam = 0;
 		else if(xshparam > 1) xshparam = 1;
+*/
 	}
 
 	I i;
 	switch(xshape) {
 	case 1:
+		// sine half wave
 		for(i = 0; i <= XZONE_TABLE; ++i) 
-			znmul[i] = ((sin(i*(pi/XZONE_TABLE)-pi/2.)+1)/2)*xshparam+i*(1./XZONE_TABLE)*(1-xshparam);
+			znmul[i] = sin(i*pi/(XZONE_TABLE*2))*xshparam+i*(1.f/XZONE_TABLE)*(1.f-xshparam);
+		break;
+	case 2:
+		// sine full wave
+		for(i = 0; i <= XZONE_TABLE; ++i) 
+			znmul[i] = ((sin(i*(pi/XZONE_TABLE)-pi*0.5f)+1.f)*0.5f)*xshparam+i*(1.f/XZONE_TABLE)*(1.f-xshparam);
 		break;
 	case 0:
 	default:
+		// linear
 		for(i = 0; i <= XZONE_TABLE; ++i) 
-			znmul[i] = i*(1./XZONE_TABLE);
+			znmul[i] = i*(1.f/XZONE_TABLE);
 	}
 }
 
@@ -607,6 +616,8 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 		register D o = curpos;
 
  		for(I i = 0; i < n; ++i) {	
+ 			// \TODO: exploit relationships: smin <= lmin, smax >= lmax
+ 		
 			// normalize offset
 			if(o >= smax) {
 				o = fmod(o-smin,plen)+smin;
@@ -644,27 +655,35 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 		}
 
 		// normalize and store current playing position
+		if(o < znsmin) o += plen;
 		setpos(o);
 
+		// calculate samples (1st voice)
 		playfun(n,&pos,outvecs); 
 
-		arrscale(n,pos,pos);
-
 		if(inzn) {
-			// only if we were in cross-fade zone
+			// only if we are in cross-fade zone
+			
+			// calculate samples in loop zone (2nd voice)
 			playfun(n,&znpos,znbuf); 
 			
-			arrscale(n,znidx,znpos,-XZONE_TABLE,-1);
+			// calculate counterpart in loop fade
+			arrscale(n,znidx,znpos,XZONE_TABLE,-1);
 			
+			// calculate fade coefficients
 			zonefun(znmul,0,XZONE_TABLE+1,n,1,1,&znidx,&znidx);
 			zonefun(znmul,0,XZONE_TABLE+1,n,1,1,&znpos,&znpos);
 
+			// mix voices for all channels
 			for(I o = 0; o < outchns; ++o) {
 				F *ov = outvecs[o],*ob = znbuf[o];
 				for(I i = 0; i < n; ++i,ov++,ob++)
 					*ov = (*ov)*znidx[i]+(*ob)*znpos[i];
 			}
 		}
+	
+		// rescale position vector
+		arrscale(n,pos,pos);
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);

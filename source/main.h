@@ -12,7 +12,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #define __XSAMPLE_H
 
 
-#define XSAMPLE_VERSION "0.3.0pre14"
+#define XSAMPLE_VERSION "0.3.0pre15"
 
 
 #define FLEXT_ATTRIBUTES 1 
@@ -154,7 +154,7 @@ protected:
 	inline F scale(F smp) const { return (smp-sclmin)*sclmul; }
 	
     static V arrscale(I n,const S *in,S *out,S add,S mul) { flext::ScaleSamples(out,in,mul,add,n); }
-	inline V arrscale(I n,const S *in,S *out) const { arrscale(n,in,out,(S)-sclmin,sclmul); }
+	inline V arrscale(I n,const S *in,S *out) const { arrscale(n,in,out,-sclmin*sclmul,sclmul); }
 	
 	static V arrmul(I n,const S *in,S *out,S mul) { flext::MulSamples(out,in,mul,n); }
 	inline V arrmul(I n,const S *in,S *out) const { arrmul(n,in,out,(S)(1./s2u)); }

@@ -3,10 +3,10 @@
 #
 
 # your c++ compiler (if not g++)
-# CXX=g++
+CXX=g++-3.3
 
 # where does the PD installation reside?
-PD=/usr/local/pd
+PD=/usr/local/lib/pd
 
 # where are the PD header files?
 # leave it blank if it is a system directory (like /usr/local/include), 
@@ -14,7 +14,7 @@ PD=/usr/local/pd
 PDINC=${PD}/src
 
 # where is the PD executable?
-PDBIN=${PD}/bin/pd
+PDBIN=/usr/local/bin/pd
 
 # where do the flext libraries reside?
 FLEXTPATH=${PD}/flext
@@ -32,5 +32,5 @@ HELPDIR=${PD}/doc/5.reference
 
 # additional compiler flags
 # (check whether they fit your system!)
-UFLAGS=-malign-power -maltivec
+UFLAGS=-malign-power -maltivec -faltivec
 

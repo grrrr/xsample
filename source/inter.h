@@ -32,19 +32,21 @@ TMPLDEF V xinter::st_play1(const S *bdt,const I smin,const I smax,const I n,cons
 	for(I i = 0; i < n; ++i,++si) {	
 		register const I oint = (I)(*(pos++));
 		register const S *fp;
-		if(oint < smin) {
+		
+		if(oint >= smin)
+			if(oint < smax) {
+				// normal
+				fp = bdt+oint*BCHNS;
+			}
+			else {
+				// position > last sample ... take only last sample
+				fp = bdt+(smin == smax?smin:smax-1)*BCHNS;
+			}
+		else {
 			// position < 0 ... take only 0th sample
 			fp = bdt+smin*BCHNS;
 		}
-		else if(oint >= smax) {
-			// position > last sample ... take only last sample
-			fp = bdt+(smin == smax?smin:smax-1)*BCHNS;
-		}
-		else {
-			// normal
-			fp = bdt+oint*BCHNS;
-		}
-
+		
 		for(I ci = 0; ci < OCHNS; ++ci)
 			sig[ci][si] = fp[ci];
 	}
@@ -77,25 +79,26 @@ TMPLDEF V xinter::st_play2(const S *bdt,const I smin,const I smax,const I n,cons
 		const F o = *(pos++);
 		register const I oint = (I)o;
 
-		if(oint < smin) {
+		if(oint >= smin)
+			if(oint < maxo) {
+				// normal interpolation
+				register const F frac = o-oint;
+				register const S *const fp0 = bdt+oint*BCHNS;
+				register const S *const fp1 = fp0+BCHNS;
+				for(I ci = 0; ci < OCHNS; ++ci) 
+					sig[ci][si] = fp0[ci]+frac*(fp1[ci]-fp0[ci]);
+			}
+			else {
+				// position is past last sample -> take the last sample
+				register const S *const fp = bdt+maxo*BCHNS;
+				for(I ci = 0; ci < OCHNS; ++ci) 
+					sig[ci][si] = fp[ci]; 
+			}
+		else {
 			// position is before first sample -> take the first sample
 			register const S *const fp = bdt+smin*BCHNS;
 			for(I ci = 0; ci < OCHNS; ++ci) 
 				sig[ci][si] = fp[ci]; 
-		}
-		else if(oint >= maxo) {
-			// position is past last sample -> take the last sample
-			register const S *const fp = bdt+maxo*BCHNS;
-			for(I ci = 0; ci < OCHNS; ++ci) 
-				sig[ci][si] = fp[ci]; 
-		}
-		else {
-			// normal interpolation
-			register const F frac = o-oint;
-			register const S *const fp0 = bdt+oint*BCHNS;
-			register const S *const fp1 = fp0+BCHNS;
-			for(I ci = 0; ci < OCHNS; ++ci) 
-				sig[ci][si] = fp0[ci]+frac*(fp1[ci]-fp0[ci]);
 		}
 	}
 
@@ -137,7 +140,35 @@ TMPLDEF V xinter::st_play4(const S *bdt,const I smin,const I smax,const I n,cons
 		register F frac;
 		register const S *fa,*fb,*fc,*fd;
 
-		if(oint <= smin) { 
+		if(oint > smin)
+			if(oint < maxo-2) {
+				// normal case
+				
+				fa = bdt+oint*BCHNS-BCHNS;
+				frac = o-oint;
+				fb = fa+BCHNS;
+	#ifdef __VEC__
+				vec_dst(fa,pf,0);
+	#endif
+				fc = fb+BCHNS;
+				fd = fc+BCHNS;
+			}
+			else {
+				// after the end
+				
+				if(oint > maxo) oint = maxo,o = (float)smax;
+				frac = o-oint;
+
+				fb = bdt+oint*BCHNS;
+				fa = fb-BCHNS;   
+				
+				// \TODO what about wraparound (in loop/palindrome mode) ?
+				fc = fb >= maxp?maxp:fb+BCHNS;
+				fd = fc >= maxp?maxp:fc+BCHNS;
+			}
+		else {
+			// before the beginning
+		
 			// if oint < first sample set it to first sample
 			// \TODO what about wraparound (in loop/palindrome mode) ?
 			if(oint < smin) oint = smin,o = (float)smin;
@@ -150,28 +181,7 @@ TMPLDEF V xinter::st_play4(const S *bdt,const I smin,const I smax,const I n,cons
 			fc = fb+BCHNS;
 			fd = fc+BCHNS;
 		}
-		else if(oint >= maxo-2) { 
-			if(oint > maxo) oint = maxo,o = (float)smax;
-			frac = o-oint;
-
-			fb = bdt+oint*BCHNS;
-			fa = fb-BCHNS;   
-			
-			// \TODO what about wraparound (in loop/palindrome mode) ?
-			fc = fb >= maxp?maxp:fb+BCHNS;
-			fd = fc >= maxp?maxp:fc+BCHNS;
-		}
-		else {
-			fa = bdt+oint*BCHNS-BCHNS;
-			frac = o-oint;
-			fb = fa+BCHNS;
-#ifdef __VEC__
-			vec_dst(fa,pf,0);
-#endif
-			fc = fb+BCHNS;
-			fd = fc+BCHNS;
-		}
-
+		
 		register F f1 = 0.5f*(frac-1.0f);
 		register F f3 = frac*3.0f-1.0f;
 		
