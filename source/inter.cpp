@@ -52,19 +52,19 @@ V xinter::m_interp(xs_intp mode)
 }
 
 
-TMPLDEF V xinter::s_play0(I n,F *const *invecs,F *const *outvecs)
+TMPLDEF V xinter::s_play0(I n,S *const *invecs,S *const *outvecs)
 {
 	// stopped
 	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
 
-	const F *pos = invecs[0];
-	F *const *sig = outvecs;
+	const S *pos = invecs[0];
+	S *const *sig = outvecs;
 	
 	for(I ci = 0; ci < outchns; ++ci) 
 		for(I si = 0; si < n; ++si) sig[ci][si] = 0;
 }
 
-TMPLDEF V xinter::s_play4(I n,F *const *invecs,F *const *outvecs)
+TMPLDEF V xinter::s_play4(I n,S *const *invecs,S *const *outvecs)
 {
 	const I smin = curmin,smax = curmax,plen = curlen;
 	if(plen < 4) {
@@ -75,10 +75,10 @@ TMPLDEF V xinter::s_play4(I n,F *const *invecs,F *const *outvecs)
 
 	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
 
-	const F *pos = invecs[0];
-	F *const *sig = outvecs;
+	const S *pos = invecs[0];
+	S *const *sig = outvecs;
 	register I si = 0;
-	const F *bdt = buf->Data();
+	const S *bdt = buf->Data();
 	
 	// 4-point interpolation
 	// ---------------------
@@ -109,10 +109,10 @@ TMPLDEF V xinter::s_play4(I n,F *const *invecs,F *const *outvecs)
 
 		register F frac = o-oint;
 		
-		register const F *fa = bdt+ointm*BCHNS;
-		register const F *fb = bdt+oint*BCHNS;
-		register const F *fc = bdt+oint1*BCHNS;
-		register const F *fd = bdt+oint2*BCHNS;
+		register const S *fa = bdt+ointm*BCHNS;
+		register const S *fb = bdt+oint*BCHNS;
+		register const S *fc = bdt+oint1*BCHNS;
+		register const S *fd = bdt+oint2*BCHNS;
 
 		for(I ci = 0; ci < OCHNS; ++ci) {
 			const F cmb = fc[ci]-fb[ci];
@@ -127,7 +127,7 @@ TMPLDEF V xinter::s_play4(I n,F *const *invecs,F *const *outvecs)
 		for(si = 0; si < n; ++si) sig[ci][si] = 0;
 }
 
-TMPLDEF V xinter::s_play2(I n,F *const *invecs,F *const *outvecs)
+TMPLDEF V xinter::s_play2(I n,S *const *invecs,S *const *outvecs)
 {
 	const I smin = curmin,smax = curmax,plen = curlen;
 	if(plen < 2) {
@@ -137,15 +137,15 @@ TMPLDEF V xinter::s_play2(I n,F *const *invecs,F *const *outvecs)
 
 	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
 
-	const F *pos = invecs[0];
-	F *const *sig = outvecs;
+	const S *pos = invecs[0];
+	S *const *sig = outvecs;
 	register I si = 0;
 	
 	// linear interpolation
 	// --------------------
 
 	const I maxo = smax-1;  // last sample in buffer
-	const F *bdt = buf->Data();
+	const S *bdt = buf->Data();
 
 	for(I i = 0; i < n; ++i,++si) {	
 		const F o = *(pos++)/s2u;
@@ -153,21 +153,21 @@ TMPLDEF V xinter::s_play2(I n,F *const *invecs,F *const *outvecs)
 
 		if(oint < smin) {
 			// position is before first sample -> take the first sample
-			register const F *const fp = bdt+smin*BCHNS;
+			register const S *const fp = bdt+smin*BCHNS;
 			for(I ci = 0; ci < OCHNS; ++ci) 
 				sig[ci][si] = fp[ci]; 
 		}
 		else if(oint >= maxo) {
 			// position is past last sample -> take the last sample
-			register const F *const fp = bdt+maxo*BCHNS;
+			register const S *const fp = bdt+maxo*BCHNS;
 			for(I ci = 0; ci < OCHNS; ++ci) 
 				sig[ci][si] = fp[ci]; 
 		}
 		else {
 			// normal interpolation
 			register const F frac = o-oint;
-			register const F *const fp0 = bdt+oint*BCHNS;
-			register const F *const fp1 = fp0+BCHNS;
+			register const S *const fp0 = bdt+oint*BCHNS;
+			register const S *const fp1 = fp0+BCHNS;
 			for(I ci = 0; ci < OCHNS; ++ci) 
 				sig[ci][si] = fp0[ci]+frac*(fp1[ci]-fp0[ci]);
 		}
@@ -178,22 +178,22 @@ TMPLDEF V xinter::s_play2(I n,F *const *invecs,F *const *outvecs)
 		for(si = 0; si < n; ++si) sig[ci][si] = 0;
 }
 
-TMPLDEF V xinter::s_play1(I n,F *const *invecs,F *const *outvecs)
+TMPLDEF V xinter::s_play1(I n,S *const *invecs,S *const *outvecs)
 {
 	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
 
-	const F *pos = invecs[0];
-	F *const *sig = outvecs;
+	const S *pos = invecs[0];
+	S *const *sig = outvecs;
 	register I si = 0;
 	const I smin = curmin,smax = curmax;
-	const F *bdt = buf->Data();
+	const S *bdt = buf->Data();
 	
 	// no interpolation
 	// ----------------
 	
 	for(I i = 0; i < n; ++i,++si) {	
 		register const I oint = (I)(*(pos++)/s2u);
-		register const F *fp;
+		register const S *fp;
 		if(oint < smin) {
 			// position < 0 ... take only 0th sample
 			fp = bdt+smin*BCHNS;

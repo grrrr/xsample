@@ -34,7 +34,7 @@ public:
 private:
 //	static V setup(t_class *c);
 
-	virtual V m_signal(I n,F *const *in,F *const *out) { playfun(n,in,out); }
+	virtual V m_signal(I n,S *const *in,S *const *out) { playfun(n,in,out); }
 };
 
 FLEXT_LIB_TILDE_G("xplay~",xplay)

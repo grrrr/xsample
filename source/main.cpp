@@ -156,7 +156,7 @@ V xsample::m_all()
 	m_sclmode();
 }
 
-V xsample::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
+V xsample::m_dsp(I /*n*/,S *const * /*insigs*/,S *const * /*outsigs*/)
 {
 	// this is hopefully called at change of sample rate ?!
 

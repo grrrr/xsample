@@ -55,6 +55,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #define C char
 #define V void
 #define BL bool
+#define S t_sample
 
 
 class xsample:
@@ -143,18 +144,18 @@ private:
 	#endif
 
 	#define DEFSIGFUN(NAME) \
-	static V st_##NAME(thisType *obj,I n,F *const *in,F *const *out)  { obj->NAME (n,in,out); } \
-	V NAME(I n,F *const *in,F *const *out)
+	static V st_##NAME(thisType *obj,I n,S *const *in,S *const *out)  { obj->NAME (n,in,out); } \
+	V NAME(I n,S *const *in,S *const *out)
 
 	#define TMPLSIGFUN(NAME) \
-	TMPLDEF static V st_##NAME(thisType *obj,I n,F *const *in,F *const *out)  { obj->NAME TMPLCALL (n,in,out); } \
-	TMPLDEF V NAME(I n,F *const *in,F *const *out)
+	TMPLDEF static V st_##NAME(thisType *obj,I n,S *const *in,S *const *out)  { obj->NAME TMPLCALL (n,in,out); } \
+	TMPLDEF V NAME(I n,S *const *in,S *const *out)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
 
 	#define DEFSIGCALL(NAME) \
-	inline V NAME(I n,F *const *in,F *const *out) { (*v_##NAME)(this,n,in,out); } \
-	V (*v_##NAME)(thisType *obj,I n,F *const *in,F *const *out) 
+	inline V NAME(I n,S *const *in,S *const *out) { (*v_##NAME)(this,n,in,out); } \
+	V (*v_##NAME)(thisType *obj,I n,S *const *in,S *const *out) 
 
 #else
 	#ifdef TMPLOPT
@@ -169,14 +170,14 @@ private:
 		#define TMPLCALL
 	#endif
 
-	#define DEFSIGFUN(NAME)	V NAME(I n,F *const *in,F *const *out)
-	#define TMPLSIGFUN(NAME) TMPLDEF V NAME(I n,F *const *in,F *const *out)
+	#define DEFSIGFUN(NAME)	V NAME(I n,S *const *in,S *const *out)
+	#define TMPLSIGFUN(NAME) TMPLDEF V NAME(I n,S *const *in,S *const *out)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
 
 	#define DEFSIGCALL(NAME) \
-	inline V NAME(I n,F *const *in,F *const *out) { (this->*v_##NAME)(n,in,out); } \
-	V (thisType::*v_##NAME)(I n,F *const *in,F *const *out)
+	inline V NAME(I n,S *const *in,S *const *out) { (this->*v_##NAME)(n,in,out); } \
+	V (thisType::*v_##NAME)(I n,S *const *in,S *const *out)
 #endif
 
 

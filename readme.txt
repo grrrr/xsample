@@ -65,6 +65,9 @@ Goals/features of the package:
 
 Version history:
 
+0.2.4:
+- according to flext 0.2.3 changed sample type to t_sample (S)
+
 0.2.3:
 - using flext 0.2.2 - xsample is now a library under MaxMSP
 - cleaner gcc makefile

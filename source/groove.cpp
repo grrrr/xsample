@@ -77,7 +77,7 @@ private:
 	DEFSIGFUN(s_pos_bidir);
 
 	DEFSIGCALL(posfun);
-	virtual V m_signal(I n,F *const *in,F *const *out) { posfun(n,in,out); }
+	virtual V m_signal(I n,S *const *in,S *const *out) { posfun(n,in,out); }
 
 	FLEXT_CALLBACK_F(m_pos)
 	FLEXT_CALLBACK(m_all)
@@ -196,9 +196,9 @@ V xgroove::m_loop(xs_loop lp)
 }
 	
 
-V xgroove::s_pos_off(I n,F *const *invecs,F *const *outvecs)
+V xgroove::s_pos_off(I n,S *const *invecs,S *const *outvecs)
 {
-	F *pos = outvecs[outchns];
+	S *pos = outvecs[outchns];
 
 	const F oscl = scale(curpos);
 	for(I si = 0; si < n; ++si) pos[si] = oscl;
@@ -206,10 +206,10 @@ V xgroove::s_pos_off(I n,F *const *invecs,F *const *outvecs)
 	playfun(n,&pos,outvecs); 
 }
 
-V xgroove::s_pos_once(I n,F *const *invecs,F *const *outvecs)
+V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
 {
-	const F *speed = invecs[0];
-	F *pos = outvecs[outchns];
+	const S *speed = invecs[0];
+	S *pos = outvecs[outchns];
 
 	const I smin = curmin,smax = curmax,plen = curlen;
 
@@ -217,7 +217,7 @@ V xgroove::s_pos_once(I n,F *const *invecs,F *const *outvecs)
 		register D o = curpos;
 
 		for(I i = 0; i < n; ++i) {	
-			const F spd = speed[i];  // must be first because the vector is reused for output!
+			const S spd = speed[i];  // must be first because the vector is reused for output!
 			
 			if(o >= smax) o = smax;
 			else if(o < smin) o = smin;
@@ -234,10 +234,10 @@ V xgroove::s_pos_once(I n,F *const *invecs,F *const *outvecs)
 		s_pos_off(n,invecs,outvecs);
 }
 
-V xgroove::s_pos_loop(I n,F *const *invecs,F *const *outvecs)
+V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 {
-	const F *speed = invecs[0];
-	F *pos = outvecs[outchns];
+	const S *speed = invecs[0];
+	S *pos = outvecs[outchns];
 
 	const I smin = curmin,smax = curmax,plen = curlen;
 
@@ -245,7 +245,7 @@ V xgroove::s_pos_loop(I n,F *const *invecs,F *const *outvecs)
 		register D o = curpos;
 
 		for(I i = 0; i < n; ++i) {	
-			const F spd = speed[i];  // must be first because the vector is reused for output!
+			const S spd = speed[i];  // must be first because the vector is reused for output!
 
 			// normalize offset
 			if(o >= smax) 
@@ -265,10 +265,10 @@ V xgroove::s_pos_loop(I n,F *const *invecs,F *const *outvecs)
 		s_pos_off(n,invecs,outvecs);
 }
 
-V xgroove::s_pos_bidir(I n,F *const *invecs,F *const *outvecs)
+V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 {
-	const F *speed = invecs[0];
-	F *pos = outvecs[outchns];
+	const S *speed = invecs[0];
+	S *pos = outvecs[outchns];
 
 	const I smin = curmin,smax = curmax,plen = curlen;
 
@@ -277,7 +277,7 @@ V xgroove::s_pos_bidir(I n,F *const *invecs,F *const *outvecs)
 		register F bd = bidir;
 
 		for(I i = 0; i < n; ++i) {	
-			const F spd = speed[i];  // must be first because the vector is reused for output!
+			const S spd = speed[i];  // must be first because the vector is reused for output!
 
 			// normalize offset
 			if(o >= smax) {

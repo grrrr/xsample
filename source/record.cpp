@@ -72,7 +72,7 @@ private:
 	TMPLSIGFUN(s_rec);
 
 	DEFSIGCALL(recfun);
-	virtual V m_signal(I n,F *const *in,F *const *out) { recfun(n,in,out); }
+	virtual V m_signal(I n,S *const *in,S *const *out) { recfun(n,in,out); }
 
 	FLEXT_CALLBACK_F(m_pos)
 	FLEXT_CALLBACK(m_all)
@@ -237,14 +237,14 @@ V xrecord::m_draw(I argc,t_atom *argv)
 }
 	
 	
-TMPLDEF V xrecord::s_rec(I n,F *const *invecs,F *const *outvecs)
+TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 {
 	SIGCHNS(BCHNS,buf->Channels(),ICHNS,inchns);
 
-	const F *const *sig = invecs;
+	const S *const *sig = invecs;
 	register I si = 0;
-	const F *on = invecs[inchns];
-	F *pos = outvecs[0];
+	const S *on = invecs[inchns];
+	S *pos = outvecs[0];
 
 	register const F pf = sclmul;
 	register L o = curpos;
@@ -269,7 +269,7 @@ TMPLDEF V xrecord::s_rec(I n,F *const *invecs,F *const *outvecs)
 			if(ncur > n) ncur = n;
 			
 			register I i;
-			register F *bf = buf->Data()+o*BCHNS;
+			register S *bf = buf->Data()+o*BCHNS;
 			register F p = scale(o);
 
 			if(sigmode) {
@@ -290,7 +290,7 @@ TMPLDEF V xrecord::s_rec(I n,F *const *invecs,F *const *outvecs)
 					}
 					else {
 						for(i = 0; i < ncur; ++i,++si) {	
-							register const F g = *(on++);
+							register const S g = *(on++);
 							if(g >= 0) {
 								for(int ci = 0; ci < ICHNS; ++ci)
 									bf[ci] = bf[ci]*(1.-g)+sig[ci][si]*g;
@@ -321,7 +321,7 @@ TMPLDEF V xrecord::s_rec(I n,F *const *invecs,F *const *outvecs)
 					}
 					else {
 						for(i = 0; i < ncur; ++i,++si) {	
-							register const F g = *(on++);
+							register const S g = *(on++);
 							if(g >= 0) {
 								for(int ci = 0; ci < ICHNS; ++ci)
 									bf[ci] = bf[ci]*(1.-g)+sig[ci][si]*g;
@@ -342,7 +342,7 @@ TMPLDEF V xrecord::s_rec(I n,F *const *invecs,F *const *outvecs)
 				// Altivec optimization for that!
 				if(!mixmode) {
 					for(int ci = 0; ci < ICHNS; ++ci) {	
-						register F *b = bf+ci;
+						register S *b = bf+ci;
 						register const F *s = sig[ci];
 						for(i = 0; i < ncur; ++i,b += BCHNS,++s) *b = *s;	
 					}
@@ -350,7 +350,7 @@ TMPLDEF V xrecord::s_rec(I n,F *const *invecs,F *const *outvecs)
 				}
 				else {
 					for(i = 0; i < ncur; ++i,++si) {	
-						register const F w = *(on++);
+						register const S w = *(on++);
 						for(int ci = 0; ci < ICHNS; ++ci)
 							bf[ci] = sig[ci][si]*w;
 						bf += BCHNS;
