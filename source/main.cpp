@@ -21,6 +21,14 @@ V lib_setup()
 	FLEXT_DSP_SETUP(xrecord);
 	FLEXT_DSP_SETUP(xplay);
 	FLEXT_DSP_SETUP(xgroove);
+	
+#ifdef MAXMSP
+	// That's not the right place..... (doesn't work)
+	finder_addclass((char *)"MSP Sampling",(char *)"xgroove~");
+	finder_addclass((char *)"MSP Sampling",(char *)"xplay~");
+	finder_addclass((char *)"MSP Sampling",(char *)"xrecord~");
+#endif
+
 }
 
 // setup the library

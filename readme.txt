@@ -9,8 +9,14 @@ Donations for further development of the package are highly appreciated.
 ----------------------------------------------------------------------------
 
 IMPORTANT INFORMATION for all MaxMSP users:
-To set up the ready-made xsample objects properly, please run MakeAliases inside the MPW folder.
-It will create the several xsample objects contained in the library.
+
+It is advisable to put the xsample shared library file into the "startup" folder. Hence it will be
+loaded at Max startup.
+
+If you want to load the xsample library on demand, please run MakeAliases inside the MPW folder.
+This will create aliases to the several xsample objects contained in the library. 
+Move these into the "externals" folder.
+(This latter procedure is only tested for OS 9.2, you may experience problems with other MacOS versions)
 
 ----------------------------------------------------------------------------
 

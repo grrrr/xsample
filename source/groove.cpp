@@ -166,7 +166,7 @@ xgroove::xgroove(I argc,t_atom *argv):
 	AddOutFloat(2); // play min & max	
 	AddOutBang();  // loop bang
 	SetupInOut();
-
+	
 	FLEXT_ADDMETHOD(1,m_min);
 	FLEXT_ADDMETHOD(2,m_max);
 	FLEXT_ADDMETHOD_F(0,"min",m_min); 
