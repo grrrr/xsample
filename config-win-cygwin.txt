@@ -1,0 +1,6 @@
+# Your settings are defined in the files
+# ../flext/build/config-win-pd-cygwin.txt
+# and
+# ../flext/build/config-win-max-cygwin.txt
+#
+# You can override them here.
