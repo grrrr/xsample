@@ -120,6 +120,7 @@ Version history:
 - fixed limit consideration for loopmode=0 and 2.
 - fixed buggy sampling in crossfade zones (and simplified it a lot)
 - different initialization on buffer absence
+- renew units and scalemode on buffer change
 
 0.3.0:
 - added resources to MaxMSP build
