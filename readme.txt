@@ -25,14 +25,14 @@ Package files:
 The package should at least compile (and is tested) with the following compilers:
 
 - pd - Windows:
-o Borland C++ 5.5 (free): makefile.bcc - just ok! - makefile is no real make but works
-o Microsoft Visual C++ 6: xsample.dsp - due to a compiler bug the optimization using templates is not functional
+o Borland C++ 5.5 (free): run "make -f makefile.bcc" - makefile is no real make but works
+o Microsoft Visual C++ 6: use "xsample.dsp" project file - due to a compiler bug the optimization using templates is not functional
 
 - pd - linux:
-o GCC for linux: makefile.pd-linux - GCC 2.95.2 dies with template optimization turned on 
+o GCC for linux: run "make -f makefile.pd-linux" - GCC 2.95.2 dies with template optimization turned on 
 
 - Max/MSP - MacOS:
-o Metrowerks CodeWarrior V6: xsample project - using redirection via static functions
+o Metrowerks CodeWarrior V6: use "xsample" project file - using dsp method redirection via static functions
 
 ----------------------------------------------------------------------------
 
