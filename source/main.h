@@ -11,7 +11,9 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #ifndef __XSAMPLE_H
 #define __XSAMPLE_H
 
-#define XSAMPLE_VERSION "0.3.0pre8"
+
+#define XSAMPLE_VERSION "0.3.0pre9"
+
 
 #define FLEXT_ATTRIBUTES 1 
 
@@ -37,7 +39,9 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 #elif defined(__MWERKS__)
 // CodeWarrior <= 8 can't take address of a template member function 
+	#ifndef FEXLT_DEBUG
 	#define TMPLOPT
+	#endif
 //	#define SIGSTATIC  // define that for CW6
 #elif defined(__MRC__)
 // Apple MPW - MrCpp

@@ -67,10 +67,7 @@ private:
 	TMPLSIGFUN(s_rec);
 
 	DEFSIGCALL(recfun);
-	virtual V m_signal(I n,S *const *in,S *const *out) 
-	{ 
-		if(bufchk()) recfun(n,in,out); 
-	}
+	virtual V m_signal(I n,S *const *in,S *const *out);
 
 	FLEXT_CALLVAR_F(mg_pos,m_pos)
 	FLEXT_CALLBACK(m_all)
@@ -391,6 +388,16 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 	}
 	
 	if(lpbang) ToOutBang(3);
+}
+
+V xrecord::m_signal(I n,S *const *in,S *const *out) 
+{ 
+	if(bufchk()) 
+		// call the appropriate dsp function
+		recfun(n,in,out); 
+	else
+		// set position signal to zero
+		ZeroSamples(out[0],n);
 }
 
 V xrecord::s_dsp()

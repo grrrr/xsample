@@ -102,6 +102,7 @@ Version history:
 - added validity check for buffers
 - Max/MSP OSX: new file xsample-objectmappings.txt fixes load of library on finding correct helpfiles!
 - makefiles for command line MSVC++, BCC, cygwin GCC
+- better handling of non-existent buffers
 
 0.2.4:
 - according to flext 0.2.3 changed sample type to t_sample (S)

@@ -93,7 +93,10 @@ BL xsample::bufchk()
 
 I xsample::m_set(I argc,const t_atom *argv)
 {
-	return buf->Set(argc >= 1?GetASymbol(argv[0]):NULL);
+	const t_symbol *sym = argc >= 1?GetASymbol(argv[0]):NULL;
+	int r = buf->Set(sym);
+	if(sym && r < 0) post("%s - can't find buffer %s",thisName(),GetString(sym));
+	return r;
 }
 
 BL xsample::m_refresh()
