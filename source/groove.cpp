@@ -311,7 +311,7 @@ V xgroove::m_xshape(I argc,const t_atom *argv)
 	switch(xshape) {
 	case 1:
 		for(i = 0; i <= XZONE_TABLE; ++i) 
-			znmul[i] = sin(i*(pi/2./XZONE_TABLE))*xshparam+i*(1./XZONE_TABLE)*(1-xshparam);
+			znmul[i] = ((sin(i*(pi/XZONE_TABLE)-pi/2.)+1)/2)*xshparam+i*(1./XZONE_TABLE)*(1-xshparam);
 		break;
 	case 0:
 	default:
@@ -358,15 +358,14 @@ V xgroove::do_xzone()
 				// must reduce crossfade/loop length
 				if(!xkeep) {	
 					// prefer preservation of cross-fade length
-					if(xzone >= plen) // have to reduce cross-fade length
-						xzone = plen-1;
-//					znmin = smin+xzone,znmax = smax-xzone;
+					if(xzone*2 >= plen) // have to reduce cross-fade length
+						xzone = plen/2;
 					znmin = xzone,znmax = buf->Frames()-xzone;
 				}
 				else {	
 					// prefer preservation of loop length
 					znmin += o1,znmax -= o2;
-					xzone = (buf->Frames()-znmax+znmin)/2;
+					xzone = (buf->Frames()-(znmax-znmin))/2;
 				}
 				znsmin = 0,znsmax = buf->Frames();
 			}
@@ -484,7 +483,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const F xz = xzone,lmin = znmin,lmax = znmax;
+	const F xz = xzone,lmin = znmin,lmax = znmax,lsh = lmax+xz-lmin;
 	const F xf = (F)XZONE_TABLE/xz;
 
     // adapt the playing bounds to the current cross-fade zone
@@ -511,14 +510,13 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
                 // in late cross-fade zone
 
                 // shift it into early zone
-				o -= plen; 
+				o -= lsh; 
             }
 
             // now: lmin-xz <= o < lmax
 
 			if(o < lmin) {
 				// in early cross-fade zone
-//				register F inp = o-smin;  // -xz/2 <= inp <= xz/2
 				register F inp = xz-(lmin-o);  // 0 <= inp < xz
 				znidx[i] = inp*xf;
 				znpos[i] = lmax+inp;
@@ -685,10 +683,10 @@ V xgroove::m_help()
 	post("\trefresh: checks buffer and refreshes outlets");
 	post("\t@units 0/1/2/3: set units to frames/buffer size/ms/s");
 	post("\t@sclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
-	post("\txzone {unit}: length of loop crossfade zone");
-	post("\txsymm -1,0...1: symmetry of crossfade zone inside/outside point");
-	post("\txshape 0/1 [param 0...1]: shape of crossfading (linear/trig)");
-	post("\txkeep 0/1: try to preserve xzone/loop length");
+	post("\t@xzone {unit}: length of loop crossfade zone");
+	post("\t@xsymm -1,0...1: symmetry of crossfade zone inside/outside point");
+	post("\t@xshape 0/1 [param 0...1]: shape of crossfading (linear/trig)");
+	post("\t@xkeep 0/1: try to preserve xzone/loop length");
 	post("");
 } 
 
