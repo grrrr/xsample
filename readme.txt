@@ -34,12 +34,22 @@ Package files:
 
 ----------------------------------------------------------------------------
 
+BUILDING XSAMPLE
+----------------
+
 The package should at least compile (and is tested) with the following compilers:
 
 pd - Windows:
 -------------
-o Microsoft Visual C++ 6: edit "xsample.dsp" project file
+o Microsoft Visual C++ 6 command line: edit "config-pd-msvc.txt" and run "build-pd-msvc.bat"
+
+o Microsoft Visual C++ 6 IDE: edit "xsample.dsp" project file
 > due to a compiler bug the optimization using templates is not functional
+
+o BCC: edit "config-pd-bcc.txt" and run "build-pd-bcc.bat"
+
+o Cygwin GCC: edit "config-pd-cygwin.txt" and run "sh ./build-pd-cygwin.sh"
+> various versions of GCC die during compile with template optimization turned on 
 
 pd - linux:
 -----------
@@ -91,6 +101,7 @@ Version history:
 - fixed scale mode bug with xgroove~
 - added validity check for buffers
 - Max/MSP OSX: new file xsample-objectmappings.txt fixes load of library on finding correct helpfiles!
+- makefiles for command line MSVC++, BCC, cygwin GCC
 
 0.2.4:
 - according to flext 0.2.3 changed sample type to t_sample (S)

@@ -25,7 +25,6 @@ LIBS=m
 # ----------------------------------------------
 
 NAME=xsample
-SRCDIR=source
 
 include make-files.txt
 

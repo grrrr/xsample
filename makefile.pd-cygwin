@@ -1,27 +1,25 @@
 # xsample - extended sample objects for Max/MSP and pd (pure data)
 # Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
 #
-# Makefile for gcc @ OSX (darwin)
+# Makefile for gcc @ cygwin
 #
 # usage:
-# to build run "make -f makefile.pd-darwin"
-# to install (as root), do "make -f makefile.pd-darwin install"
-# to install help, do "make -f makefile.pd-darwin install-help"
+# to build run "make -f makefile.pd-cygwin"
+# to install (as root), do "make -f makefile.pd-cygwin install"
 #
 
-CONFIG=config-pd-darwin.txt
+CONFIG=config-pd-cygwin.txt
 
 include ${CONFIG}
 
-FLEXTLIB=$(FLEXTPATH)/flext.a
+FLEXTLIB=$(FLEXTPATH)/flext-pdwin.lib
+PDLIBS=$(PD)/bin/pd.dll $(PD)/bin/pthreadVC.dll
 
 # compiler stuff
-INCLUDES=$(PDINC) 
+INCLUDES=$(PDINC) # /usr/include 
 FLAGS=-DFLEXT_SYS=2
-CFLAGS=${UFLAGS} -O6 -Wno-unused -Wno-parentheses -Wno-switch -Wstrict-prototypes -funroll-loops -fmove-all-movables -frerun-loop-opt -fno-rtti -fno-exceptions 
+CFLAGS=${UFLAGS} -O6 -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions -fno-rtti -fno-exceptions
 LIBS=m
-LDFLAGS=-bundle -bundle_loader $(PDBIN)
-FRAMEWORKS=Carbon
 
 # ----------------------------------------------
 # the rest can stay untouched
@@ -31,9 +29,8 @@ NAME=xsample
 
 include make-files.txt
 
-MAKEFILE=makefile.pd-darwin
-TARGET=$(TARGDIR)/$(NAME).pd_darwin
-
+MAKEFILE=makefile.pd-cygwin
+TARGET=$(TARGDIR)/$(NAME).dll
 
 # default target
 all: $(TARGDIR) $(TARGET) 
@@ -48,9 +45,9 @@ $(TARGDIR)/%.o : $(SRCDIR)/%.cpp
 	$(CXX) -c $(CFLAGS) $(FLAGS) $(patsubst %,-I%,$(INCLUDES) $(FLEXTPATH)) $< -o $@
 
 $(TARGET) : $(patsubst %.cpp,$(TARGDIR)/%.o,$(SRCS)) $(FLEXTLIB) 
-	$(CXX) $(LDFLAGS) $^ $(patsubst %,-framework %,$(FRAMEWORKS)) $(patsubst %,-L%,$(LIBPATH)) $(patsubst %,-l%,$(LIBS)) -o $@ 
+	$(CXX) $(LDFLAGS) -shared $^ ${PDLIBS} $(patsubst %,-l%,$(LIBS)) -o $@ 
+	strip --strip-unneeded $@
 	chmod 755 $@
-
 
 $(INSTDIR):
 	-mkdir $(INSTDIR)
@@ -58,9 +55,8 @@ $(INSTDIR):
 install:: $(INSTDIR)
 
 install:: $(TARGET) 
-	cp -R $^ $(INSTDIR)
-#	chown -R root.root $(INSTDIR)
-
+	cp $^ $(INSTDIR)
+#	chown root.root $(patsubst %,$(INSTDIR)/%,$(notdir $^))
 
 $(HELPDIR):
 	-mkdir $(HELPDIR)
@@ -68,11 +64,10 @@ $(HELPDIR):
 install-help:: $(HELPDIR)
 
 install-help:: ./pd
+	chmod 644 $^/*.*
 	cp $^/*.* $(HELPDIR)
-#	chown -R root.root $(HELPDIR)
 
 
 .PHONY: clean
 clean:
 	rm -f $(TARGDIR)/*.o $(TARGET)
-	
