@@ -18,6 +18,9 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #pragma warning (disable:4244)
 #endif
 
+#ifndef M_PI
+#define M_PI 3.141592653589793238462643383
+#endif
 
 #define XZONE_TABLE 512
 
