@@ -16,8 +16,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
  
 #include <flext.h>
 
-#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 400)
-#error You need at least flext version 0.4.0
+#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 401)
+#error You need at least flext version 0.4.1
 #endif
 
 
@@ -217,7 +217,7 @@ private:
 		const I IOCHNS = _IOCHNS_ < 0?MIN(iochns,BCHNS):MIN(_IOCHNS_,BCHNS)
 #else 
 	// no template optimization
-	#ifdef PD // only mono buffers
+	#if FLEXT_SYS == FLEXT_SYS_PD // only mono buffers
 		#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)   \
 			const I BCHNS = 1;  \
 			const I IOCHNS = MIN(iochns,BCHNS)

@@ -26,7 +26,7 @@ public:
 	
 	virtual BL Init();
 		
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 
@@ -57,7 +57,7 @@ V xplay::setup(t_class *)
 xplay::xplay(I argc,const t_atom *argv)
 {
 	I argi = 0;
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 	if(argc > argi && CanbeInt(argv[argi])) {
 		outchns = GetAInt(argv[argi]);
 		argi++;
@@ -68,7 +68,7 @@ xplay::xplay(I argc,const t_atom *argv)
 		buf = new buffer(GetSymbol(argv[argi]),true);
 		argi++;
 		
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 		// oldstyle command line?
 		if(argi == 1 && argc == 2 && CanbeInt(argv[argi])) {
 			outchns = GetAInt(argv[argi]);
@@ -101,11 +101,11 @@ BL xplay::Init()
 V xplay::m_help()
 {
 	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
-#ifdef _DEBUG
+#ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
 	post("(C) Thomas Grill, 2001-2002");
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
 	post("Arguments: %s [buffer]",thisName());
@@ -137,7 +137,7 @@ V xplay::m_print()
 }
 
 
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 V xplay::m_assist(L msg,L arg,C *s)
 {
 	switch(msg) {

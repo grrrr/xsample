@@ -23,7 +23,7 @@ V lib_setup()
 	FLEXT_DSP_SETUP(xplay);
 	FLEXT_DSP_SETUP(xgroove);
 	
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 	finder_addclass((C *)"MSP Sampling",(C *)"xgroove~");
 	finder_addclass((C *)"MSP Sampling",(C *)"xplay~");
 	finder_addclass((C *)"MSP Sampling",(C *)"xrecord~");
@@ -38,10 +38,10 @@ FLEXT_LIB_SETUP(xsample,lib_setup)
 
 xsample::xsample():
 	buf(NULL),
-#ifdef PD
-	unitmode(xsu_sample),  // PD defaults to samples
-#else
+#if FLEXT_SYS == FLEXT_SYS_MAX
 	unitmode(xsu_ms),	   // Max/MSP defaults to milliseconds
+#else
+	unitmode(xsu_sample),  // PD defaults to samples
 #endif
 	sclmode(xss_unitsinbuf),
 	curmin(0),curmax(1<<30)
