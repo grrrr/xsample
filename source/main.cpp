@@ -55,8 +55,10 @@ xsample::xsample():
 	FLEXT_ADDMETHOD_(0,"refresh",m_refresh);
 	FLEXT_ADDMETHOD_(0,"reset",m_reset);
 
-	FLEXT_ADDMETHOD_E(0,"units",m_units);
-	FLEXT_ADDMETHOD_E(0,"sclmode",m_sclmode);
+	FLEXT_ADDATTR_VAR("buffer",mg_buffer,ms_buffer);
+	FLEXT_ADDATTR_VAR_E("units",unitmode,m_units);
+	FLEXT_ADDATTR_VAR_E("sclmode",sclmode,m_sclmode);
+	FLEXT_ADDATTR_GET("scale",s2u);
 }
 	
 xsample::~xsample()

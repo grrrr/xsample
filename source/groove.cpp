@@ -84,6 +84,8 @@ protected:
 		curpos = pos;
 	}
 
+	V mg_pos(F &v) const { v = curpos*s2u; }
+
 private:
 //	static V setup(t_class *c);
 
@@ -108,16 +110,20 @@ private:
 	}
 
 	FLEXT_CALLBACK_F(m_pos)
-	FLEXT_CALLBACK(m_all)
 	FLEXT_CALLBACK_F(m_min)
 	FLEXT_CALLBACK_F(m_max)
-	
+	FLEXT_CALLBACK(m_all)
+
 	FLEXT_CALLBACK_F(m_xzone)
 	FLEXT_CALLBACK_F(m_xsymm)
 	FLEXT_CALLBACK_V(m_xshape)
 	FLEXT_CALLBACK_B(m_xkeep)
 
-	FLEXT_CALLBACK_1(m_loop,xs_loop)
+	FLEXT_CALLVAR_F(mg_pos,m_pos)
+	FLEXT_CALLSET_F(m_min)
+	FLEXT_CALLSET_F(m_max)
+	FLEXT_CALLSET_E(m_loop,xs_loop)
+	FLEXT_ATTRGET_E(loopmode,xs_loop)
 };
 
 
@@ -169,13 +175,15 @@ xgroove::xgroove(I argc,const t_atom *argv):
 	AddOutFloat(2); // play min & max	
 	AddOutBang();  // loop bang
 	
+	FLEXT_ADDMETHOD_(0,"all",m_all);
 	FLEXT_ADDMETHOD(1,m_min);
 	FLEXT_ADDMETHOD(2,m_max);
-	FLEXT_ADDMETHOD_F(0,"min",m_min); 
-	FLEXT_ADDMETHOD_F(0,"max",m_max);
-	FLEXT_ADDMETHOD_F(0,"pos",m_pos);
-	FLEXT_ADDMETHOD_(0,"all",m_all);
-	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
+
+	FLEXT_ADDATTR_VAR("min",mg_min,m_min); 
+	FLEXT_ADDATTR_VAR("max",mg_max,m_max);
+	FLEXT_ADDATTR_VAR("pos",mg_pos,m_pos);
+
+	FLEXT_ADDATTR_VAR_E("loop",loopmode,m_loop);
 
 	FLEXT_ADDMETHOD_F(0,"xzone",m_xzone);
 	FLEXT_ADDMETHOD_F(0,"xsymm",m_xsymm);
@@ -634,21 +642,21 @@ V xgroove::m_help()
 	post("Outlets: 1:Audio signal, 2:Position signal, 3:Min position (rounded), 4:Max position (rounded)");	
 	post("Methods:");
 	post("\thelp: shows this help");
-	post("\tset [name]: set buffer or reinit");
+	post("\tset [name] / @buffer [name]: set buffer or reinit");
 	post("\tenable 0/1: turn dsp calculation off/on");	
 	post("\treset: reset min/max playing points and playing offset");
 	post("\tprint: print current settings");
-	post("\tloop 0/1/2: sets looping to off/forward/bidirectional");
-	post("\tinterp 0/1/2: set interpolation to off/4-point/linear");
-	post("\tmin {unit}: set minimum playing point");
-	post("\tmax {unit}: set maximum playing point");
+	post("\t@loop 0/1/2: sets looping to off/forward/bidirectional");
+	post("\t@interp 0/1/2: set interpolation to off/4-point/linear");
+	post("\t@min {unit}: set minimum playing point");
+	post("\t@max {unit}: set maximum playing point");
 	post("\tall: select entire buffer length");
 	post("\tpos {unit}: set playing position (obeying the current scale mode)");
 	post("\tbang/start: start playing");
 	post("\tstop: stop playing");
 	post("\trefresh: checks buffer and refreshes outlets");
-	post("\tunits 0/1/2/3: set units to frames/buffer size/ms/s");
-	post("\tsclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
+	post("\t@units 0/1/2/3: set units to frames/buffer size/ms/s");
+	post("\t@sclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
 	post("\txzone {unit}: length of loop crossfade zone");
 	post("\txsymm -1,0...1: symmetry of crossfade zone inside/outside point");
 	post("\txshape 0/1 [param 0...1]: shape of crossfading (linear/trig)");

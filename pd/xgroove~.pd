@@ -1,4 +1,4 @@
-#N canvas 92 110 837 556 12;
+#N canvas 92 110 839 558 12;
 #X obj 258 240 hsl 128 15 0.001 3 1 1 empty empty empty 20 8 0 8 -225271
 -1 -1 0 1;
 #X floatatom 255 261 8 0 0;
@@ -88,12 +88,12 @@
 -1 -1 0 1;
 #X floatatom 10 83 5 0 0;
 #X obj 258 32 vdl 15 0 0 3 empty empty empty 0 -6 0 8 -262144 -1 -1
-1;
+0;
 #X text 277 29 once;
 #X text 277 45 forward;
 #X text 277 61 bidir;
 #X obj 372 31 vdl 15 0 0 3 empty empty empty 0 -6 0 8 -262144 -1 -1
-1;
+0;
 #X text 391 28 none;
 #X text 391 44 linear;
 #X text 391 60 4-point;
@@ -102,7 +102,7 @@
 #X obj 521 275 bng 15 250 50 0 empty empty empty 0 -6 0 8 -262144 -1
 -1;
 #X obj 256 134 vdl 15 0 0 4 empty empty empty 0 -6 0 8 -262144 -1 -1
-2;
+0;
 #X text 255 113 units;
 #X msg 256 199 units \$1;
 #X obj 364 134 vdl 15 0 0 4 empty empty empty 0 -6 0 8 -262144 -1 -1
@@ -122,6 +122,10 @@
 #X obj 536 467 bng 15 250 50 0 empty empty empty 0 -6 0 8 -262144 -1
 -1;
 #X msg 557 468 stop;
+#X obj 319 343 print A;
+#X msg 131 213 getattributes;
+#X msg 177 248 getmax;
+#X msg 120 248 getmin;
 #X connect 0 0 1 0;
 #X connect 1 0 31 0;
 #X connect 2 0 31 1;
@@ -143,6 +147,7 @@
 #X connect 31 1 8 0;
 #X connect 31 2 4 0;
 #X connect 31 3 5 0;
+#X connect 31 5 70 0;
 #X connect 34 0 37 0;
 #X connect 35 0 37 0;
 #X connect 36 0 14 0;
@@ -164,3 +169,6 @@
 #X connect 66 0 67 0;
 #X connect 68 0 67 0;
 #X connect 69 0 67 0;
+#X connect 71 0 31 0;
+#X connect 72 0 31 0;
+#X connect 73 0 31 0;

@@ -11,9 +11,10 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #ifndef __XSAMPLE_H
 #define __XSAMPLE_H
 
-#define XSAMPLE_VERSION "0.2.5pre1"
+#define XSAMPLE_VERSION "0.2.5pre2"
 
- 
+#define FLEXT_ATTRIBUTES 1 
+
 #include <flext.h>
 
 #if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 401)
@@ -118,6 +119,12 @@ protected:
 
 	BL bufchk() { if(buf->Update()) { m_refresh(); return true; } return false; }
 
+	V mg_buffer(AtomList &l) { if(buf) { l(1); SetSymbol(l[0],buf->Symbol()); } else l(); }
+	V ms_buffer(const AtomList &l) { m_set(l.Count(),l.Atoms()); }
+
+	V mg_min(F &v) const { v = curmin*s2u; }
+	V mg_max(F &v) const { v = curmax*s2u; }
+
 private:
 
 	FLEXT_CALLBACK(m_start)
@@ -128,8 +135,18 @@ private:
 	FLEXT_CALLBACK(m_refresh)
 	FLEXT_CALLBACK(m_reset)
 
-	FLEXT_CALLBACK_1(m_units,xs_unit)
-	FLEXT_CALLBACK_1(m_sclmode,xs_sclmd)
+	FLEXT_CALLVAR_V(mg_buffer,ms_buffer)
+
+	FLEXT_CALLSET_E(m_units,xs_unit)
+	FLEXT_ATTRGET_E(unitmode,xs_unit)
+	FLEXT_CALLSET_E(m_sclmode,xs_sclmd)
+	FLEXT_ATTRGET_E(sclmode,xs_sclmd)
+
+	FLEXT_ATTRGET_F(s2u)
+
+protected:
+	FLEXT_CALLGET_F(mg_min)
+	FLEXT_CALLGET_F(mg_max)
 };
 
 

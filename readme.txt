@@ -77,6 +77,7 @@ Version history:
 - added MaxMSP buffer resize recognition
 - xgroove~: introduced a crossfading loop zone
 - adapted source for flext 0.4.1
+- introduced attributes
 
 0.2.4:
 - according to flext 0.2.3 changed sample type to t_sample (S)

@@ -1,4 +1,4 @@
-#N canvas 134 12 855 608 12;
+#N canvas 134 12 857 610 12;
 #X obj 14 15 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1
 -1;
 #X msg 13 35 stop;
@@ -52,7 +52,7 @@
 #X obj 411 473 metro 30;
 #X obj 18 247 metro 30;
 #X obj 640 21 osc~ 10;
-#X obj 91 133 r~ rec;
+#X obj 86 78 r~ rec;
 #X obj 482 339 r~ rec;
 #X obj 678 95 s~ rec;
 #X obj 623 48 *~ 1;
@@ -82,6 +82,9 @@
 #X msg 488 206 100;
 #X obj 521 426 line~;
 #X msg 520 401 \$1 20;
+#X msg 9 135 getattributes;
+#X obj 208 211 print A;
+#X msg 10 163 getbuffer;
 #X connect 0 0 7 0;
 #X connect 1 0 7 0;
 #X connect 4 0 7 2;
@@ -89,6 +92,7 @@
 #X connect 7 0 9 0;
 #X connect 7 1 2 0;
 #X connect 7 2 3 0;
+#X connect 7 4 72 0;
 #X connect 8 0 7 0;
 #X connect 9 0 10 0;
 #X connect 11 0 41 0;
@@ -134,3 +138,5 @@
 #X connect 68 0 32 0;
 #X connect 69 0 24 1;
 #X connect 70 0 69 0;
+#X connect 71 0 7 0;
+#X connect 73 0 7 0;

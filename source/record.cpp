@@ -46,10 +46,10 @@ public:
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
 
-	virtual V m_mixmode(BL mx) { mixmode = mx; }
-	virtual V m_sigmode(BL mode) { /*dorec =*/ sigmode = mode; }
-	virtual V m_loop(BL lp) { doloop = lp; }
-	virtual V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
+//	V m_mixmode(BL mx) { mixmode = mx; }
+//	V m_sigmode(BL mode) { sigmode = mode; }
+//	V m_loop(BL lp) { doloop = lp; }
+	V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
 
 	virtual V m_draw(I argc,const t_atom *argv);	
 
@@ -85,10 +85,11 @@ private:
 	FLEXT_CALLBACK_F(m_min)
 	FLEXT_CALLBACK_F(m_max)
 
-	FLEXT_CALLBACK_B(m_loop)
-	FLEXT_CALLBACK_B(m_mixmode)
-	FLEXT_CALLBACK_B(m_sigmode)
-	FLEXT_CALLBACK_B(m_append)
+	FLEXT_ATTRVAR_B(doloop)
+	FLEXT_ATTRVAR_B(mixmode)
+	FLEXT_ATTRVAR_B(sigmode)
+	FLEXT_CALLSET_B(m_append)
+	FLEXT_ATTRGET_B(appmode)
 
 	FLEXT_CALLBACK_V(m_draw)
 };
@@ -150,12 +151,12 @@ xrecord::xrecord(I argc,const t_atom *argv):
 	FLEXT_ADDMETHOD_F(0,"max",m_max);
 	FLEXT_ADDMETHOD_(0,"all",m_all);
 	
-	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
-	FLEXT_ADDMETHOD_B(0,"mixmode",m_mixmode);
-	FLEXT_ADDMETHOD_B(0,"sigmode",m_sigmode);
-	FLEXT_ADDMETHOD_B(0,"append",m_append);
-	
 	FLEXT_ADDMETHOD_(0,"draw",m_draw);
+	
+	FLEXT_ADDATTR_VAR1("loop",doloop);
+	FLEXT_ADDATTR_VAR1("mixmode",mixmode);
+	FLEXT_ADDATTR_VAR1("sigmode",sigmode);
+	FLEXT_ADDATTR_VAR("append",appmode,m_append);
 }
 
 
@@ -435,10 +436,10 @@ V xrecord::m_help()
 	post("\tenable 0/1: turn dsp calculation off/on");	
 	post("\treset: reset min/max recording points and recording offset");
 	post("\tprint: print current settings");
-	post("\tsigmode 0/1: specify message or signal triggered recording");
-	post("\tappend 0/1: reset recording position or append to current position");
-	post("\tloop 0/1: switches looping off/on");
-	post("\tmixmode 0/1: specify if audio signal should be mixed in");
+	post("\t@sigmode 0/1: specify message or signal triggered recording");
+	post("\t@append 0/1: reset recording position or append to current position");
+	post("\t@loop 0/1: switches looping off/on");
+	post("\t@mixmode 0/1: specify if audio signal should be mixed in");
 	post("\tmin {unit}: set minimum recording point");
 	post("\tmax {unit}: set maximum recording point");
 	post("\tall: select entire buffer length");
@@ -446,8 +447,8 @@ V xrecord::m_help()
 	post("\tbang/start: start recording");
 	post("\tstop: stop recording");
 	post("\trefresh: checks buffer and refreshes outlets");
-	post("\tunits 0/1/2/3: set units to frames/buffer size/ms/s");
-	post("\tsclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
+	post("\t@units 0/1/2/3: set units to frames/buffer size/ms/s");
+	post("\t@sclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
 	post("\tdraw [{float}]: redraw buffer immediately (arg omitted) or periodic (in ms)");
 	post("");
 }
