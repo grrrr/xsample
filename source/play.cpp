@@ -18,7 +18,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xplay:
 	public xsample
 {
-	FLEXT_HEADER_S(xplay,xsample,setup)
+//	FLEXT_HEADER_S(xplay,xsample,setup)
+	FLEXT_HEADER(xplay,xsample)
 
 public:
 	xplay(I argc, t_atom *argv);
@@ -48,16 +49,16 @@ private:
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is the dsp method
 };
 
-FLEXT_NEW_TILDE_G("xplay~",xplay)
+FLEXT_LIB_TILDE_G("xplay~",xplay)
 
-
+/*
 V xplay::setup(t_class *)
 {
 #ifndef PD
 	post("loaded xplay~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");
 #endif
 }
-
+*/
 
 xplay::xplay(I argc, t_atom *argv): 
 	doplay(false),

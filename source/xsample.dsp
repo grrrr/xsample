@@ -5,17 +5,17 @@
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
 CFG=xsample - Win32 Debug
-!MESSAGE Dies ist kein gültiges Makefile. Zum Erstellen dieses Projekts mit NMAKE
-!MESSAGE verwenden Sie den Befehl "Makefile exportieren" und führen Sie den Befehl
+!MESSAGE Dies ist kein g¸ltiges Makefile. Zum Erstellen dieses Projekts mit NMAKE
+!MESSAGE verwenden Sie den Befehl "Makefile exportieren" und f¸hren Sie den Befehl
 !MESSAGE 
 !MESSAGE NMAKE /f "xsample.mak".
 !MESSAGE 
-!MESSAGE Sie können beim Ausführen von NMAKE eine Konfiguration angeben
+!MESSAGE Sie k–nnen beim Ausf¸hren von NMAKE eine Konfiguration angeben
 !MESSAGE durch Definieren des Makros CFG in der Befehlszeile. Zum Beispiel:
 !MESSAGE 
 !MESSAGE NMAKE /f "xsample.mak" CFG="xsample - Win32 Debug"
 !MESSAGE 
-!MESSAGE Für die Konfiguration stehen zur Auswahl:
+!MESSAGE F¸r die Konfiguration stehen zur Auswahl:
 !MESSAGE 
 !MESSAGE "xsample - Win32 Release" (basierend auf  "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "xsample - Win32 Debug" (basierend auf  "Win32 (x86) Dynamic-Link Library")

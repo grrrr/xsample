@@ -19,7 +19,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xgroove:
 	public xsample
 {
-	FLEXT_HEADER_S(xgroove,xsample,setup)
+//	FLEXT_HEADER_S(xgroove,xsample,setup)
+	FLEXT_HEADER(xgroove,xsample)
 
 public:
 	xgroove(I argc,t_atom *argv);
@@ -78,20 +79,24 @@ private:
 };
 
 
-FLEXT_NEW_TILDE_G("xgroove~",xgroove)
+FLEXT_LIB_TILDE_G("xgroove~",xgroove)
 
+/*
 V xgroove::setup(t_class *)
 {
 #ifndef PD
 	post("loaded xgroove~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");
 #endif
 }
+*/
 
 xgroove::xgroove(I argc,t_atom *argv):
 	doplay(false),doloop(true),
 	curpos(0),
 	outchns(1)
 {
+	post("xgroove~ new: argc=%i, argv=%s",argc,GetString(argv[0]));
+
 	I argi = 0;
 #ifdef MAXMSP
 	if(argc > argi && IsFlint(argv[argi])) {
