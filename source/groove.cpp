@@ -17,10 +17,10 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 
 class xgroove:
-	public xsample
+	public xinter
 {
-//	FLEXT_HEADER_S(xgroove,xsample,setup)
-	FLEXT_HEADER(xgroove,xsample)
+//	FLEXT_HEADER_S(xgroove,xinter,setup)
+	FLEXT_HEADER(xgroove,xinter)
 
 public:
 	xgroove(I argc,t_atom *argv);
@@ -50,8 +50,7 @@ public:
 
 protected:
 
-	I outchns;
-	BL doplay,doloop;
+	BL doloop;
 	D curpos;  // in samples
 
 	outlet *outmin,*outmax; // float outlets	
@@ -91,9 +90,7 @@ V xgroove::setup(t_class *)
 */
 
 xgroove::xgroove(I argc,t_atom *argv):
-	doplay(false),doloop(true),
-	curpos(0),
-	outchns(1)
+	doloop(true),curpos(0)
 {
 	I argi = 0;
 #ifdef MAXMSP

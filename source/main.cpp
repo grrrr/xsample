@@ -14,7 +14,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 V lib_setup()
 {
 	post("xsample objects, version " XSAMPLE_VERSION ", (C)2001,2002 Thomas Grill");
-	post("xsample: xrecord~, xplay~, xspeed~ - send objects a 'help' message to get assistance");
+	post("xsample: xrecord~, xplay~, xgroove~ - send objects a 'help' message to get assistance");
 	post("");
 
 	// call the objects' setup routines
@@ -36,7 +36,6 @@ xsample::xsample():
 #else
 	unitmode(xsu_ms),	   // Max/MSP defaults to milliseconds
 #endif
-	interp(xsi_4p),
 	sclmode(xss_unitsinbuf),
 	curmin(0),curmax(1<<30)
 {
@@ -50,7 +49,6 @@ xsample::xsample():
 	FLEXT_ADDMETHOD_(0,"reset",m_reset);
 
 	FLEXT_ADDMETHOD_E(0,"units",m_units);
-	FLEXT_ADDMETHOD_E(0,"interp",m_interp);
 	FLEXT_ADDMETHOD_E(0,"sclmode",m_sclmode);
 }
 	
@@ -110,12 +108,6 @@ V xsample::m_units(xs_unit mode)
 	}
 }
 
-V xsample::m_interp(xs_intp mode) 
-{ 
-	interp = mode; 
-	s_dsp(); 
-}
-
 V xsample::m_sclmode(xs_sclmd mode)
 {
 	if(mode != xss__) sclmode = mode;
@@ -172,6 +164,22 @@ V xsample::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 	m_refresh();  
 	s_dsp();
 }
+
+
+
+xinter::xinter():
+	doplay(false),outchns(1),
+	interp(xsi_4p)
+{
+	FLEXT_ADDMETHOD_E(0,"interp",m_interp);
+}
+
+V xinter::m_interp(xs_intp mode) 
+{ 
+	interp = mode; 
+	s_dsp(); 
+}
+
 
 
 

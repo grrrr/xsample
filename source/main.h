@@ -94,12 +94,8 @@ protected:
 	virtual V m_loadbang();
 
 	virtual V m_units(xs_unit u = xsu__);
-//	virtual V m_iunits(xs_unit u = xsu__);
-//	virtual V m_ounits(xs_unit u = xsu__);
 	virtual V m_sclmode(xs_sclmd u = xss__);
-//	virtual V m_isclmode(xs_sclmd u = xss__);
-//	virtual V m_osclmode(xs_sclmd u = xss__);
-	virtual V m_interp(xs_intp u = xsi__);
+//	virtual V m_interp(xs_intp u = xsi__);
 
 	virtual V m_all();
 	virtual V m_min(F mn);
@@ -110,7 +106,7 @@ protected:
 
 	xs_unit unitmode; //iunitmode,ounitmode;
 	xs_sclmd sclmode; //isclmode,osclmode;
-	xs_intp interp;
+//	xs_intp interp;
 
 	I curmin,curmax,curlen;  // in samples
 	I sclmin; // in samples
@@ -130,12 +126,8 @@ private:
 	FLEXT_CALLBACK(m_reset)
 
 	FLEXT_CALLBACK_1(m_units,xs_unit)
-//	FLEXT_CALLBACK_1(m_iunits,xs_unit)
-//	FLEXT_CALLBACK_1(m_ounits,xs_unit)
 	FLEXT_CALLBACK_1(m_sclmode,xs_sclmd)
-//	FLEXT_CALLBACK_1(m_isclmode,xs_sclmd)
-//	FLEXT_CALLBACK_1(m_osclmode,xs_sclmd)
-	FLEXT_CALLBACK_1(m_interp,xs_intp)
+//	FLEXT_CALLBACK_1(m_interp,xs_intp)
 };
 
 
@@ -201,6 +193,34 @@ private:
 			const I IOCHNS = MIN(iochns,BCHNS)
 	#endif
 #endif
+
+
+class xinter:
+	public xsample
+{
+	FLEXT_HEADER(xinter,xsample)
+	
+public:
+	xinter();
+	
+protected:
+	virtual V m_interp(xs_intp u = xsi__);
+
+	I outchns;
+	BL doplay;	
+	xs_intp interp;
+
+	TMPLDEF V s_speed(I n,F *const *in,F *const *out);  // this is the dsp method
+
+	TMPLDEF V s_play0(I n,F *const *in,F *const *out);  // this is the dsp method
+	TMPLDEF V s_play1(I n,F *const *in,F *const *out);  // this is the dsp method
+	TMPLDEF V s_play2(I n,F *const *in,F *const *out);  // this is the dsp method
+	TMPLDEF V s_play4(I n,F *const *in,F *const *out);  // this is the dsp method
+
+private:
+
+	FLEXT_CALLBACK_1(m_interp,xs_intp)
+};
 
 
 #endif

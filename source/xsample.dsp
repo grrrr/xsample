@@ -115,5 +115,9 @@ SOURCE=.\play.cpp
 
 SOURCE=.\record.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\speed.cpp
+# End Source File
 # End Target
 # End Project
