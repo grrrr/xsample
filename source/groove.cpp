@@ -27,15 +27,18 @@ class xgroove_obj:
 
 public:
 	xgroove_obj(I argc,t_atom *argv);
+	~xgroove_obj();
 
-#ifdef MAX
-	virtual V m_loadbang() { setbuf(); }
+#ifdef MAXMSP
+	virtual V m_loadbang() { buf->Set(); }
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 
 	virtual V m_help();
 	virtual V m_print();
-	
+
+	virtual BL m_set(I argc,t_atom *argv);
+
 	virtual V m_start() { doplay = true; }
 	virtual V m_stop() { doplay = false; }
 
@@ -60,24 +63,22 @@ protected:
 	
 	V outputmin() { outlet_float(outmin,curmin*s2u); }
 	V outputmax() { outlet_float(outmax,curmax*s2u); }
-	
+
+#ifdef TMPLOPT
 	template <int _BCHNS_,int _OCHNS_>
+#endif
 	V signal(I n,const F *speed,F *pos);  // this is the dsp method
 	
-	virtual V setbuf(t_symbol *s = NULL);
-
 private:
 	virtual V m_dsp(t_signal **sp);
 
 	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
 
+#ifdef TMPLOPT
 	template <int _BCHNS_,int _OCHNS_>
-	static t_int *dspmeth(t_int *w) 
-	{ 
-		((xgroove_obj *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3],(F *)w[4]); 
-		return w+5;
-	}
+#endif
+	static t_int *dspmeth(t_int *w);
 
 	static V cb_pos(V *c,F pos) { thisClass(c)->m_pos(pos); }
 	static V cb_min(V *c,F mn) { thisClass(c)->m_min(mn); }
@@ -86,6 +87,8 @@ private:
 	static V cb_reset(V *c) { thisClass(c)->m_reset(); }
 	static V cb_loop(V *c,FI lp) { thisClass(c)->m_loop(lp != 0); }
 };
+
+
 
 CPPEXTERN_NEW_WITH_GIMME(OBJNAME,xgroove_obj)
 
@@ -117,7 +120,7 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 	} 
 #endif
 	
-#ifdef MAX
+#ifdef MAXMSP
 	outchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
 #else
 	outchns = 1;
@@ -132,7 +135,7 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 	newout_signal(x_obj); // position
 	outmin = newout_float(x_obj); // play min
 	outmax = newout_float(x_obj); // play max
-#elif defined(MAX)
+#elif defined(MAXMSP)
 	// set up inlets and outlets in reverse
 	floatin(x_obj,2);  // max play pos
 	floatin(x_obj,1);  // min play pos
@@ -145,11 +148,16 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 	for(ci = 0; ci < outchns; ++ci) newout_signal(x_obj); // output
 #endif
 
-	bufname = argc >= 1?atom_getsymbolarg(0,argc,argv):NULL;
-#ifdef PD  // in max it is called by loadbang
-	setbuf(bufname);  // calls reset
-#endif
+	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
+	// in max loadbang does the init again
 }
+
+xgroove_obj::~xgroove_obj()
+{
+	if(buf) delete buf;
+	if(outvecs) delete[] outvecs;
+}
+
 
 V xgroove_obj::m_units(xs_unit mode)
 {
@@ -182,32 +190,54 @@ V xgroove_obj::m_pos(F pos)
 
 V xgroove_obj::m_reset() 
 {
-	xs_obj::setbuf();
+	buf->Set();
 	curpos = 0;
 	m_min(0);
-    m_max(buflen*s2u);
+    m_max(buf->Frames()*s2u);
 }
 
 
-V xgroove_obj::setbuf(t_symbol *s)
+BL xgroove_obj::m_set(I argc,t_atom *argv)
 {
-	const I bufl1 = buflen;
-	xs_obj::setbuf(s);
-	if(bufl1 != buflen) m_reset(); // calls recmin,recmax,rescale
+	BL r = xs_obj::m_set(argc,argv);
+	if(r) m_reset(); // calls recmin,recmax,rescale
     m_units();
+	return r;
 }
+
+
+#ifdef TMPLOPT
+template <int _BCHNS_,int _OCHNS_>
+t_int *xgroove_obj::dspmeth(t_int *w) 
+{ 
+	((xgroove_obj *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3],(F *)w[4]); 
+	return w+5;
+}
+#else
+t_int *xgroove_obj::dspmeth(t_int *w) 
+{ 
+	((xgroove_obj *)w[1])->signal((I)w[2],(const F *)w[3],(F *)w[4]); 
+	return w+5;
+}
+#endif
 
 #ifndef MIN
 #define MIN(x,y) ((x) < (y)?(x):(y))
 #endif
 
-
+#ifdef TMPLOPT
 template <int _BCHNS_,int _OCHNS_>
+#endif
 V xgroove_obj::signal(I n,const F *speed,F *pos)
 {
 	if(enable) {    
-		const I BCHNS = _BCHNS_ == 0?bufchns:_BCHNS_;
+#ifdef TMPLOPT
+		const I BCHNS = _BCHNS_ == 0?buf->Channels():_BCHNS_;
 		const I OCHNS = _OCHNS_ == 0?MIN(outchns,BCHNS):MIN(_OCHNS_,BCHNS);
+#else
+		const I BCHNS = buf->Channels();
+		const I OCHNS = MIN(outchns,BCHNS);
+#endif
 		F **sig = outvecs;
 		register I si = 0;
 	
@@ -236,11 +266,11 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 					const F frac = o-oint;
 
 					for(I ci = 0; ci < OCHNS; ++ci) {
-						register const F *fp = buf+oint*BCHNS+ci;
+						register const F *fp = buf->Data()+oint*BCHNS+ci;
 						if (oint <= smin) {
 							if(doloop) {
 								// oint is always == smin
-								a = buf[(smax-1)*BCHNS+ci];
+								a = buf->Data()[(smax-1)*BCHNS+ci];
 								b = fp[0*BCHNS];
 								c = fp[1*BCHNS];
 								d = fp[2*BCHNS];
@@ -253,7 +283,7 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 									d = fp[2*BCHNS];
 								}
 								else {
-									a = b = c = d = buf[smin*BCHNS+ci];
+									a = b = c = d = buf->Data()[smin*BCHNS+ci];
 								}
 							}
 						}
@@ -263,11 +293,11 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 								b = fp[0*BCHNS];
 								if(oint == maxo+1) {
 									c = fp[1*BCHNS];
-									d = buf[smin*BCHNS+ci];
+									d = buf->Data()[smin*BCHNS+ci];
 								}
 								else {
-									c = buf[smin*BCHNS+ci];
-									d = buf[(smin+1)*BCHNS+ci];
+									c = buf->Data()[smin*BCHNS+ci];
+									d = buf->Data()[(smin+1)*BCHNS+ci];
 								}
 							}
 							else {
@@ -284,7 +314,7 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 								}
 								else { 
 									// >= (maxo+3 = smax-1)
-									a = b = c = d = buf[(smax-1)*BCHNS+ci];
+									a = b = c = d = buf->Data()[(smax-1)*BCHNS+ci];
 								}
 
 							}
@@ -318,7 +348,7 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 
 						*(pos++) = scale(o);
 						for(I ci = 0; ci < OCHNS; ++ci)
-							sig[ci][si] = buf[(I)o*BCHNS+ci];
+							sig[ci][si] = buf->Data()[(I)o*BCHNS+ci];
 
 						o += spd;
 					}
@@ -332,15 +362,15 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 						const I oint = o;
 						if(oint < smin) {
 							for(I ci = 0; ci < OCHNS; ++ci)
-								sig[ci][si] = buf[smin*BCHNS+ci];
+								sig[ci][si] = buf->Data()[smin*BCHNS+ci];
 						}
 						else if(oint >= smax) {
 							for(I ci = 0; ci < OCHNS; ++ci)
-								sig[ci][si] = buf[smax*BCHNS+ci];
+								sig[ci][si] = buf->Data()[smax*BCHNS+ci];
 						}
 						else {
 							for(I ci = 0; ci < OCHNS; ++ci)
-								sig[ci][si] = buf[oint*BCHNS+ci];
+								sig[ci][si] = buf->Data()[oint*BCHNS+ci];
 						}
 
 						o += spd;
@@ -363,16 +393,17 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 
 V xgroove_obj::m_dsp(t_signal **sp)
 {
-	setbuf();  // method_dsp hopefully called at change of sample rate ?!
+	m_set(0,NULL);  // method_dsp hopefully called at change of sample rate ?!
 
 	// TODO: check whether buffer has changed
 
 	if(outvecs) delete[] outvecs;
-	outvecs = new F *[bufchns];
-	for(I ci = 0; ci < bufchns; ++ci)
+	outvecs = new F *[buf->Channels()];
+	for(I ci = 0; ci < buf->Channels(); ++ci)
 		outvecs[ci] = sp[1+ci%outchns]->s_vec;
-		
-	switch(bufchns*100+outchns) {
+
+#ifdef TMPLOPT
+	switch(buf->Channels()*100+outchns) {
 		case 101:
 			dsp_add(dspmeth<1,1>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
 			break;
@@ -397,6 +428,9 @@ V xgroove_obj::m_dsp(t_signal **sp)
 		default:
 			dsp_add(dspmeth<0,0>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
 	}
+#else
+	dsp_add(dspmeth, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+#endif
 }
 
 
@@ -404,7 +438,7 @@ V xgroove_obj::m_help()
 {
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
-#ifdef MAX
+#ifdef MAXMSP
 	post("Arguments: " OBJNAME " [buffer] [channels=1]");
 #else
 	post("Arguments: " OBJNAME " [buffer]");
@@ -436,13 +470,13 @@ V xgroove_obj::m_print()
 
 	// print all current settings
 	post(OBJNAME " - current settings:");
-	post("bufname = '%s',buflen = %.3f",bufname?bufname->s_name:"",(F)(buflen*s2u)); 
+	post("bufname = '%s',buflen = %.3f",buf->Name(),(F)(buf->Frames()*s2u)); 
 	post("samples/unit = %.3f, scale mode = %s",(F)(1./s2u),sclmode_txt[sclmode]); 
 	post("loop = %s, interpolation = %s",doloop?"yes":"no",interp?"yes":"no"); 
 	post("");
 }
 
-#ifdef MAX
+#ifdef MAXMSP
 V xgroove_obj::m_assist(long msg, long arg, char *s)
 {
 	switch(msg) {
@@ -485,7 +519,7 @@ extern "C" {
 
 #ifdef PD
 EXT_EXTERN V xgroove_tilde_setup()
-#elif defined(MAX)
+#elif defined(MAXMSP)
 V main()
 #endif
 {

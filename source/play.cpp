@@ -28,30 +28,28 @@ public:
 	xplay_obj(I argc, t_atom *argv);
 	~xplay_obj();
 	
-#ifdef MAX
-	virtual V m_loadbang() { setbuf(); }
+#ifdef MAXMSP
+	virtual V m_loadbang() { buf->Set(); }
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 
 	virtual V m_help();
 	virtual V m_print();
 	
+	virtual BL m_set(I argc,t_atom *argv);
+
 	virtual V m_start() { doplay = true; }
 	virtual V m_stop() { doplay = false; }
-	virtual V m_reset() { xs_obj::setbuf(); }
-
-	virtual V setbuf(t_symbol *s = NULL) 
-	{
-		xs_obj::setbuf(s);
-	    m_units();
-	}
+	virtual V m_reset() { buf->Set(); }
 
 protected:
 	BL doplay;
 	I outchns;
 	F **outvecs;
 
+#ifdef TMPLOPT
 	template <int _BCHNS_,int _OCHNS_>
+#endif
 	V signal(I n,const F *pos);  // this is the dsp method
 
 private:
@@ -61,12 +59,10 @@ private:
 	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
 	static V cb_reset(t_class *c) { thisClass(c)->m_reset(); }
 
+#ifdef TMPLOPT
 	template <int _BCHNS_,int _OCHNS_>
-	static t_int *dspmeth(t_int *w) 
-	{ 
-		((xplay_obj *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3]); 
-		return w+4;
-	}
+#endif
+	static t_int *dspmeth(t_int *w); 
 };
 
 CPPEXTERN_NEW_WITH_GIMME(OBJNAME,xplay_obj)
@@ -89,7 +85,7 @@ xplay_obj::xplay_obj(I argc, t_atom *argv):
 	} 
 #endif
 	
-#ifdef MAX
+#ifdef MAXMSP
 	dsp_setup(x_obj,1); // pos signal in
 	outchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
 #else
@@ -100,33 +96,58 @@ xplay_obj::xplay_obj(I argc, t_atom *argv):
 	for(ci = 0; ci < outchns; ++ci)
 		newout_signal(x_obj); // output
 
-	bufname = argc >= 1?atom_getsymbolarg(0,argc,argv):NULL;	
-#ifdef PD
-	setbuf(bufname);
-#endif
+	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);	
 }
 
 xplay_obj::~xplay_obj()
 {
+	if(buf) delete buf;
 	if(outvecs) delete[] outvecs;
 }
 
-#ifndef MIN
-#define MIN(x,y) ((x) < (y)?(x):(y))
+BL xplay_obj::m_set(I argc,t_atom *argv) 
+{
+	BL r = xs_obj::m_set(argc,argv);
+	m_units();
+	return r;
+}
+
+
+#ifdef TMPLOPT
+template <int _BCHNS_,int _OCHNS_>
+t_int *xplay_obj::dspmeth(t_int *w) 
+{ 
+	((xplay_obj *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3]); 
+	return w+4;
+}
+#else
+t_int *xplay_obj::dspmeth(t_int *w) 
+{ 
+	((xplay_obj *)w[1])->signal((I)w[2],(const F *)w[3]); 
+	return w+4;
+}
 #endif
 
+
+#ifdef TMPLOPT
 template <int _BCHNS_,int _OCHNS_>
+#endif
 V xplay_obj::signal(I n,const F *pos)
 {
 	if(enable) {
-		const I BCHNS = _BCHNS_ == 0?bufchns:_BCHNS_;
+#ifdef TMPLOPT
+		const I BCHNS = _BCHNS_ == 0?buf->Channels():_BCHNS_;
 		const I OCHNS = _OCHNS_ == 0?MIN(outchns,BCHNS):MIN(_OCHNS_,BCHNS);
+#else
+		const I BCHNS = buf->Channels();
+		const I OCHNS = MIN(outchns,BCHNS);
+#endif
 		F **sig = outvecs;
 		register I si = 0;
 	
-		if(doplay && buflen > 0) {
-			if(interp == xsi_4p && buflen > 4) {
-				I maxo = buflen-3;
+		if(doplay && buf->Frames() > 0) {
+			if(interp == xsi_4p && buf->Frames() > 4) {
+				I maxo = buf->Frames()-3;
 
 				for(I i = 0; i < n; ++i,++si) {	
 					F o = *(pos++)/s2u;
@@ -134,13 +155,13 @@ V xplay_obj::signal(I n,const F *pos)
 					register F a,b,c,d;
 
 					for(I ci = 0; ci < OCHNS; ++ci) {
-						register const F *fp = buf+oint*BCHNS+ci;
+						register const F *fp = buf->Data()+oint*BCHNS+ci;
 						F frac = o-oint;
 
 						if (oint < 1) {
 							if(oint < 0) {
 								frac = 0;
-								a = b = c = d = buf[0*BCHNS+ci];
+								a = b = c = d = buf->Data()[0*BCHNS+ci];
 							}
 							else {
 								a = b = fp[0*BCHNS];
@@ -156,7 +177,7 @@ V xplay_obj::signal(I n,const F *pos)
 							}
 							else {
 								frac = 0; 
-								a = b = c = d = buf[(buflen-1)*BCHNS+ci]; 
+								a = b = c = d = buf->Data()[(buf->Frames()-1)*BCHNS+ci]; 
 							}
 						}
 						else {
@@ -179,15 +200,15 @@ V xplay_obj::signal(I n,const F *pos)
 					I o = *(pos++)/s2u;
 					if(o < 0) {
 						for(I ci = 0; ci < OCHNS; ++ci)
-							sig[ci][si] = buf[0*BCHNS+ci];
+							sig[ci][si] = buf->Data()[0*BCHNS+ci];
 					}
-					if(o > buflen) {
+					if(o > buf->Frames()) {
 						for(I ci = 0; ci < OCHNS; ++ci)
-							sig[ci][si] = buf[(buflen-1)*BCHNS+ci];
+							sig[ci][si] = buf->Data()[(buf->Frames()-1)*BCHNS+ci];
 					}
 					else {
 						for(I ci = 0; ci < OCHNS; ++ci)
-							sig[ci][si] = buf[o*BCHNS+ci];
+							sig[ci][si] = buf->Data()[o*BCHNS+ci];
 					}
 				}
 			}	
@@ -208,11 +229,12 @@ V xplay_obj::m_dsp(t_signal **sp)
 	// TODO: check whether buffer has changed
 
 	if(outvecs) delete[] outvecs;
-	outvecs = new F *[bufchns];
-	for(I ci = 0; ci < bufchns; ++ci)
+	outvecs = new F *[buf->Frames()];
+	for(I ci = 0; ci < buf->Frames(); ++ci)
 		outvecs[ci] = sp[1+ci%outchns]->s_vec;
-		
-	switch(bufchns*100+outchns) {
+
+#ifdef TMPLOPT
+	switch(buf->Frames()*100+outchns) {
 		case 101:
 			dsp_add(dspmeth<1,1>, 3,this,sp[0]->s_n,sp[0]->s_vec);
 			break;
@@ -237,6 +259,9 @@ V xplay_obj::m_dsp(t_signal **sp)
 		default:
 			dsp_add(dspmeth<0,0>, 3,this,sp[0]->s_n,sp[0]->s_vec);
 	}
+#else
+	dsp_add(dspmeth, 3,this,sp[0]->s_n,sp[0]->s_vec);
+#endif
 }
 
 
@@ -245,7 +270,7 @@ V xplay_obj::m_help()
 {
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
-#ifdef MAX
+#ifdef MAXMSP
 	post("Arguments: " OBJNAME " [buffer] [channels=1]");
 #else
 	post("Arguments: " OBJNAME " [buffer]");
@@ -269,13 +294,13 @@ V xplay_obj::m_print()
 {
 	// print all current settings
 	post(OBJNAME " - current settings:");
-	post("bufname = '%s',buflen = %.3f",bufname?bufname->s_name:"",(F)(buflen*s2u)); 
+	post("bufname = '%s',buflen = %.3f",buf->Name(),(F)(buf->Frames()*s2u)); 
 	post("samples/unit = %.3f,interpolation = %s",(F)(1./s2u),interp?"yes":"no"); 
 	post("");
 }
 
 
-#ifdef MAX
+#ifdef MAXMSP
 V xplay_obj::m_assist(L msg,L arg,C *s)
 {
 	switch(msg) {
@@ -304,7 +329,7 @@ extern "C" {
 
 #ifdef PD
 EXT_EXTERN V xplay_tilde_setup()
-#elif defined(MAX)
+#elif defined(MAXMSP)
 V main()
 #endif
 {

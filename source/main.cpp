@@ -46,16 +46,16 @@ xs_obj::xs_obj():
 {}
 	
 
-V xs_obj::cb_set(V *c,t_symbol *s,I argc,t_atom *argv) { thisClass(c)->m_set(s,argc,argv); }
+V xs_obj::cb_set(V *c,t_symbol *s,I argc,t_atom *argv) { thisClass(c)->m_set(argc,argv); }
 V xs_obj::cb_print(V *c) { thisClass(c)->m_print(); }	
 V xs_obj::cb_units(V *c,FI md) { thisClass(c)->m_units((xs_unit)(I)md); }
 V xs_obj::cb_interp(V *c,FI md) { thisClass(c)->m_interp((xs_intp)(I)md); }
 V xs_obj::cb_sclmode(V *c,FI md) { thisClass(c)->m_sclmode((xs_sclmd)(I)md); }
 
 
-V xs_obj::m_set(t_symbol *s, I argc, t_atom *argv)
+BL xs_obj::m_set(I argc, t_atom *argv)
 {
-	setbuf(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
+	return buf->Set(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
 }
 
 V xs_obj::m_units(xs_unit mode)
@@ -66,7 +66,7 @@ V xs_obj::m_units(xs_unit mode)
 			s2u = 1;
 			break;
 		case xsu_buffer: // buffer size
-			s2u = 1.f/buflen;
+			s2u = 1.f/buf->Frames();
 			break;
 		case xsu_ms: // ms
 			s2u = 1000.f/sys_getsr();
@@ -92,7 +92,7 @@ V xs_obj::m_sclmode(xs_sclmd mode)
 			sclmin = curmin; sclmul = s2u;
 			break;
 		case 2: // unity between 0 and buffer size
-			sclmin = 0; sclmul = buflen?1.f/buflen:0;
+			sclmin = 0; sclmul = buf->Frames()?1.f/buf->Frames():0;
 			break;
 		case 3:	// unity between recmin and recmax
 			sclmin = curmin; sclmul = curlen?1.f/curlen:0;
@@ -115,7 +115,7 @@ V xs_obj::m_min(F mn)
 V xs_obj::m_max(F mx)
 {
 	mx /= s2u;  // conversion to samples
-	if(mx > buflen) mx = (F)buflen;
+	if(mx > buf->Frames()) mx = (F)buf->Frames();
 	else if(mx < curmin) mx = (F)curmin;
 	curmax = (I)(mx+.5);
 	curlen = curmax-curmin;

@@ -26,14 +26,16 @@ public:
 	xrec_obj(I argc,t_atom *argv);
 	~xrec_obj();
 	
-#ifdef MAX
-	virtual V m_loadbang() { setbuf();	}
+#ifdef MAXMSP
+	virtual V m_loadbang() { buf->Set();	}
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 	
 	virtual V m_help();
 	virtual V m_print();
 	
+	virtual BL m_set(I argc,t_atom *argv);
+
 	virtual V m_pos(F pos);
 	virtual V m_start() { dorec = true; }
 	virtual V m_stop() { dorec = false; if(!sigmode && !appmode) m_pos(0); }
@@ -62,20 +64,20 @@ protected:
 	V outputmin() const { outlet_float(outmin,curmin*s2u); }
 	V outputmax() const { outlet_float(outmax,curmax*s2u); }
 	
-	template<int _CHNS_>
+#ifdef TMPLOPT
+	template<I _BCHNS_,I _ICHNS_>
+#endif
 	V signal(I n,const F *on,F *pos);  // this is the dsp method
 
-	virtual V setbuf(t_symbol *s = NULL);
+//	virtual V setbuf(t_symbol *s = NULL);
 
 private:
 	virtual V m_dsp(t_signal **sp);
 
-	template<int CHNS>
-	static t_int *dspmeth(t_int *w)
-	{ 
-		((xrec_obj *)w[1])->signal<CHNS>((I)w[2],(const F *)w[3],(F *)w[4]); 
-		return w+5;
-	}
+#ifdef TMPLOPT
+	template<I _BCHNS_,I _ICHNS_>
+#endif
+	static t_int *dspmeth(t_int *w);
 	
 	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
@@ -128,7 +130,7 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 	} 
 #endif
 
-#ifdef MAX
+#ifdef MAXMSP
 	inchns = argc >= 2?atom_getflintarg(1,argc,argv):1;
 #else
 	inchns = 1;
@@ -147,7 +149,7 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 	outmax = newout_float(x_obj);
 
 //    clock = clock_new(x,(t_method)method_tick);
-#elif defined(MAX)
+#elif defined(MAXMSP)
 	// inlets and outlets set up in reverse
 	floatin(x_obj,3);  // max record pos
 	floatin(x_obj,2);  // min record pos
@@ -158,18 +160,13 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 	newout_signal(x_obj);  // pos signal out
 #endif
 
-	bufname = atom_getsymbolarg(0,argc,argv);
-#ifdef PD  // in max it is called by loadbang
-	setbuf(bufname);  // calls reset
-#endif
+	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
 }
 
 xrec_obj::~xrec_obj()
 {
+	if(buf) delete buf;
 	if(invecs) delete[] invecs;
-#ifdef PD
-//	clock_free(clock);
-#endif
 }
 
 
@@ -204,44 +201,51 @@ V xrec_obj::m_pos(F pos)
 
 V xrec_obj::m_reset()
 {
-	xs_obj::setbuf();
+	buf->Set();
 	curpos = 0;
 	m_min(0);
-    m_max(buflen*s2u);
+    m_max(buf->Frames()*s2u);
 }
 
 
-V xrec_obj::setbuf(t_symbol *s)
+BL xrec_obj::m_set(I argc,t_atom *argv)
 {
-	const I bufl1 = buflen;
-	xs_obj::setbuf(s);
-	if(bufl1 != buflen) m_reset(); // calls recmin,recmax,rescale
+	BL r = xs_obj::m_set(argc,argv);
+	if(r) m_reset(); // calls recmin,recmax,rescale
     m_units();
+	return r;
 }
 
 	
-#ifdef PD
-/*
-V xrec_obj::m_tick()
-{
-	if(x->dirty) {
-	    t_garray *a = (t_garray *)pd_findbyclass(x->bufname, garray_class);
-		if (a) bug("tabwrite_tilde_tick");
-		else garray_redraw(a);
-
-		x->dirty = false;
-	}
+#ifdef TMPLOPT  
+template<int _BCHNS_,int _ICHNS_>  
+t_int *xrec_obj::dspmeth(t_int *w)
+{ 
+	((xrec_obj *)w[1])->signal<_BCHNS_,_ICHNS_>((I)w[2],(const F *)w[3],(F *)w[4]); 
+	return w+5;
 }
-*/
+#else
+t_int *xrec_obj::dspmeth(t_int *w)
+{ 
+	((xrec_obj *)w[1])->signal((I)w[2],(const F *)w[3],(F *)w[4]); 
+	return w+5;
+}
 #endif
-
-
-template<int _CHNS_> // trust in loop unrolling!
+	
+#ifdef TMPLOPT  
+template<int _BCHNS_,int _ICHNS_>  
+#endif
 V xrec_obj::signal(I n,const F *on,F *pos)
 {
 	if(enable) {	
 		// optimizer should recognize whether constant or not
-		const I CHNS = _CHNS_ == 0?bufchns:_CHNS_;  
+#ifdef TMPLOPT
+		const I BCHNS = _BCHNS_ == 0?buf->Channels():_BCHNS_;
+		const I ICHNS = _ICHNS_ == 0?MIN(inchns,BCHNS):MIN(_ICHNS_,BCHNS);
+#else
+		const I BCHNS = buf->Channels();
+		const I ICHNS = MIN(inchns,BCHNS);
+#endif
 		const F **sig = invecs;
 
 		register const F pf = sclmul;
@@ -267,7 +271,7 @@ V xrec_obj::signal(I n,const F *on,F *pos)
 				if(ncur > n) ncur = n;
 				
 				register I i;
-				register F *bf = buf+o*CHNS;
+				register F *bf = buf->Data()+o*BCHNS;
 				register F p = scale(o);
 
 				if(sigmode) {
@@ -277,8 +281,9 @@ V xrec_obj::signal(I n,const F *on,F *pos)
 						if(!mixmode) {
 							for(i = 0; i < ncur; ++i,++si) {	
 								if(*(on++) >= 0) {
-									for(int ci = 0; ci < CHNS; ++ci)
-										*(bf++) = sig[ci][si];	
+									for(int ci = 0; ci < ICHNS; ++ci)
+										bf[ci] = sig[ci][si];	
+									bf += BCHNS;
 									*(pos++) = p,p += pf,++o;
 								}
 								else 
@@ -289,8 +294,9 @@ V xrec_obj::signal(I n,const F *on,F *pos)
 							for(i = 0; i < ncur; ++i,++si) {	
 								register const F g = *(on++);
 								if(g >= 0) {
-									for(int ci = 0; ci < CHNS; ++ci,++bf)
-										*bf = *bf *(1.-g)+sig[ci][si]*g;
+									for(int ci = 0; ci < ICHNS; ++ci)
+										bf[ci] = bf[ci]*(1.-g)+sig[ci][si]*g;
+									bf += BCHNS;
 									*(pos++) = p,p += pf,++o;
 								}
 								else 
@@ -304,13 +310,14 @@ V xrec_obj::signal(I n,const F *on,F *pos)
 							for(i = 0; i < ncur; ++i,++si) {	
 								if(*(on++) >= 0)
 								{ 	
-									for(int ci = 0; ci < CHNS; ++ci)
-										*(bf++) = sig[ci][si];	
+									for(int ci = 0; ci < ICHNS; ++ci)
+										bf[ci] = sig[ci][si];	
+									bf += BCHNS;
 									*(pos++) = p,p += pf,++o;
 								}
 								else {
 									*(pos++) = p = scale(o = 0);
-									bf = buf;
+									bf = buf->Data();
 								}
 							}
 						}
@@ -318,13 +325,14 @@ V xrec_obj::signal(I n,const F *on,F *pos)
 							for(i = 0; i < ncur; ++i,++si) {	
 								register const F g = *(on++);
 								if(g >= 0) {
-									for(int ci = 0; ci < CHNS; ++ci,++bf)
-										*bf = *bf *(1.-g)+sig[ci][si]*g;
+									for(int ci = 0; ci < ICHNS; ++ci)
+										bf[ci] = bf[ci]*(1.-g)+sig[ci][si]*g;
+									bf += BCHNS;
 									*(pos++) = p,p += pf,++o;
 								}
 								else {
 									*(pos++) = p = scale(o = 0);
-									bf = buf;
+									bf = buf->Data();
 								}
 							}
 						}
@@ -335,18 +343,19 @@ V xrec_obj::signal(I n,const F *on,F *pos)
 					
 					// Altivec optimization for that!
 					if(!mixmode) {
-						for(int ci = 0; ci < CHNS; ++ci) {	
+						for(int ci = 0; ci < ICHNS; ++ci) {	
 							register F *b = bf+ci;
 							register const F *s = sig[ci];
-							for(i = 0; i < ncur; ++i,b += CHNS,++s) *b = *s;	
+							for(i = 0; i < ncur; ++i,b += BCHNS,++s) *b = *s;	
 						}
 						si += ncur;
 					}
 					else {
 						for(i = 0; i < ncur; ++i,++si) {	
 							register const F w = *(on++);
-							for(int ci = 0; ci < CHNS; ++ci)
-								*(bf++) = sig[ci][si]*w;
+							for(int ci = 0; ci < ICHNS; ++ci)
+								bf[ci] = sig[ci][si]*w;
+							bf += BCHNS;
 						}
 					}
 					for(i = 0; i < ncur; ++i) {
@@ -355,16 +364,10 @@ V xrec_obj::signal(I n,const F *on,F *pos)
 				}
 
 				n -= ncur;
-	#ifdef PD
-				dirty = true;
-//	    	    clock_delay(clock, 10);
-	#endif
 			} 
 			curpos = o;
 			
-	#ifdef MAX
-			if(dirty) { setdirty(); dirty = false; }
-	#endif
+			buf->Dirty(); 
 		}
 
 		if(n) {
@@ -381,24 +384,40 @@ V xrec_obj::m_dsp(t_signal **sp)
 	// TODO: check whether buffer has changed
 
 	if(invecs) delete[] invecs;
-	invecs = new const F *[bufchns];
-	for(I ci = 0; ci < bufchns; ++ci)
+	invecs = new const F *[buf->Channels()];
+	for(I ci = 0; ci < buf->Channels(); ++ci)
 		invecs[ci] = sp[0+ci%inchns]->s_vec;
 		
-	switch(bufchns) {
-		case 1:
-			dsp_add(dspmeth<1>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+#ifdef TMPLOPT
+	switch(buf->Channels()*100+inchns) {
+		case 101:
+			dsp_add(dspmeth<1,1>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
-		case 2:
-			dsp_add(dspmeth<2>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+		case 102:
+			dsp_add(dspmeth<1,2>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
-		case 4:
-			dsp_add(dspmeth<4>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+		case 201:
+			dsp_add(dspmeth<2,1>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			break;
+		case 202:
+			dsp_add(dspmeth<2,2>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			break;
+		case 204:
+			dsp_add(dspmeth<2,4>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			break;
+		case 402:
+			dsp_add(dspmeth<4,2>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			break;
+		case 404:
+			dsp_add(dspmeth<4,4>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		default:
-			dsp_add(dspmeth<0>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<0,0>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 	}
+#else
+	dsp_add(dspmeth, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+#endif
 }
 
 
@@ -408,7 +427,7 @@ V xrec_obj::m_help()
 {
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
-#ifdef MAX
+#ifdef MAXMSP
 	post("Arguments: " OBJNAME " [buffer] [channels=1]");
 #else
 	post("Arguments: " OBJNAME " [buffer]");
@@ -442,14 +461,14 @@ V xrec_obj::m_print()
 
 	// print all current settings
 	post(OBJNAME " - current settings:");
-	post("bufname = '%s',buflen = %.3f",bufname?bufname->s_name:"",(F)(buflen*s2u)); 
+	post("bufname = '%s',buflen = %.3f",buf->Name(),(F)(buf->Frames()*s2u)); 
 	post("samples/unit = %.3f, scale mode = %s",(F)(1./s2u),sclmode_txt[sclmode]); 
 	post("sigmode = %s, append = %s, loop = %s, mixmode = %s",sigmode?"yes":"no",appmode?"yes":"no",doloop?"yes":"no",mixmode?"yes":"no"); 
 	post("");
 }
 
 
-#ifdef MAX
+#ifdef MAXMSP
 V xrec_obj::m_assist(L msg,L arg,C *s)
 {
 	switch(msg) {
@@ -494,7 +513,7 @@ extern "C" {
 
 #ifdef PD
 EXT_EXTERN V xrecord_tilde_setup()
-#elif defined(MAX)
+#elif defined(MAXMSP)
 V main()
 #endif
 {

@@ -15,10 +15,24 @@ EXT_EXTERN V xgroove_tilde_setup();
 #endif
 
 
+#ifndef _MSC_VER
+// MS VC 6.0 can't handle <int,int> templates?!
+#define TMPLOPT
+#endif
+
+#ifndef MIN
+#define MIN(x,y) ((x) < (y)?(x):(y))
+#endif
+
+#ifndef MAX
+#define MAX(x,y) ((x) > (y)?(x):(y))
+#endif
+
+
 class xs_obj:
-	public bufdsp_obj
+	public dsp_obj
 {
-	CPPEXTERN_HEADER(xs_obj,bufdsp_obj)
+	CPPEXTERN_HEADER(xs_obj,dsp_obj)
 	
 public:
 	xs_obj();
@@ -39,7 +53,9 @@ public:
 	};
 	
 protected:
-	virtual V m_set(t_symbol *s,I argc,t_atom *argv);
+	buffer *buf;
+
+  	virtual BL m_set(I argc,t_atom *argv);
 	virtual V m_print() = 0;
 	virtual V m_units(xs_unit u = xsu__);
 	virtual V m_interp(xs_intp u = xsi__);
