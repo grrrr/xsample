@@ -38,7 +38,7 @@ TMPLDEF V xinter::st_play1(const S *bdt,const I smin,const I smax,const I n,cons
 		}
 		else if(oint >= smax) {
 			// position > last sample ... take only last sample
-			fp = bdt+(smax-1)*BCHNS;
+			fp = bdt+(smin == smax?smin:smax-1)*BCHNS;
 		}
 		else {
 			// normal
@@ -116,50 +116,73 @@ TMPLDEF V xinter::st_play4(const S *bdt,const I smin,const I smax,const I n,cons
 
 	// position info are frame units
 	const S *pos = invecs[0];
+
+#ifdef __VEC__
+	// prefetch cache
+	vec_dst(pos,GetPrefetchConstant(1,n>>2,0),0);
+	const int pf = GetPrefetchConstant(BCHNS,1,16*BCHNS);
+#endif
+
 	S *const *sig = outvecs;
 	register I si = 0;
 	
 	// 4-point interpolation
 	// ---------------------
 	const I maxo = smax-1; // last sample in play region
+	const S *maxp = bdt+maxo*BCHNS;  // pointer to last sample
 
 	for(I i = 0; i < n; ++i,++si) {	
 		F o = *(pos++);
-		register I oint = (I)o,ointm,oint1,oint2;
+		register I oint = (I)o;
+		register F frac;
+		register const S *fa,*fb,*fc,*fd;
 
 		if(oint <= smin) { 
 			if(oint < smin) oint = smin,o = (float)smin;
-			// position is first simple
-			ointm = smin; // first sample 
-			oint1 = oint+1;
-			oint2 = oint1+1;
+			
+			fa = bdt+smin*BCHNS;  // position is first sample
+			fb = bdt+oint*BCHNS;
+						
+			frac = o-oint;
+			fc = fb+BCHNS;
+			fd = fc+BCHNS;
 		}
 		else if(oint >= maxo-2) { 
 			if(oint > maxo) oint = maxo,o = (float)smax;
-			ointm = oint-1;
-			oint1 = oint >= maxo?maxo:oint+1;
-			oint2 = oint1 >= maxo?maxo:oint1+1;
+			frac = o-oint;
+
+			fb = bdt+oint*BCHNS;
+			fa = fb-BCHNS;   // CACHE!
+			
+			// \TODO what about wrap-around???
+			fc = fb >= maxp?maxp:fb+BCHNS;	// ev. CACHE!		
+			fd = fc >= maxp?maxp:fc+BCHNS;	// ev. CACHE!
 		}
 		else {
-			ointm = oint-1;
-			oint1 = oint+1;
-			oint2 = oint1+1;
+			fa = bdt+oint*BCHNS-BCHNS;
+			frac = o-oint;
+			fb = fa+BCHNS;
+#ifdef __VEC__
+			vec_dst(fa,pf,0);
+#endif
+			fc = fb+BCHNS;
+			fd = fc+BCHNS;
 		}
 
-		register F frac = o-oint;
+		register F f1 = 0.5f*(frac-1.0f);
+		register F f3 = frac*3.0f-1.0f;
 		
-		register const S *fa = bdt+ointm*BCHNS;
-		register const S *fb = bdt+oint*BCHNS;
-		register const S *fc = bdt+oint1*BCHNS;
-		register const S *fd = bdt+oint2*BCHNS;
-
 		for(I ci = 0; ci < OCHNS; ++ci) {
+			const F amdf = (fa[ci]-fd[ci])*frac;
 			const F cmb = fc[ci]-fb[ci];
-			sig[ci][si] = fb[ci] + frac*( 
-				cmb - 0.5f*(frac-1.0f) * ((fa[ci]-fd[ci]+3.0f*cmb)*frac + (fb[ci]-fa[ci]-cmb))
-			);
+			const F bma = fb[ci]-fa[ci];
+			sig[ci][si] = fb[ci] + frac*( cmb - f1 * ( amdf+bma+cmb*f3 ) );
 		}
 	}
+	
+#ifdef __VEC__
+	vec_dss(0);
+#endif
 
 	// clear rest of output channels (if buffer has less channels)
 	for(I ci = OCHNS; ci < outchns; ++ci) ZeroSamples(sig[ci],n);

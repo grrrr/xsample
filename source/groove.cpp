@@ -498,6 +498,11 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
+#ifdef __VEC__
+	// prefetch cache
+	vec_dst(speed,GetPrefetchConstant(1,n>>2,0),0);
+#endif
+
 	const D smin = curmin,smax = curmax,plen = smax-smin; //curlen;
 
 	if(buf && plen > 0) {
@@ -529,6 +534,10 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 	else 
 		s_pos_off(n,invecs,outvecs);
 		
+#ifdef __VEC__
+	vec_dss(0);
+#endif
+
 	if(lpbang) ToOutBang(outchns+3);
 }
 

@@ -12,7 +12,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #define __XSAMPLE_H
 
 
-#define XSAMPLE_VERSION "0.3.0pre12"
+#define XSAMPLE_VERSION "0.3.0pre13"
 
 
 #define FLEXT_ATTRIBUTES 1 
@@ -72,6 +72,28 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	#define STD
 #endif
 
+#ifdef __ALTIVEC__
+#if FLEXT_CPU == FLEXT_CPU_PPC && defined(__MWERKS__)
+	#pragma altivec_model on
+	#include <vBasicOps.h>
+	#include <vectorOps.h>
+#elif FLEXT_CPU == FLEXT_CPU_PPC && defined(__GNUG__)
+	#include <vecLib/vBasicOps.h>
+	#include <vecLib/vectorOps.h>
+#endif
+
+	// Initialize a prefetch constant for use with vec_dst(), vec_dstt(), vec_dstst or vec_dststt
+	// Taken from the "AltiVec tutorial" by Ian Ollmann, Ph.D. 
+	inline UInt32 GetPrefetchConstant( int blockSizeInVectors,int blockCount,int blockStride )
+	{
+//		FLEXT_ASSERT( blockSizeInVectors > 0 && blockSizeInVectors <= 32 );
+//		FLEXT_ASSERT( blockCount > 0 && blockCount <= 256 );
+//		FLEXT_ASSERT( blockStride > MIN_SHRT && blockStride <= MAX_SHRT );
+		return ((blockSizeInVectors << 24) & 0x1F000000) |
+			((blockCount << 16) && 0x00FF0000) |
+			(blockStride & 0xFFFF);
+	}
+#endif
 
 class xsample:
 	public flext_dsp
