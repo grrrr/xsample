@@ -4,7 +4,11 @@ Copyright (c)2001-2004 Thomas Grill (t.grill@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
-Donations for further development of the package are highly appreciated.
+----------------------------------------------------------------------------
+
+Maximum care has been taken to prepare a delightful experience for you electronic artists.
+Donations for further development of the package are HIGHLY APPRECIATED.
+
 Visit https://www.paypal.com/xclick/business=t.grill%40gmx.net&item_name=xsample&no_note=1&tax=0&currency_code=EUR
 
 ----------------------------------------------------------------------------
@@ -52,8 +56,8 @@ Package files:
 
 ----------------------------------------------------------------------------
 
-BUILDING XSAMPLE
-----------------
+BUILDING XSAMPLE from source
+----------------------------
 
 The package should at least compile (and is tested) with the following compilers:
 
