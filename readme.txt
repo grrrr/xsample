@@ -42,13 +42,6 @@ by adding "-lib xsample" to the PD command line.
 
 ----------------------------------------------------------------------------
 
-Package files:
-- readme.txt: this one
-- gpl.txt,license.txt: GPL license stuff
-- package.txt: Definitions for building the package
-- some source code files
-
-----------------------------------------------------------------------------
 
 BUILDING XSAMPLE from source
 ----------------------------
@@ -81,6 +74,7 @@ Max - OS9 - Metrowerks CodeWarrior:
 use the "xsample.mcp" project file
 
 ----------------------------------------------------------------------------
+
 
 Goals/features of the package:
 
@@ -183,5 +177,4 @@ tests:
 
 bugs:
 - PD: problems with timed buffer redrawing (takes a lot of cpu time) - flext bug?
-- Apple MPW doesn't correctly compile template optimization 
 - Max help files aren't correctly opened due to xsample objects residing in a library (FIXED for OSX!!!)

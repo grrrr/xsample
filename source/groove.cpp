@@ -67,7 +67,7 @@ public:
 protected:
 
 	double curpos;  // in samples
-	int bidir; // +1 or -1
+	float bidir; // +1 or -1
 
 	float _xzone,xzone;
     long znsmin,znsmax;
@@ -106,11 +106,7 @@ private:
 
 	DEFSIGFUN(s_pos_off);
 	DEFSIGFUN(s_pos_once);
-//	DEFSIGFUN(s_pos_c_once);
-//	DEFSIGFUN(s_pos_a_once);
 	DEFSIGFUN(s_pos_loop);
-//	DEFSIGFUN(s_pos_c_loop);
-//	DEFSIGFUN(s_pos_a_loop);
 	DEFSIGFUN(s_pos_loopzn);
 	DEFSIGFUN(s_pos_bidir);
 
@@ -321,50 +317,6 @@ void xgroove::s_pos_once(int n,t_sample *const *invecs,t_sample *const *outvecs)
 	if(lpbang) ToOutBang(outchns+3);
 }
 
-#if 0
-// \TODO optimize that for spd = const!
-void xgroove::s_pos_c_once(int n,t_sample *const *invecs,t_sample *const *outvecs)
-{
-	const t_sample spd = *invecs[0];
-	t_sample *pos = outvecs[outchns];
-	bool lpbang = false;
-
-	const double smin = curmin,smax = curmax,plen = smax-smin;
-
-	if(plen > 0) {
-		register double o = curpos;
-
-		for(int i = 0; i < n; ++i) {	
-			if(!(o < smax)) { o = smax; lpbang = true; }
-			else if(o < smin) { o = smin; lpbang = true; }
-			
-			pos[i] = o;
-			o += spd;
-		}
-		// normalize and store current playing position
-		setpos(o);
-
-		playfun(n,&pos,outvecs); 
-
-		arrscale(n,pos,pos);
-	} 
-	else 
-		s_pos_off(n,invecs,outvecs);
-		
-	if(lpbang) ToOutBang(outchns+3);
-}
-
-void xgroove::s_pos_a_once(int n,t_sample *const *invecs,t_sample *const *outvecs)
-{
-	const t_sample *speed = invecs[0];
-	if(speed[0] == speed[n/2] && speed[0] == speed[n-1]) 
-		// assume constant speed
-		s_pos_c_once(n,invecs,outvecs);
-	else
-		s_pos_once(n,invecs,outvecs);
-}
-#endif
-
 void xgroove::s_pos_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
 {
 	const t_sample *speed = invecs[0];
@@ -413,57 +365,6 @@ void xgroove::s_pos_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
 
 	if(lpbang) ToOutBang(outchns+3);
 }
-
-#if 0
-// \TODO optimize that for spd = const!
-void xgroove::s_pos_c_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
-{
-	const t_sample spd = *invecs[0];
-	t_sample *pos = outvecs[outchns];
-	bool lpbang = false;
-
-	const double smin = curmin,smax = curmax,plen = smax-smin;
-
-	if(plen > 0) {
-		register double o = curpos;
-
-		for(int i = 0; i < n; ++i) {	
-			// normalize offset
-			if(!(o < smax)) {  // faster than o >= smax
-				o = fmod(o-smin,plen)+smin;
-				lpbang = true;
-			}
-			else if(o < smin) {
-				o = fmod(o-smin,plen)+smax; 
-				lpbang = true;
-			}
-
-			pos[i] = o;
-			o += spd;
-		}
-		// normalize and store current playing position
-		setpos(o);
-
-		playfun(n,&pos,outvecs); 
-
-		arrscale(n,pos,pos);
-	} 
-	else 
-		s_pos_off(n,invecs,outvecs);
-		
-	if(lpbang) ToOutBang(outchns+3);
-}
-
-void xgroove::s_pos_a_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
-{
-	const t_sample *speed = invecs[0];
-	if(speed[0] == speed[n/2] && speed[0] == speed[n-1]) 
-		// assume constant speed
-		s_pos_c_loop(n,invecs,outvecs);
-	else
-		s_pos_loop(n,invecs,outvecs);
-}
-#endif
 
 void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvecs)
 {
@@ -626,7 +527,7 @@ void xgroove::s_pos_bidir(int n,t_sample *const *invecs,t_sample *const *outvecs
 		// normalize and store current playing position
 		setpos(o);
 
-		bidir = CASTINT<int>(bd);
+		bidir = bd;
 		playfun(n,&pos,outvecs); 
 
 		arrscale(n,pos,pos);

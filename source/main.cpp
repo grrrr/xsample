@@ -58,10 +58,7 @@ xsample::xsample():
 	curmin(0),curmax(1<<(sizeof(curmax)*8-2))
 {}
 	
-xsample::~xsample()
-{
-//	m_enable(false); // switch off DSP
-}
+xsample::~xsample() {}
 
 bool xsample::Finalize()
 {

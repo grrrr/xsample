@@ -80,7 +80,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	}
 #endif
 
-#if FLEXT_CPU != FLEXT_CPU_PPC && defined(__GNUC__) 
+#if FLEXT_CPU == FLEXT_CPU_INTEL && defined(__GNUC__) 
 template<typename I,typename F> inline I CASTINT(F o) { return lrintf(o); }
 #elif FLEXT_CPU == FLEXT_CPU_INTEL && defined(_MSC_VER)
 template<typename I,typename F>
