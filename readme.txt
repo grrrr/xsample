@@ -35,8 +35,6 @@ The package should at least compile (and is tested) with the following compilers
 
 pd - Windows:
 -------------
-o Borland C++ 5.5 (free): edit & run "make -f makefile.bcc"
-
 o Microsoft Visual C++ 6: edit "xsample.dsp" project file
 > due to a compiler bug the optimization using templates is not functional
 
