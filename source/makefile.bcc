@@ -22,7 +22,7 @@ BCCPATH=c:\programme\prog\bcc55  	### EDIT! ##
 PDPATH=c:\programme\audio\pd		### EDIT! ##
 
 # includes, libs
-INCPATH=-I$(BCCPATH)\include -I$(PDPATH)\src -I$(FLEXTPATH)
+INCPATH=-I$(BCCPATH)\include -I$(PDPATH)\src -I$(FLEXTPATH)\source
 LIBPATH=-L$(BCCPATH)\lib -L$(PDPATH)\lib 
 LIBS=cw32.lib import32.lib C0D32.OBJ
 
@@ -36,7 +36,7 @@ CFLAGS=-6 -O2 -OS -ff -tWD
 
 # all the source files from the package
 SRCS= main.cpp inter.cpp record.cpp play.cpp groove.cpp
-HDRS= main.h
+HDRS= main.h inter.ci
 
 OBJS= $(SRCS:.cpp=.obj)
 
@@ -70,5 +70,5 @@ $(OUTPATH)\$(NAME).def:
 $(OUTPATH)\$(NAME).dll :: $(OUTPATH) $(OUTPATH)\$(NAME).def $(OUTPATH)\pd.lib 
 
 $(OUTPATH)\$(NAME).dll :: $(OBJS) 
-	ilink32 -C -Tpd $(LIBPATH) $** ,$<,,$(LIBS) $(OUTPATH)\pd.lib $(FLEXTPATH)\bcc\flext-$(TARGET).lib,$(OUTPATH)\$(NAME).def
+	ilink32 -C -Tpd $(LIBPATH) $** ,$<,,$(LIBS) $(OUTPATH)\pd.lib $(FLEXTPATH)\pd-bcc\flext-$(TARGET).lib,$(OUTPATH)\$(NAME).def
 
