@@ -74,10 +74,13 @@ public:
 protected:
 	buffer *buf;
 
+	virtual V m_start() = 0;
+	virtual V m_stop() = 0;
+	virtual V m_reset();
+
   	virtual I m_set(I argc,t_atom *argv);
 	virtual V m_print() = 0;
 	virtual V m_refresh();
-	virtual V m_reset();
 	virtual V m_loadbang();
 
 	virtual V m_units(xs_unit u = xsu__);
@@ -99,6 +102,9 @@ protected:
 	inline F scale(F smp) const { return (smp-sclmin)*sclmul; }
 
 private:
+
+	FLEXT_CALLBACK(m_start)
+	FLEXT_CALLBACK(m_stop)
 
 	FLEXT_CALLBACK_G(m_set)
 	FLEXT_CALLBACK(m_print)

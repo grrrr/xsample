@@ -44,10 +44,6 @@ private:
 	
 	DEFSIGFUN(xplay)
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is the dsp method
-
-	FLEXT_CALLBACK(m_start)
-	FLEXT_CALLBACK(m_stop)
-	FLEXT_CALLBACK(m_reset)
 };
 
 FLEXT_TILDE_GIMME("xplay~",xplay)
@@ -71,7 +67,6 @@ xplay::xplay(I argc, t_atom *argv):
 		outchns = geta_flint(argv[argi]);
 		argi++;
 	}
-	else
 #endif
 
 	if(argc > argi && is_symbol(argv[argi])) {
@@ -93,16 +88,13 @@ xplay::xplay(I argc, t_atom *argv):
 	add_in_signal();  // pos signal
 	add_out_signal(outchns);
 	setup_inout();
-
-	FLEXT_ADDBANG(0,m_start);
-	FLEXT_ADDMETHOD_(0,"start",m_start);
-	FLEXT_ADDMETHOD_(0,"stop",m_stop);
 }
 
 
 I xplay::m_set(I argc,t_atom *argv) 
 {
 	I r = xsample::m_set(argc,argv);
+	if(r < 0) m_reset(); // resets pos/min/max
 	if(r != 0) m_units();
 	return r;
 }
@@ -177,7 +169,7 @@ TMPLDEF V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 			}
 		}
 		else {
-			// keine Interpolation
+			// no interpolation
 			for(I i = 0; i < n; ++i,++si) {	
 				I o = (I)(*(pos++)/s2u);
 				if(o < 0) {
@@ -211,8 +203,8 @@ V xplay::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 	m_refresh();  
 
-	switch(buf->Frames()*100+outchns) {
-		case 101:
+	switch(buf->Channels()*100+outchns) {
+		case 101: 
 			sigfun = SIGFUN(xplay,1,1); break;
 		case 102:
 			sigfun = SIGFUN(xplay,1,2); break;
@@ -265,7 +257,7 @@ V xplay::m_print()
 {
 	// print all current settings
 	post("%s - current settings:",thisName());
-	post("bufname = '%s', frames = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
+	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
 	post("out channels = %i, samples/unit = %.3f, interpolation = %s",outchns,(F)(1./s2u),interp?"yes":"no"); 
 	post("");
 }

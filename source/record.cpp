@@ -67,9 +67,6 @@ private:
 	DEFSIGFUN(xrecord)
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is the dsp method
 
-	FLEXT_CALLBACK(m_start)
-	FLEXT_CALLBACK(m_stop)
-
 	FLEXT_CALLBACK_1(m_pos,F)
 	FLEXT_CALLBACK_1(m_min,F)
 	FLEXT_CALLBACK_1(m_max,F)
@@ -106,8 +103,8 @@ xrecord::xrecord(I argc,t_atom *argv):
 		inchns = geta_flint(argv[argi]);
 		argi++;
 	}
-	else
 #endif
+
 	if(argc > argi && is_symbol(argv[argi])) {
 		buf = new buffer(get_symbol(argv[argi]),true);
 		argi++;
@@ -131,13 +128,9 @@ xrecord::xrecord(I argc,t_atom *argv):
 	add_out_float(2); // min & max
 	setup_inout();
 
-	FLEXT_ADDBANG(0,m_start);
-	FLEXT_ADDMETHOD_(0,"start",m_start);
-	FLEXT_ADDMETHOD_(0,"stop",m_stop);
-
 	FLEXT_ADDMETHOD_1(0,"pos",m_pos,F);
-	FLEXT_ADDMETHOD(2,m_min);
-	FLEXT_ADDMETHOD(3,m_max);
+	FLEXT_ADDMETHOD(inchns+1,m_min);
+	FLEXT_ADDMETHOD(inchns+2,m_max);
 	FLEXT_ADDMETHOD_1(0,"min",m_min,F);
 	FLEXT_ADDMETHOD_1(0,"max",m_max,F);
 	
@@ -180,6 +173,7 @@ V xrecord::m_max(F mx)
 V xrecord::m_pos(F pos)
 {
 	curpos = pos?(L)(pos/s2u+.5):0;
+
 	if(curpos < curmin) curpos = curmin;
 	else if(curpos > curmax) curpos = curmax;
 }
@@ -433,7 +427,7 @@ V xrecord::m_print()
 
 	// print all current settings
 	post("%s - current settings:",thisName());
-	post("bufname = '%s', frames = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
+	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
 	post("in channels = %i, samples/unit = %.3f, scale mode = %s",inchns,(F)(1./s2u),sclmode_txt[sclmode]); 
 	post("sigmode = %s, append = %s, loop = %s, mixmode = %s",sigmode?"yes":"no",appmode?"yes":"no",doloop?"yes":"no",mixmode?"yes":"no"); 
 	post("");

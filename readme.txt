@@ -61,6 +61,7 @@ Version history:
 - fixed xplay~ help method 
 - changed syntax to x*~ [channels=1] [buffer] for future enhancements (MaxMSP only, warning for old syntax)
 - fixed small bug concerning startup position in xgroove~ and xrecord~
+- fixed deadly bug in xplay~ dsp code (only active with template optimization) 
 
 0.2.1:
 - no leftmost float inlet for position setting - use pos method
@@ -93,4 +94,4 @@ tests:
 - reconsider startup sequence of set buffer,set units,set sclmode,set pos/min/max
 
 bugs:
-no unfixed known
+- PD: problems with timed buffer redrawing (takes a lot of cpu time) - flext bug?

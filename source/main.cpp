@@ -46,6 +46,10 @@ xsample::xsample():
 	sclmode(xss_unitsinbuf),
 	curmin(0),curmax(1<<30)
 {
+	FLEXT_ADDBANG(0,m_start);
+	FLEXT_ADDMETHOD_(0,"start",m_start);
+	FLEXT_ADDMETHOD_(0,"stop",m_stop);
+
 	FLEXT_ADDMETHOD_(0,"set",m_set);
 	FLEXT_ADDMETHOD_(0,"print",m_print);
 	FLEXT_ADDMETHOD_(0,"refresh",m_refresh);

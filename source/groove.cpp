@@ -66,9 +66,6 @@ private:
 	DEFSIGFUN(xgroove)	
 	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is my dsp method
 
-	FLEXT_CALLBACK(m_start)
-	FLEXT_CALLBACK(m_stop)
-
 	FLEXT_CALLBACK_1(m_pos,F)
 	FLEXT_CALLBACK_1(m_min,F)
 	FLEXT_CALLBACK_1(m_max,F)
@@ -127,10 +124,6 @@ xgroove::xgroove(I argc,t_atom *argv):
 	FLEXT_ADDMETHOD_1(0,"min",m_min,F); 
 	FLEXT_ADDMETHOD_1(0,"max",m_max,F);
 	FLEXT_ADDMETHOD_1(0,"pos",m_pos,F);
-
-	FLEXT_ADDBANG(0,m_start);
-	FLEXT_ADDMETHOD_(0,"start",m_start);
-	FLEXT_ADDMETHOD_(0,"stop",m_stop);
 
 	FLEXT_ADDMETHOD_1(0,"loop",m_loop,BL);
 
@@ -425,7 +418,7 @@ V xgroove::m_print()
 
 	// print all current settings
 	post("%s - current settings:",thisName());
-	post("bufname = '%s', frames = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
+	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
 	post("out channels = %i, samples/unit = %.3f, scale mode = %s",outchns,(F)(1./s2u),sclmode_txt[sclmode]); 
 	post("loop = %s, interpolation = %s",doloop?"yes":"no",interp?"yes":"no"); 
 	post("");
