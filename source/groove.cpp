@@ -72,10 +72,8 @@ protected:
 	S *znpos,*znmul,*znidx;
 	I pblksz;
 
-	outlet *outmin,*outmax; // float outlets	
-	
-	inline V outputmin() { ToOutFloat(outmin,curmin*s2u); }
-	inline V outputmax() { ToOutFloat(outmax,curmax*s2u); }
+	inline V outputmin() { ToOutFloat(outchns+1,curmin*s2u); }
+	inline V outputmax() { ToOutFloat(outchns+2,curmax*s2u); }
 	
 	inline V setpos(F pos)
 	{
@@ -220,9 +218,6 @@ xgroove::~xgroove()
 BL xgroove::Init()
 {
 	if(xinter::Init()) {
-		outmin = GetOut(outchns+1);
-		outmax = GetOut(outchns+2);
-
 		m_reset();
 		return true;
 	}

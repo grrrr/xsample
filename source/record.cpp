@@ -54,10 +54,8 @@ protected:
 	BL dorec,doloop,mixmode;
 	L curpos;  // in samples
 
-	outlet *outmin,*outmax; // float outlets	
-	
-	inline V outputmin() { ToOutFloat(outmin,curmin*s2u); }
-	inline V outputmax() { ToOutFloat(outmax,curmax*s2u); }
+	inline V outputmin() { ToOutFloat(1,curmin*s2u); }
+	inline V outputmax() { ToOutFloat(2,curmax*s2u); }
 
 	inline V mg_pos(F &v) const { v = curpos*s2u; }
 	
@@ -164,9 +162,6 @@ xrecord::xrecord(I argc,const t_atom *argv):
 BL xrecord::Init()
 {
 	if(xsample::Init()) {
-		outmin = GetOut(1);
-		outmax = GetOut(2);
-		
 		m_reset();
 		return true;
 	}
