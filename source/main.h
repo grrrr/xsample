@@ -91,7 +91,7 @@ protected:
 	virtual V m_stop() = 0;
 	virtual BL m_reset();
 
-  	virtual I m_set(I argc,t_atom *argv);
+  	virtual I m_set(I argc,const t_atom *argv);
 	virtual V m_print() = 0;
 	virtual BL m_refresh();
 	virtual V m_loadbang();
@@ -238,7 +238,7 @@ public:
 	xinter();
 	
 protected:
-	virtual I m_set(I argc,t_atom *argv);
+	virtual I m_set(I argc,const t_atom *argv);
 
 	virtual V m_start();
 	virtual V m_stop();

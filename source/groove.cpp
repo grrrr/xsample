@@ -26,7 +26,7 @@ class xgroove:
 	FLEXT_HEADER(xgroove,xinter)
 
 public:
-	xgroove(I argc,t_atom *argv);
+	xgroove(I argc,const t_atom *argv);
 	~xgroove();
 
 	virtual BL Init();
@@ -49,7 +49,7 @@ public:
 	
 	V m_xzone(F xz);
 	V m_xsymm(F xz);
-	V m_xshape(I argc = 0,t_atom *argv = NULL);
+	V m_xshape(I argc = 0,const t_atom *argv = NULL);
 	V m_xkeep(BL k);
 
 	enum xs_loop {
@@ -132,7 +132,7 @@ V xgroove::setup(t_class *)
 }
 */
 
-xgroove::xgroove(I argc,t_atom *argv):
+xgroove::xgroove(I argc,const t_atom *argv):
 	loopmode(xsl_loop),curpos(0),
 	_xzone(0),xzone(0),xsymm(0.5),xkeep(0),pblksz(0),
 	znbuf(NULL),znmul(NULL),znidx(NULL),znpos(NULL),
@@ -280,7 +280,7 @@ V xgroove::m_xsymm(F xs)
 	do_xzone();
 }
 
-V xgroove::m_xshape(I argc,t_atom *argv) 
+V xgroove::m_xshape(I argc,const t_atom *argv) 
 { 
 	const F pi = 3.14159265358979f;
 	I i,sh = 0;

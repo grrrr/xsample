@@ -69,7 +69,7 @@ xsample::~xsample()
 
 
 
-I xsample::m_set(I argc, t_atom *argv)
+I xsample::m_set(I argc,const t_atom *argv)
 {
 	return buf->Set(argc >= 1?GetASymbol(argv[0]):NULL);
 }

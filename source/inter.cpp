@@ -27,7 +27,7 @@ xinter::xinter():
 	FLEXT_ADDMETHOD_E(0,"interp",m_interp);
 }
 
-I xinter::m_set(I argc,t_atom *argv) 
+I xinter::m_set(I argc,const t_atom *argv) 
 {
 	I r = xsample::m_set(argc,argv);
 	if(r < 0) m_reset(); // resets pos/min/max

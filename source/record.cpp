@@ -22,7 +22,7 @@ class xrecord:
 	FLEXT_HEADER(xrecord,xsample)
 
 public:
-	xrecord(I argc,t_atom *argv);
+	xrecord(I argc,const t_atom *argv);
 	
 	virtual BL Init();
 		
@@ -33,7 +33,7 @@ public:
 	virtual V m_help();
 	virtual V m_print();
 	
-	virtual I m_set(I argc,t_atom *argv);
+	virtual I m_set(I argc,const t_atom *argv);
 
 	virtual V m_pos(F pos);
 	virtual V m_all();
@@ -51,7 +51,7 @@ public:
 	virtual V m_loop(BL lp) { doloop = lp; }
 	virtual V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
 
-	virtual V m_draw(I argc,t_atom *argv);	
+	virtual V m_draw(I argc,const t_atom *argv);	
 
 protected:
 	I inchns;
@@ -105,7 +105,7 @@ V xrecord::setup(t_class *)
 }
 */
 
-xrecord::xrecord(I argc,t_atom *argv):
+xrecord::xrecord(I argc,const t_atom *argv):
 	dorec(false),
 	sigmode(false),mixmode(false),
 	appmode(true),doloop(false),
@@ -211,7 +211,7 @@ V xrecord::m_pos(F pos)
 }
 
 
-I xrecord::m_set(I argc,t_atom *argv)
+I xrecord::m_set(I argc,const t_atom *argv)
 {
 	I r = xsample::m_set(argc,argv);
 	if(r < 0) m_reset(); // resets pos/min/max
@@ -242,7 +242,7 @@ BL xrecord::m_reset()
 	return xsample::m_reset();
 }
 
-V xrecord::m_draw(I argc,t_atom *argv)
+V xrecord::m_draw(I argc,const t_atom *argv)
 {
 	if(argc >= 1) {
 		drintv = GetInt(argv[0]);

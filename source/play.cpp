@@ -22,7 +22,7 @@ class xplay:
 	FLEXT_HEADER(xplay,xinter)
 
 public:
-	xplay(I argc, t_atom *argv);
+	xplay(I argc,const t_atom *argv);
 	
 	virtual BL Init();
 		
@@ -54,7 +54,7 @@ V xplay::setup(t_class *)
 }
 */
 
-xplay::xplay(I argc, t_atom *argv)
+xplay::xplay(I argc,const t_atom *argv)
 {
 	I argi = 0;
 #ifdef MAXMSP
