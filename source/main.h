@@ -14,13 +14,31 @@ FLEXT_EXT V xgroove_tilde_setup();
 }
 #endif
 
+// most compilers are somehow broken.....
+// in other words: can't handle all C++ features
 
-#if !defined(_MSC_VER) && !defined(__GNUC__) && (!__MWERKS__)
+#if defined(_MSC_VER)
 // MS VC 6.0 can't handle <int,int> templates?!
-// GNUC 2.95.2 dies at compile
-// CodeWarrior says: unimplemented C++ feature
-#define TMPLOPT
+	#define TMPLOPT
+#elif defined(__BORLANDC__)
+// BorlandC++ 5.5 works fine (recommendation: it's FREE!)
+	#define TMPLOPT
+	#define TMPLINT
+#elif defined(__GNUC__)
+// GNUC 2.95.2 dies at compile with <int,int> templates
+	#define TMPLOPT
+#elif defined(__MWERKS__)
+// CodeWarrior can't take address of a template member function 
+	#define TMPLOPT
+	#define TMPLINT
+	#define SIGSTATIC
+#elif
+// another compiler
+	#define TMPLOPT  // template optimation for much more speed
+	#define TMPLINT	 // if <int,int> templates are correctly handled 
+	//#define SIGSTATIC  // another redirection to avoid addresses of member functions
 #endif
+
 
 #ifndef MIN
 #define MIN(x,y) ((x) < (y)?(x):(y))
@@ -90,6 +108,85 @@ private:
 	static V cb_interp(V *c,FI md);
 	static V cb_sclmode(V *c,FI md);
 };
+
+
+// defines which are used in the derived classes
+#ifdef SIGSTATIC
+	#ifdef TMPLOPT
+		#ifdef TMPLINT
+			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::st_signal<BCHNS,IOCHNS>
+			#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
+			#define TMPLCALL <_BCHNS_,_IOCHNS_>
+		#else 
+			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::st_signal<B[BCHNS],B[IOCHNS]>
+			#define TMPLDEF template <class BCL,class IOCL>
+			#define TMPLCALL <BCL,IOCL>
+		#endif
+	#else
+		#define SIGFUN(CL,BCHNS,IOCHNS) &CL::st_signal
+		#define TMPLDEF 
+		#define TMPLCALL
+	#endif
+#else
+	#ifdef TMPLOPT
+		#ifdef TMPLINT
+			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::signal<BCHNS,IOCHNS>
+			#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
+			#define TMPLCALL <_BCHNS_,_IOCHNS_>
+		#else
+			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::signal<B[BCHNS],B[IOCHNS]>
+			#define TMPLDEF template <class BCL,class IOCL>
+			#define TMPLCALL <BCL,IOCL>
+		#endif
+	#else
+		#define SIGFUN(CL,BCHNS,IOCHNS) &CL::signal
+		#define TMPLDEF 
+		#define TMPLCALL
+	#endif
+#endif
+
+#ifndef SIGSTATIC
+	// member function
+	#define DEFSIGFUN(CL) \
+	V (CL::*sigfun)(I n,F *const *in,F *const *out);  \
+	virtual V m_signal(I n,F *const *in,F *const *out) { (this->*sigfun)(n,in,out); }
+#else
+	// static function -> another redirection...
+	#define DEFSIGFUN(CL) \
+	V (*sigfun)(CL &obj,I n,F *const *in,F *const *out);  \
+	virtual V m_signal(I n,F *const *in,F *const *out)   \
+		{ (*sigfun)(*this,n,in,out); }  \
+	TMPLDEF static V st_signal(CL &obj,I n,F *const *in,F *const *out)  \
+		{ obj.signal TMPLCALL (n,in,out); }
+#endif
+
+
+
+#ifndef MIN
+#define MIN(x,y) ((x) < (y)?(x):(y))
+#endif
+
+// in the signal functions
+#ifdef TMPLOPT
+	// optimization by using constants for channel numbers
+#ifdef TMPLINT
+#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)  \
+	const I BCHNS = _BCHNS_ == 0?(bchns):_BCHNS_;  \
+	const I IOCHNS = _IOCHNS_ == 0?MIN(iochns,BCHNS):MIN(_IOCHNS_,BCHNS)
+#else
+	// the same but using classes to calculate channel numbers
+#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)   \
+	const I BCHNS = sizeof(BCL) == 0?(bchns):sizeof(BCL);  \
+	const I IOCHNS = sizeof(IOCL) == 0?MIN(iochns,BCHNS):MIN(sizeof(IOCL),BCHNS)
+#endif
+#else 
+	// no template optimization
+#define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)   \
+	const I BCHNS = bchns;  \
+	const I IOCHNS = MIN(iochns,BCHNS)
+#endif
+
+
 
 
 #endif

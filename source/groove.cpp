@@ -63,15 +63,9 @@ protected:
 
 private:
 	virtual V m_dsp(I n,F *const *in,F *const *out);
-	virtual V m_signal(I n,F *const *in,F *const *out) { (this->*sigfun)(n,in,out); }
 
-	V (xgroove::*sigfun)(I n,F *const *in,F *const *out);  // this is my dsp method
-
-#ifdef TMPLOPT
-	template <I _BCHNS_,I _OCHNS_>
-#endif
-	V signal(I n,F *const *in,F *const *out);  // this is my dsp method
-	
+	DEFSIGFUN(xgroove)	
+	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is my dsp method
 
 	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
@@ -84,13 +78,12 @@ private:
 };
 
 
-
 FLEXT_NEW_WITH_GIMME("xgroove~",xgroove)
 
 V xgroove::cb_setup(t_class *c)
 {
-	add_float1(c,cb_min);
-	add_float2(c,cb_max);
+	add_floatn(c,cb_min,1);
+	add_floatn(c,cb_max,2);
 
 	add_method1(c,cb_loop, "loop", A_FLINT);	
 	add_method1(c,cb_min, "min", A_FLOAT);	
@@ -197,22 +190,9 @@ V xgroove::m_reset()
 }
 
 
-#ifndef MIN
-#define MIN(x,y) ((x) < (y)?(x):(y))
-#endif
-
-#ifdef TMPLOPT
-template <int _BCHNS_,int _OCHNS_>
-#endif
-V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
+TMPLDEF V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 {
-#ifdef TMPLOPT
-	const I BCHNS = _BCHNS_ == 0?buf->Channels():_BCHNS_;
-	const I OCHNS = _OCHNS_ == 0?MIN(outchns,BCHNS):MIN(_OCHNS_,BCHNS);
-#else
-	const I BCHNS = buf->Channels();
-	const I OCHNS = MIN(outchns,BCHNS);
-#endif
+	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
 
 	const F *speed = invecs[0];
 	F *const *sig = outvecs;
@@ -374,28 +354,24 @@ V xgroove::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 	m_refresh();  
 
-#ifdef TMPLOPT
 	switch(buf->Channels()*100+outchns) {
 		case 101:
-			sigfun = &xgroove::signal<1,1>;	break;
+			sigfun = SIGFUN(xgroove,1,1);	break;
 		case 102:
-			sigfun = &xgroove::signal<1,2>;	break;
+			sigfun = SIGFUN(xgroove,1,2);	break;
 		case 201: 
-			sigfun = &xgroove::signal<2,1>;	break;
+			sigfun = SIGFUN(xgroove,2,1);	break;
 		case 202:
-			sigfun = &xgroove::signal<2,2>;	break;
+			sigfun = SIGFUN(xgroove,2,2);	break;
 		case 401:
 		case 402:
 		case 403:
-			sigfun = &xgroove::signal<4,0>;	break;
+			sigfun = SIGFUN(xgroove,4,0);	break;
 		case 404:
-			sigfun = &xgroove::signal<4,4>;	break;
+			sigfun = SIGFUN(xgroove,4,4);	break;
 		default:
-			sigfun = &xgroove::signal<0,0>;
+			sigfun = SIGFUN(xgroove,0,0);
 	}
-#else
-	sigfun = &xgroove::signal;
-#endif
 }
 
 

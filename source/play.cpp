@@ -46,15 +46,9 @@ protected:
 
 private:
 	virtual V m_dsp(I n,F *const *in,F *const *out);
-	virtual V m_signal(I n,F *const *in,F *const *out) { (this->*sigfun)(n,in,out); }
-
-	V (xplay::*sigfun)(I n,F *const *in,F *const *out);  // this is my dsp method
-
-#ifdef TMPLOPT
-	template <int _BCHNS_,int _OCHNS_>
-#endif
-	V signal(I n,F *const *in,F *const *out);  // this is the dsp method
-
+	
+	DEFSIGFUN(xplay)
+	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is the dsp method
 
 	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
@@ -119,18 +113,9 @@ V xplay::m_stop()
 }
 
 
-#ifdef TMPLOPT
-template <int _BCHNS_,int _OCHNS_>
-#endif
-V xplay::signal(I n,F *const *invecs,F *const *outvecs)
+TMPLDEF V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 {
-#ifdef TMPLOPT
-	const I BCHNS = _BCHNS_ == 0?buf->Channels():_BCHNS_;
-	const I OCHNS = _OCHNS_ == 0?MIN(outchns,BCHNS):MIN(_OCHNS_,BCHNS);
-#else
-	const I BCHNS = buf->Channels();
-	const I OCHNS = MIN(outchns,BCHNS);
-#endif
+	SIGCHNS(BCHNS,buf->Channels(),OCHNS,outchns);
 
 	const F *pos = invecs[0];
 	F *const *sig = outvecs;
@@ -218,28 +203,24 @@ V xplay::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 	m_refresh();  
 
-#ifdef TMPLOPT
 	switch(buf->Frames()*100+outchns) {
 		case 101:
-			sigfun = &xplay::signal<1,1>; break;
+			sigfun = SIGFUN(xplay,1,1); break;
 		case 102:
-			sigfun = &xplay::signal<1,2>; break;
+			sigfun = SIGFUN(xplay,1,2); break;
 		case 201:
-			sigfun = &xplay::signal<2,1>; break;
+			sigfun = SIGFUN(xplay,2,1); break;
 		case 202:
-			sigfun = &xplay::signal<2,2>; break;
+			sigfun = SIGFUN(xplay,2,2); break;
 		case 401:
 		case 402:
 		case 403:
-			sigfun = &xplay::signal<4,0>; break;
+			sigfun = SIGFUN(xplay,4,0); break;
 		case 404:
-			sigfun = &xplay::signal<4,4>; break;
+			sigfun = SIGFUN(xplay,4,4); break;
 		default:
-			sigfun = &xplay::signal<0,0>;
+			sigfun = SIGFUN(xplay,0,0);
 	}
-#else
-	sigfun = &xplay::signal;
-#endif
 }
 
 

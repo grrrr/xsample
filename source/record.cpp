@@ -66,15 +66,9 @@ protected:
 	
 private:
 	virtual V m_dsp(I n,F *const *in,F *const *out);
-	virtual V m_signal(I n,F *const *in,F *const *out) { (this->*sigfun)(n,in,out); }
-
-	V (xrecord::*sigfun)(I n,F *const *in,F *const *out);  // this is my dsp method
-
-#ifdef TMPLOPT
-	template<I _BCHNS_,I _ICHNS_>
-#endif
-	V signal(I n,F *const *in,F *const *out);  // this is the dsp method
-
+	
+	DEFSIGFUN(xrecord)
+	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is the dsp method
   
 	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
@@ -97,8 +91,8 @@ FLEXT_NEW_WITH_GIMME("xrecord~",xrecord)
 
 V xrecord::cb_setup(t_class *c)
 {
-	add_float2(c,cb_min);
-	add_float3(c,cb_max);
+	add_floatn(c,cb_min,2);
+	add_floatn(c,cb_max,3);
 
 	add_method1(c,cb_mixmode, "mixmode", A_FLINT);	
 	add_method1(c,cb_sigmode, "sigmode", A_FLINT);	
@@ -226,19 +220,9 @@ V xrecord::m_draw(I argc,t_atom *argv)
 }
 	
 	
-#ifdef TMPLOPT  
-template<int _BCHNS_,int _ICHNS_>  
-#endif
-V xrecord::signal(I n,F *const *invecs,F *const *outvecs)
+TMPLDEF V xrecord::signal(I n,F *const *invecs,F *const *outvecs)
 {
-	// optimizer should recognize whether constant or not
-#ifdef TMPLOPT
-	const I BCHNS = _BCHNS_ == 0?buf->Channels():_BCHNS_;
-	const I ICHNS = _ICHNS_ == 0?MIN(inchns,BCHNS):MIN(_ICHNS_,BCHNS);
-#else
-	const I BCHNS = buf->Channels();
-	const I ICHNS = MIN(inchns,BCHNS);
-#endif
+	SIGCHNS(BCHNS,buf->Channels(),ICHNS,inchns);
 
 	const F *const *sig = invecs;
 	register I si = 0;
@@ -379,28 +363,24 @@ V xrecord::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 	m_refresh();  
 
-#ifdef TMPLOPT
 	switch(buf->Channels()*100+inchns) {
 		case 101:
-			sigfun = &xrecord::signal<1,1>;	break;
+			sigfun = SIGFUN(xrecord,1,1);	break;
 		case 102:
-			sigfun = &xrecord::signal<1,2>;	break;
+			sigfun = SIGFUN(xrecord,1,2);	break;
 		case 201:
-			sigfun = &xrecord::signal<2,1>;	break;
+			sigfun = SIGFUN(xrecord,2,1);	break;
 		case 202:
-			sigfun = &xrecord::signal<2,2>;	break;
+			sigfun = SIGFUN(xrecord,2,2);	break;
 		case 401:
 		case 402:
 		case 403:
-			sigfun = &xrecord::signal<4,0>;	break;
+			sigfun = SIGFUN(xrecord,4,0);	break;
 		case 404:
-			sigfun = &xrecord::signal<4,4>;	break;
+			sigfun = SIGFUN(xrecord,4,4);	break;
 		default:
-			sigfun = &xrecord::signal<0,0>;	break;
+			sigfun = SIGFUN(xrecord,0,0);	break;
 	}
-#else
-	sigfun = &xrecord::signal;
-#endif
 }
 
 
