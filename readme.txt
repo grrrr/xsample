@@ -100,6 +100,7 @@ Version history:
 - fixed looped recording bug (thanks to Tatama Suomo)
 - reconsidered all state changes
 - more optimizations for interpolation functions
+- use the new flext build system
 
 0.3.0:
 - added resources to MaxMSP build
@@ -157,23 +158,13 @@ Version history:
 
 ---------------------------------------------------------------------------
 
-
 TODO list:
-
-general:
-
-- do a smooth (line~) mixin in xrecord~ help patch
 
 features:
 - multi-buffer handling (aka multi-channel for pd)
-- vasp handling
-- performance comparison to respective PD/Max objects
 - anti-alias filter? (possible?)
 
 - delay min/max changes when cur pos in cross-fade zone
-
-tests:
-- reconsider startup sequence of set buffer,set units,set sclmode,set pos/min/max
 
 bugs:
 - PD: problems with timed buffer redrawing (takes a lot of cpu time) - flext bug?
