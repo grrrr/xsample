@@ -1,10 +1,25 @@
+/* 
+
+xsample - extended sample objects for Max/MSP and pd (pure data)
+
+Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+For information on usage and redistribution, and for a DISCLAIMER OF ALL
+WARRANTIES, see the file, "license.txt," in this distribution.  
+
+*/
+
 #ifndef __XSAMPLE_H
 #define __XSAMPLE_H
 
-#define VERSION "0.21"
+#define XSAMPLE_VERSION "0.2.1"
 
 
 #include <flext.h>
+
+#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 101)
+#error You need at least flext version 0.1.1 
+#endif
+
 
 #ifdef PD
 extern "C" {
@@ -37,15 +52,6 @@ FLEXT_EXT V xgroove_tilde_setup();
 	#define TMPLOPT  // template optimation for much more speed
 	#define TMPLINT	 // if <int,int> templates are correctly handled 
 	//#define SIGSTATIC  // another redirection to avoid addresses of member functions
-#endif
-
-
-#ifndef MIN
-#define MIN(x,y) ((x) < (y)?(x):(y))
-#endif
-
-#ifndef MAX
-#define MAX(x,y) ((x) > (y)?(x):(y))
 #endif
 
 

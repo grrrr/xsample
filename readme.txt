@@ -1,8 +1,11 @@
 xsample - extended sample objects for Max/MSP and pd (pure data)
+version 0.2.1
 
 Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
+
+Donations for further development of the package are highly appreciated.
 
 ----------------------------------------------------------------------------
 
@@ -26,18 +29,45 @@ o Borland C++ 5.5 (free): just ok! - makefile is no real make but works
 o Microsoft Visual C++ 6: due to a compiler bug the optimization using templates is not functional
 
 - pd - linux:
-o GCC for linux: the compiler (version 2.95.2) dies when template optimization is turned on 
+o GCC for linux: the compiler (version 2.95.2) dies with template optimization turned on 
 
 - Max/MSP - MacOS:
-o Metrowerks CodeWarrior V6: can't get address of a template function
+o Metrowerks CodeWarrior V6: ok - with redirection by static functions
 
 ----------------------------------------------------------------------------
+
+Goals/features of the package:
+
+- portable and effective sample recording/playing objects for pd and Max/MSP
+- MSP-like groove~ object for PD 
+- message- or signal-triggered recording object with mix-in capability
+- avoid the various bugs of the original MSP2 objects
+- multi-channel capability 
+- live update of respective buffer/array object
+- switchable 4-point-interpolation for xplay~/xgroove~ object
+
+----------------------------------------------------------------------------
+
+Version history:
+
+0.2.1:
+- no leftmost float inlet for position setting - use pos method
+- changed dsp handling for flext 0.1.1 conformance
+- workarounds for buggy/incomplete compilers
+- prevent buffer warning message at max patcher load (wait for loadbang)
+
+0.2.0: 
+- first version for flext
+
+---------------------------------------------------------------------------
+
 
 TODO list:
 - Documentation and better example patches
 - cleaner makefile PD/Borland C++
 - makefile and build for PD/GCC
 - eventually make use of resource files for text items
-- as template <int> functions don't work for most compilers: find another way for optimizations
-- crossfading loop zone for xgroove~
 
+- crossfading loop zone for xgroove~
+- multi-buffer handling (aka multi-channel for pd)
+- performance comparison to respective PD/Max objects

@@ -230,7 +230,7 @@ V xplay::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 V xplay::m_help()
 {
 	post("%s - part of xsample objects",thisName());
-	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
+	post("(C) Thomas Grill, 2001-2002 - version " XSAMPLE_VERSION " compiled on " __DATE__ " " __TIME__);
 #ifdef MAXMSP
 	post("Arguments: %s [out channels=1] [buffer] [channel(s)] ...",thisName());
 #else

@@ -381,7 +381,7 @@ V xgroove::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 V xgroove::m_help()
 {
 	post("%s - part of xsample objects",thisName());
-	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
+	post("(C) Thomas Grill, 2001-2002 - version " XSAMPLE_VERSION " compiled on " __DATE__ " " __TIME__);
 #ifdef MAXMSP
 	post("Arguments: %s [buffer] [channels=1]",thisName());
 #else

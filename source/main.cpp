@@ -1,7 +1,14 @@
-#include "main.h"
+/* 
 
-#define BIGFLOAT 1.e10
-#define BIGLONG 0x7fffffffL
+xsample - extended sample objects for Max/MSP and pd (pure data)
+
+Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+For information on usage and redistribution, and for a DISCLAIMER OF ALL
+WARRANTIES, see the file, "license.txt," in this distribution.  
+
+*/
+
+#include "main.h"
 
 
 #ifdef PD
@@ -40,7 +47,7 @@ xsample::xsample():
 #endif
 	interp(xsi_4p),
 	sclmode(xss_unitsinbuf),
-	curmin(0),curmax(BIGLONG)
+	curmin(0),curmax(1<<30)
 {}
 	
 
@@ -62,8 +69,8 @@ I xsample::m_set(I argc, t_atom *argv)
 V xsample::m_refresh()
 {
 	buf->Set();	
-	m_min(curmin); // also checks pos
-	m_max(curmax); // also checks pos
+	m_min((F)curmin); // also checks pos
+	m_max((F)curmax); // also checks pos
 }
 
 V xsample::m_reset()
