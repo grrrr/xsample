@@ -6,6 +6,10 @@ For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 */
 
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
+
 #include "main.h"
 #include <math.h>
 #include <stdio.h>
@@ -143,10 +147,6 @@ t_sample xgroove::fade_lin[XZONE_TABLE+1];
 t_sample xgroove::fade_qsine[XZONE_TABLE+1];
 t_sample xgroove::fade_hsine[XZONE_TABLE+1];
 
-#ifndef PI
-#define PI 3.14159265358979f
-#endif
-
 void xgroove::setup(t_classid c)
 {
 	DefineHelp(c,"xgroove~");
@@ -173,10 +173,10 @@ void xgroove::setup(t_classid c)
 		fade_lin[i] = x;
 
 		// quarter sine wave
-		fade_qsine[i] = sin(x*(PI/2));
+		fade_qsine[i] = sin(x*(M_PI/2));
 
 		// half sine wave
-		fade_hsine[i] = (sin(x*PI-PI/2)+1.f)*0.5f;
+		fade_hsine[i] = (sin(x*M_PI-M_PI/2)+1.f)*0.5f;
 	}
 }
 

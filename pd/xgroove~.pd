@@ -1,6 +1,6 @@
-#N canvas 69 62 941 606 12;
+#N canvas 69 62 945 610 12;
 #X obj 215 253 hsl 128 15 0.001 3 1 1 empty empty speed 0 -8 0 10 -225271
--1 -1 10400 1;
+-1 -1 5000 1;
 #X msg 603 169 loop \$1;
 #X obj 28 72 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1
 -1;
@@ -40,7 +40,7 @@
 #X obj 82 491 hsl 128 15 0.0001 1 1 0 empty empty volume -2 -6 0 8
 -261689 -1 -1 0 1;
 #X obj 79 509 nbx 5 14 -1e+037 1e+037 0 0 empty empty empty 0 -6 0
-10 -261689 -1 -1 0 256;
+10 -261689 -1 -1 0.0001 256;
 #X msg 25 249 pos \$1;
 #X msg 63 220 200;
 #X msg 25 221 100;
@@ -89,9 +89,9 @@
 #X text 622 148 bidirectional;
 #X text 244 111 buffer size;
 #X obj 574 419 hsl 300 15 0 10000 0 0 empty bufpos empty -2 -6 0 8
--262144 -1 -1 0 1;
+-262144 -1 -1 10628 1;
 #X obj 236 527 nbx 5 14 -1e+037 1e+037 0 0 empty empty position 0 -6
-0 10 -228992 -1 -1 0 256;
+0 10 -228992 -1 -1 3554.44 256;
 #N canvas 0 0 474 324 watch 0;
 #X obj 163 18 loadbang;
 #X obj 88 80 snapshot~;
@@ -137,32 +137,34 @@
 #X text 377 96 units in buffer (def.);
 #X text 622 132 forward (def.);
 #X text 768 132 4-point (def.);
-#N canvas 12 194 482 399 attributes 0;
-#X msg 82 51 getattributes;
-#X msg 138 110 getmax;
-#X msg 81 110 getmin;
-#X text 200 52 dump all attributes;
-#X text 200 112 get min/max positions;
-#X msg 82 82 getbuffer;
-#X msg 80 139 getpos;
-#X text 140 139 get current position;
-#X text 167 82 get buffer name;
-#X msg 79 228 getloop;
-#X msg 79 253 getinterp;
-#X text 147 228 get loop mode;
-#X text 160 253 get interpolation mode;
-#X msg 79 174 getunits;
-#X text 152 174 get unit setting;
-#X msg 79 199 getsclmode;
-#X text 170 199 get scale mode;
-#X msg 79 292 getxfade;
-#X msg 78 342 getxshape;
-#X text 157 292 get crossfade mode;
-#X msg 79 317 getxzone;
-#X text 154 317 get crossfade length;
-#X text 156 344 get crossfade shape;
+#N canvas 12 194 490 407 attributes 0;
+#X msg 82 74 getattributes;
+#X msg 138 133 getmax;
+#X msg 81 133 getmin;
+#X text 198 75 dump all attributes;
+#X text 200 135 get min/max positions;
+#X msg 82 105 getbuffer;
+#X msg 80 162 getpos;
+#X text 140 162 get current position;
+#X text 167 105 get buffer name;
+#X msg 79 251 getloop;
+#X msg 79 276 getinterp;
+#X text 147 251 get loop mode;
+#X text 160 276 get interpolation mode;
+#X msg 79 197 getunits;
+#X text 152 197 get unit setting;
+#X msg 79 222 getsclmode;
+#X text 170 222 get scale mode;
+#X msg 79 315 getxfade;
+#X msg 78 365 getxshape;
+#X text 157 315 get crossfade mode;
+#X msg 79 340 getxzone;
+#X text 154 340 get crossfade length;
+#X text 156 367 get crossfade shape;
 #X text 19 12 xgroove~ attributes;
-#X obj 19 172 s to-g;
+#X obj 19 195 s to-g;
+#X msg 82 49 getmethods;
+#X text 174 49 dump all methods;
 #X connect 0 0 24 0;
 #X connect 1 0 24 0;
 #X connect 2 0 24 0;
@@ -175,6 +177,7 @@
 #X connect 17 0 24 0;
 #X connect 18 0 24 0;
 #X connect 20 0 24 0;
+#X connect 25 0 24 0;
 #X restore 24 343 pd attributes;
 #X text 23 324 attribute stuff;
 #X text 484 177 generate;
@@ -203,7 +206,7 @@
 #X obj 79 550 line~;
 #X msg 79 527 \$1 50;
 #X obj 212 271 nbx 5 14 -1e+037 1e+037 0 0 empty empty empty 0 -6 0
-10 -225271 -1 -1 0.703731 256;
+10 -225271 -1 -1 0.0233854 256;
 #X text 227 10 varispeed sample player \, (C)2001-2005 Thomas Grill
 ;
 #X connect 0 0 82 0;
