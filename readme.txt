@@ -18,6 +18,7 @@ If you want to load the xsample library on demand, create a [xsample] object in 
 ----------------------------------------------------------------------------
 
 You will need the flext C++ layer for PD and Max/MSP externals to compile this.
+see http://www.parasitaere-kapazitaeten.net/ext
 
 
 Package files:
