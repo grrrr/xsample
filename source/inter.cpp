@@ -68,8 +68,8 @@ TMPLDEF V xinter::s_play4(I n,F *const *invecs,F *const *outvecs)
 {
 	const I smin = 0,smax = buf->Frames(),plen = smax-smin;
 	if(plen < 4) {
-		if(plen < 2) s_play1(n,invecs,outvecs);
-		else s_play2(n,invecs,outvecs);
+		if(plen < 2) s_play1 TMPLCALL (n,invecs,outvecs);
+		else s_play2 TMPLCALL (n,invecs,outvecs);
 		return;
 	}
 
@@ -130,7 +130,7 @@ TMPLDEF V xinter::s_play2(I n,F *const *invecs,F *const *outvecs)
 {
 	const I smin = 0,smax = buf->Frames(),plen = smax-smin;
 	if(plen < 2) {
-		s_play1(n,invecs,outvecs);
+		s_play1 TMPLCALL (n,invecs,outvecs);
 		return;
 	}
 

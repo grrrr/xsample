@@ -148,7 +148,7 @@ private:
 
 	#define TMPLSIGFUN(NAME) \
 	TMPLDEF static V st_##NAME(thisType *obj,I n,F *const *in,F *const *out)  { obj->NAME TMPLCALL (n,in,out); } \
-	V NAME(I n,F *const *in,F *const *out)
+	TMPLDEF V NAME(I n,F *const *in,F *const *out)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
 
