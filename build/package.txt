@@ -1,0 +1,6 @@
+NAME=xsample
+
+SRCDIR=source
+
+SRCS=main.cpp play.cpp groove.cpp record.cpp inter.cpp
+HDRS=main.h inter.h

@@ -1,3 +1,0 @@
-# usage:
-# to build run "sh build-mac-max-gcc.sh" or "sh build-mac-pd-gcc.sh"
-#

@@ -1,7 +1,0 @@
-# xsample - extended sample objects for Max/MSP and pd (pure data)
-# Copyright (c) 2001-2004 Thomas Grill (gr@grrrr.org)
-#
-# Your settings are defined in the file
-# ..\flext\build\config-win-pd-msvc.txt
-#
-# You can override them here.
