@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib pd.lib flext-pdwin.lib /nologo /dll /machine:I386 /libpath:"c:\programme\audio\pd\bin" /libpath:"..\..\flext\pd-msvc\\"
+# ADD LINK32 kernel32.lib user32.lib pd.lib flext-pdwin.lib /nologo /dll /machine:I386 /libpath:"c:\programme\audio\pd\bin" /libpath:"..\flext\pd-msvc\\"
 
 !ELSEIF  "$(CFG)" == "xsample - Win32 Debug"
 
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib pd.lib flext_d-pdwin.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"c:\programme\audio\pd\bin\\" /libpath:"..\..\flext\pd-msvc\\"
+# ADD LINK32 kernel32.lib user32.lib pd.lib flext_d-pdwin.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"c:\programme\audio\pd\bin\\" /libpath:"..\flext\pd-msvc\\"
 
 !ENDIF 
 
@@ -92,36 +92,36 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\readme.txt
+SOURCE=".\make-files.txt"
+# End Source File
+# Begin Source File
+
+SOURCE=.\readme.txt
 # End Source File
 # End Group
 # Begin Source File
 
-SOURCE=.\groove.cpp
+SOURCE=.\source\groove.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\inter.ci
+SOURCE=.\source\inter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\inter.cpp
+SOURCE=.\source\main.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\main.cpp
+SOURCE=.\source\main.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main.h
+SOURCE=.\source\play.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\play.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\record.cpp
+SOURCE=.\source\record.cpp
 # End Source File
 # End Target
 # End Project

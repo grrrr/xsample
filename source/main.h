@@ -2,7 +2,7 @@
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -11,7 +11,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #ifndef __XSAMPLE_H
 #define __XSAMPLE_H
 
-#define XSAMPLE_VERSION "0.2.5pre2"
+#define XSAMPLE_VERSION "0.2.5pre3"
 
 #define FLEXT_ATTRIBUTES 1 
 
@@ -126,7 +126,7 @@ protected:
 	V mg_max(F &v) const { v = curmax*s2u; }
 
 private:
-	static V setup(t_class *c);
+	static V setup(t_classid c);
 
 	FLEXT_CALLBACK(m_start)
 	FLEXT_CALLBACK(m_stop)

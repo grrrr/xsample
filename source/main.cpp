@@ -2,7 +2,7 @@
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -14,7 +14,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 // Initialization function for xsample library
 V lib_setup()
 {
-	post("xsample objects, version " XSAMPLE_VERSION ", (C)2001,2002 Thomas Grill");
+	post("xsample objects, version " XSAMPLE_VERSION ", (C)2001-2003 Thomas Grill");
 	post("xsample: xrecord~, xplay~, xgroove~ - send objects a 'help' message to get assistance");
 	post("");
 
@@ -36,7 +36,7 @@ FLEXT_LIB_SETUP(xsample,lib_setup)
 
 // ------------------------------
 
-void xsample::setup(t_class *c)
+void xsample::setup(t_classid c)
 {
 	FLEXT_CADDBANG(c,0,m_start);
 	FLEXT_CADDMETHOD_(c,0,"start",m_start);

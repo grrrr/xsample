@@ -2,7 +2,7 @@
 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -63,7 +63,7 @@ protected:
 	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
 	
 private:
-	static V setup(t_class *c);
+	static V setup(t_classid c);
 
 	virtual V s_dsp();
 
@@ -94,7 +94,7 @@ private:
 FLEXT_LIB_DSP_V("xrecord~",xrecord)
 
 
-V xrecord::setup(t_class *c)
+V xrecord::setup(t_classid c)
 {
 	FLEXT_CADDMETHOD_F(c,0,"pos",m_pos);
 	FLEXT_CADDMETHOD_F(c,0,"min",m_min);

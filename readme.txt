@@ -1,6 +1,6 @@
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001-2003 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -72,6 +72,7 @@ Goals/features of the package:
 Version history:
 
 0.2.5:
+- restructured make procedures
 - added resources to MaxMSP build
 - xgroove~, xrecord~: introduced a loop/end bang outlet 
 - added MaxMSP buffer resize recognition
