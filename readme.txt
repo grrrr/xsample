@@ -83,6 +83,8 @@ pd - OSX:
 o GCC: edit "config-pd-darwin.txt" and run "sh ./build-pd-darwin.sh"
 > various versions of GCC die during compile with template optimization turned on 
 
+o XCode: use "xsample.xcode" project
+
 Max/MSP - MacOS9:
 ----------------
 o Metrowerks CodeWarrior: "xsample.cw" project file
@@ -92,6 +94,8 @@ o Apple MPW-PR: edit & use the "flext.mpw" makefile
 Max/MSP - MacOSX:
 ----------------
 o Metrowerks CodeWarrior: "xsample.cw" project file
+
+o XCode: use "xsample.xcode" project
 
 Max/MSP - Windows:
 ----------------
@@ -121,6 +125,7 @@ Version history:
 - fixed buggy sampling in crossfade zones (and simplified it a lot)
 - different initialization on buffer absence
 - renew units and scalemode on buffer change
+- fixed looped recording bug (thanks to Tatama Suomo)
 
 0.3.0:
 - added resources to MaxMSP build

@@ -11,17 +11,13 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #ifndef __XSAMPLE_H
 #define __XSAMPLE_H
 
-
-#define XSAMPLE_VERSION "0.3.1pre3"
-
-
-#define FLEXT_ATTRIBUTES 1 
-
-#include <flext.h>
+#include "prefix.h"
 
 #if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 406)
 #error You need at least flext version 0.4.6
 #endif
+
+#define XSAMPLE_VERSION "0.3.1pre3"
 
 
 // most compilers are somehow broken - in other words - can't handle all C++ features
@@ -295,7 +291,7 @@ class xinter:
 	FLEXT_HEADER_S(xinter,xsample,setup)
 	
 public:
-	xinter();
+	xinter(): outchns(1),doplay(false),interp(xsi_4p) {}
 	
 protected:
 	virtual I m_set(I argc,const t_atom *argv);

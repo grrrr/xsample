@@ -1,0 +1,599 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 39;
+	objects = {
+		034768DDFF38A45A11DB9C8B = {
+			children = (
+				D2AAC09D05546B4700DB518D,
+				E9974E53077083C700206F68,
+			);
+			isa = PBXGroup;
+			name = Products;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+//030
+//031
+//032
+//033
+//034
+//080
+//081
+//082
+//083
+//084
+		0867D690FE84028FC02AAC07 = {
+			buildSettings = {
+			};
+			buildStyles = (
+				4F0BB7EC011F40E904CA0E50,
+				4F0BB7ED011F40E904CA0E50,
+			);
+			hasScannedForEncodings = 1;
+			isa = PBXProject;
+			mainGroup = 0867D691FE84028FC02AAC07;
+			productRefGroup = 034768DDFF38A45A11DB9C8B;
+			projectDirPath = "";
+			targets = (
+				D2AAC09C05546B4700DB518D,
+				E9974E52077083C700206F68,
+			);
+		};
+		0867D691FE84028FC02AAC07 = {
+			children = (
+				E9974EC507708CFA00206F68,
+				08FB77ACFE841707C02AAC07,
+				0867D69AFE84028FC02AAC07,
+				034768DDFF38A45A11DB9C8B,
+			);
+			isa = PBXGroup;
+			name = xsample;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		0867D69AFE84028FC02AAC07 = {
+			children = (
+				E9974E060770761500206F68,
+				E9974E04077075E800206F68,
+				E9974DFA0770750400206F68,
+				E9974DFB0770750400206F68,
+			);
+			isa = PBXGroup;
+			name = "External Frameworks and Libraries";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		08FB77ACFE841707C02AAC07 = {
+			children = (
+				E9974EAF07708BF700206F68,
+				E9974E58077084DA00206F68,
+				E9974E2B07707D1400206F68,
+				E9974DE50770749400206F68,
+				E9974DE60770749400206F68,
+				E9974DE70770749400206F68,
+				E9974DE80770749400206F68,
+				E9974DE90770749400206F68,
+				E9974DEA0770749400206F68,
+				E9974DEB0770749400206F68,
+			);
+			isa = PBXGroup;
+			name = Source;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+//080
+//081
+//082
+//083
+//084
+//4F0
+//4F1
+//4F2
+//4F3
+//4F4
+		4F0BB7EC011F40E904CA0E50 = {
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = source/prefix.h;
+				OPTIMIZATION_CFLAGS = "-O0";
+				ZERO_LINK = YES;
+			};
+			isa = PBXBuildStyle;
+			name = Development;
+		};
+		4F0BB7ED011F40E904CA0E50 = {
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = source/prefix.h;
+				ZERO_LINK = NO;
+			};
+			isa = PBXBuildStyle;
+			name = Deployment;
+		};
+//4F0
+//4F1
+//4F2
+//4F3
+//4F4
+//D20
+//D21
+//D22
+//D23
+//D24
+		D2AAC09905546B4700DB518D = {
+			buildActionMask = 2147483647;
+			files = (
+				E9974DF50770749400206F68,
+				E9974DF70770749400206F68,
+				E9974E2D07707D1400206F68,
+			);
+			isa = PBXHeadersBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2AAC09A05546B4700DB518D = {
+			buildActionMask = 2147483647;
+			files = (
+				E9974DF30770749400206F68,
+				E9974DF40770749400206F68,
+				E9974DF60770749400206F68,
+				E9974DF80770749400206F68,
+				E9974DF90770749400206F68,
+			);
+			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2AAC09B05546B4700DB518D = {
+			buildActionMask = 2147483647;
+			files = (
+				E9974E05077075E800206F68,
+			);
+			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2AAC09C05546B4700DB518D = {
+			buildPhases = (
+				D2AAC09905546B4700DB518D,
+				D2AAC09B05546B4700DB518D,
+				D2AAC09A05546B4700DB518D,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_EXTENSION = pd_darwin;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = "FLEXT_SYS=2";
+				HEADER_SEARCH_PATHS = "$(PD)/src $(Flext)/source";
+				INSTALL_PATH = "$(PD)/extra";
+				LIBRARY_SEARCH_PATHS = "$(Flext)/build";
+				LIBRARY_STYLE = BUNDLE;
+				OTHER_LDFLAGS = "-bundle_loader $(PD)/bin/pd";
+				PRODUCT_NAME = xsample;
+			};
+			dependencies = (
+			);
+			isa = PBXNativeTarget;
+			name = "pd static";
+			productName = xsample;
+			productReference = D2AAC09D05546B4700DB518D;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		D2AAC09D05546B4700DB518D = {
+			explicitFileType = "compiled.mach-o.dylib";
+			includeInIndex = 0;
+			isa = PBXFileReference;
+			path = xsample.pd_darwin;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+//D20
+//D21
+//D22
+//D23
+//D24
+//E90
+//E91
+//E92
+//E93
+//E94
+		E9974DE50770749400206F68 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = groove.cpp;
+			path = source/groove.cpp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974DE60770749400206F68 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = inter.cpp;
+			path = source/inter.cpp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974DE70770749400206F68 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = inter.h;
+			path = source/inter.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974DE80770749400206F68 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = main.cpp;
+			path = source/main.cpp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974DE90770749400206F68 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = main.h;
+			path = source/main.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974DEA0770749400206F68 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = play.cpp;
+			path = source/play.cpp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974DEB0770749400206F68 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = record.cpp;
+			path = source/record.cpp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974DF30770749400206F68 = {
+			fileRef = E9974DE50770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974DF40770749400206F68 = {
+			fileRef = E9974DE60770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974DF50770749400206F68 = {
+			fileRef = E9974DE70770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974DF60770749400206F68 = {
+			fileRef = E9974DE80770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974DF70770749400206F68 = {
+			fileRef = E9974DE90770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974DF80770749400206F68 = {
+			fileRef = E9974DEA0770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974DF90770749400206F68 = {
+			fileRef = E9974DEB0770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974DFA0770750400206F68 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = MaxAPI.framework;
+			path = /Library/Frameworks/MaxAPI.framework;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		E9974DFB0770750400206F68 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = MaxAudioAPI.framework;
+			path = /Library/Frameworks/MaxAudioAPI.framework;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		E9974E04077075E800206F68 = {
+			isa = PBXFileReference;
+			lastKnownFileType = archive.ar;
+			name = libflext_s.a;
+			path = /Volumes/Daten/Prog/pdmax/flext/build/libflext_s.a;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		E9974E05077075E800206F68 = {
+			fileRef = E9974E04077075E800206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E060770761500206F68 = {
+			isa = PBXFileReference;
+			lastKnownFileType = archive.ar;
+			name = "libflext-max_s.a";
+			path = "/Volumes/Daten/Prog/pdmax/flext/build/libflext-max_s.a";
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		E9974E2B07707D1400206F68 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = prefix.h;
+			path = source/prefix.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974E2D07707D1400206F68 = {
+			fileRef = E9974E2B07707D1400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E4F077083C700206F68 = {
+			buildActionMask = 2147483647;
+			files = (
+				E9974E59077084DA00206F68,
+				E9974EB007708BF700206F68,
+			);
+			isa = PBXResourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9974E50077083C700206F68 = {
+			buildActionMask = 2147483647;
+			files = (
+				E9974E5E0770852000206F68,
+				E9974E5F0770852000206F68,
+				E9974E600770852000206F68,
+				E9974E610770852000206F68,
+				E9974E620770852000206F68,
+				E9974E630770852000206F68,
+				E9974E640770852000206F68,
+				E9974E650770852000206F68,
+			);
+			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9974E51077083C700206F68 = {
+			buildActionMask = 2147483647;
+			files = (
+				E9974E5C0770851700206F68,
+				E9974E5B0770851500206F68,
+				E9974E5A0770851200206F68,
+			);
+			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9974E52077083C700206F68 = {
+			buildPhases = (
+				E9974E4F077083C700206F68,
+				E9974E50077083C700206F68,
+				E9974E51077083C700206F68,
+				E9974EC207708C9300206F68,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = "FLEXT_SYS=1";
+				HEADER_SEARCH_PATHS = "$(Max SDK)/max-includes $(Max SDK)/msp-includes $(Flext)/source";
+				INFOPLIST_FILE = "source/xsample-Info.plist";
+				INSTALL_PATH = "\"/Library/Application Support/Cycling '74/externals\"";
+				LIBRARY_SEARCH_PATHS = "$(Flext)/build";
+				LIBRARY_STYLE = DYNAMIC;
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = xsample;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+				WRAPPER_EXTENSION = mxo;
+			};
+			dependencies = (
+			);
+			isa = PBXNativeTarget;
+			name = "max static";
+			productName = "Max xsample static";
+			productReference = E9974E53077083C700206F68;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>Max xsample static</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.Max_xsample_static</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>CSResourcesFileMapped</key>
+	<string>yes</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.bundle";
+		};
+		E9974E53077083C700206F68 = {
+			explicitFileType = wrapper.cfbundle;
+			includeInIndex = 0;
+			isa = PBXFileReference;
+			path = xsample.mxo;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E9974E58077084DA00206F68 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.xml;
+			name = "xsample-Info.plist";
+			path = "source/xsample-Info.plist";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974E59077084DA00206F68 = {
+			fileRef = E9974E58077084DA00206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E5A0770851200206F68 = {
+			fileRef = E9974E060770761500206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E5B0770851500206F68 = {
+			fileRef = E9974DFA0770750400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E5C0770851700206F68 = {
+			fileRef = E9974DFB0770750400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E5E0770852000206F68 = {
+			fileRef = E9974E2B07707D1400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E5F0770852000206F68 = {
+			fileRef = E9974DE50770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E600770852000206F68 = {
+			fileRef = E9974DE60770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E610770852000206F68 = {
+			fileRef = E9974DE70770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E620770852000206F68 = {
+			fileRef = E9974DE80770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E630770852000206F68 = {
+			fileRef = E9974DE90770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E640770852000206F68 = {
+			fileRef = E9974DEA0770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974E650770852000206F68 = {
+			fileRef = E9974DEB0770749400206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974EAF07708BF700206F68 = {
+			isa = PBXFileReference;
+			lastKnownFileType = archive.rsrc;
+			name = xsample.rsrc;
+			path = source/xsample.rsrc;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974EB007708BF700206F68 = {
+			fileRef = E9974EAF07708BF700206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9974EC207708C9300206F68 = {
+			buildActionMask = 8;
+			dstPath = "/Library/Application Support/Cycling '74/init";
+			dstSubfolderSpec = 0;
+			files = (
+				E9974EC607708D0C00206F68,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		E9974EC307708CED00206F68 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = "xsample-objectmappings.txt";
+			path = "maxmsp/xsample-objectmappings.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974EC507708CFA00206F68 = {
+			children = (
+				E9974EC307708CED00206F68,
+			);
+			isa = PBXGroup;
+			name = Max;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		E9974EC607708D0C00206F68 = {
+			fileRef = E9974EC307708CED00206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+	};
+	rootObject = 0867D690FE84028FC02AAC07;
+}

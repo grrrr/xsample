@@ -108,11 +108,11 @@ V xrecord::setup(t_classid c)
 }
 
 xrecord::xrecord(I argc,const t_atom *argv):
-	dorec(false),
-	sigmode(false),mixmode(0),
-	appmode(true),doloop(false),
+	inchns(1),
+	sigmode(false),appmode(true),
 	drintv(0),
-	inchns(1)
+	dorec(false),doloop(false),
+    mixmode(0)
 {
 	I argi = 0;
 #if FLEXT_SYS == FLEXT_SYS_MAX
@@ -394,8 +394,9 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
                     case 0: {
 					    for(int ci = 0; ci < ICHNS; ++ci) {	
 						    register S *b = bf+ci;
-						    register const F *s = sig[ci];
-						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) *b = *s;	
+						    register const F *s = sig[ci]+si;
+						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) 
+                                *b = *s;	
 					    }
 					    si += ncur;
                         break;
@@ -412,7 +413,7 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
                     case 2: {
 					    for(int ci = 0; ci < ICHNS; ++ci) {	
 						    register S *b = bf+ci;
-						    register const F *s = sig[ci];
+						    register const F *s = sig[ci]+si;
 						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) *b += *s;	
 					    }
 					    si += ncur;

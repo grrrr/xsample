@@ -197,11 +197,11 @@ V xgroove::setup(t_classid c)
 }
 
 xgroove::xgroove(I argc,const t_atom *argv):
-	loopmode(xsl_loop),curpos(0),
-	_xzone(0),xzone(0),pblksz(0),
+	loopmode(xsl_loop),curpos(0),bidir(1),
+	_xzone(0),xzone(0),
 	xfade(xsf_keeplooppos),xshape(xss_lin),
-	znidx(NULL),znpos(NULL),
-	bidir(1)
+	znpos(NULL),znmul(NULL),znidx(NULL),
+	pblksz(0)
 {
 	I argi = 0;
 #if FLEXT_SYS == FLEXT_SYS_MAX
@@ -867,6 +867,7 @@ V xgroove::s_dsp()
 		case xsl_bidir: 
 			SETSIGFUN(posfun,SIGFUN(s_pos_bidir)); 
 			break;
+        default: ; // just to prevent warning
 		}
 	}
 	else
