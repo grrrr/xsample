@@ -109,10 +109,10 @@ TMPLDEF V xinter::s_play4(I n,F *const *invecs,F *const *outvecs)
 
 		register F frac = o-oint;
 		
-		register F *fa = bdt+ointm*BCHNS;
-		register F *fb = bdt+oint*BCHNS;
-		register F *fc = bdt+oint1*BCHNS;
-		register F *fd = bdt+oint2*BCHNS;
+		register const F *fa = bdt+ointm*BCHNS;
+		register const F *fb = bdt+oint*BCHNS;
+		register const F *fc = bdt+oint1*BCHNS;
+		register const F *fd = bdt+oint2*BCHNS;
 
 		for(I ci = 0; ci < OCHNS; ++ci) {
 			const F cmb = fc[ci]-fb[ci];
@@ -193,7 +193,7 @@ TMPLDEF V xinter::s_play1(I n,F *const *invecs,F *const *outvecs)
 	
 	for(I i = 0; i < n; ++i,++si) {	
 		register const I oint = (I)(*(pos++)/s2u);
-		register F *fp;
+		register const F *fp;
 		if(oint < smin) {
 			// position < 0 ... take only 0th sample
 			fp = bdt+smin*BCHNS;
