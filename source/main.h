@@ -108,16 +108,6 @@ private:
 	FLEXT_CALLBACK_E(m_units,xs_unit)
 	FLEXT_CALLBACK_E(m_interp,xs_intp)
 	FLEXT_CALLBACK_E(m_sclmode,xs_sclmd)
-/*
-	static V cb_set(V *c,t_symbol *s,I argc,t_atom *argv);
-	static V cb_print(V *c);
-	static V cb_refresh(V *c);
-	static V cb_reset(V *c);
-
-	static V cb_units(V *c,FI md);
-	static V cb_interp(V *c,FI md);
-	static V cb_sclmode(V *c,FI md);
-*/
 };
 
 
