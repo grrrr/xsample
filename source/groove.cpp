@@ -248,8 +248,6 @@ t_int *xgroove_obj::dspmeth(t_int *w)
 
 #ifdef TMPLOPT
 template <int _BCHNS_,int _OCHNS_>
-#else
-template <int _BCHNS_>
 #endif
 V xgroove_obj::signal(I n,const F *speed,F *pos)
 {
