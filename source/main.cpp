@@ -67,6 +67,8 @@ I xsample::m_set(I argc, t_atom *argv)
 
 BL xsample::m_refresh()
 {
+//	bufchk();
+
 	BL ret;
 	if(buf->Set()) { s_dsp(); ret = true; } // channel count may have changed
 	else ret = false;
@@ -79,6 +81,8 @@ BL xsample::m_refresh()
 
 BL xsample::m_reset()
 {
+//	bufchk();
+
 	BL ret;
 	if(buf->Set()) { s_dsp(); ret = true; } // channel count may have changed
 	else ret = false;
@@ -98,6 +102,8 @@ V xsample::m_loadbang()
 
 V xsample::m_units(xs_unit mode)
 {
+	bufchk();
+
 	if(mode != xsu__) unitmode = mode;
 	switch(unitmode) {
 		case xsu_sample: // samples
@@ -119,6 +125,8 @@ V xsample::m_units(xs_unit mode)
 
 V xsample::m_sclmode(xs_sclmd mode)
 {
+	bufchk();
+
 	if(mode != xss__) sclmode = mode;
 	switch(sclmode) {
 		case 0: // samples/units
@@ -141,6 +149,8 @@ V xsample::m_sclmode(xs_sclmd mode)
 
 V xsample::m_min(F mn)
 {
+	bufchk();
+
 	mn /= s2u;  // conversion to samples
 	if(mn < 0) mn = 0;
 	else if(mn > curmax) mn = (F)curmax;
@@ -152,6 +162,8 @@ V xsample::m_min(F mn)
 
 V xsample::m_max(F mx)
 {
+	bufchk();
+
 	mx /= s2u;  // conversion to samples
 	if(mx > buf->Frames()) mx = (F)buf->Frames();
 	else if(mx < curmin) mx = (F)curmin;
@@ -163,6 +175,8 @@ V xsample::m_max(F mx)
 
 V xsample::m_all()
 {
+	bufchk();
+
 //	curlen = (curmax = buf->Frames())-(curmin = 0);
 	curmin = 0; curmax = buf->Frames();
 	m_sclmode();
@@ -172,8 +186,7 @@ V xsample::m_dsp(I /*n*/,S *const * /*insigs*/,S *const * /*outsigs*/)
 {
 	// this is hopefully called at change of sample rate ?!
 
-	m_refresh();  
-	s_dsp();  // s_dsp is eventually done a second time!
+	if(!m_refresh()) s_dsp();
 }
 
 

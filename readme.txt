@@ -67,6 +67,7 @@ Version history:
 0.2.5:
 - xgroove~, xrecord~: introduced a loop/end bang outlet 
 - added MaxMSP buffer resize recognition
+- xgroove~: introduced a crossfading loop zone
 
 0.2.4:
 - according to flext 0.2.3 changed sample type to t_sample (S)

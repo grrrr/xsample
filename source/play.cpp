@@ -36,9 +36,7 @@ private:
 
 	virtual V m_signal(I n,S *const *in,S *const *out) 
 	{ 
-#ifdef MAXMSP // in max/msp the dsp tree is not rebuilt upon buffer resize
-		if(buf->Update()) m_refresh();
-#endif
+		bufchk();
 		playfun(n,in,out); 
 	}
 };

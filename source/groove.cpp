@@ -42,8 +42,8 @@ public:
 	virtual V m_min(F mn);
 	virtual V m_max(F mx);
 	
-	V m_xzone(F xz) { xzone = xz < 0?0:xz/s2u; s_dsp(); }
-	V m_xsymm(F xs) { xsymm = xs < -1?-1:(xs > 1?1:xs); }
+	V m_xzone(F xz);
+	V m_xshape(I argc,t_atom *argv);
 
 	enum xs_loop {
 		xsl__ = -1,  // don't change
@@ -57,14 +57,18 @@ protected:
 	xs_loop loopmode;
 	D curpos;  // in samples
 	I bidir;
-	F xzone,xsymm;
-	S *znbuf,*znmul;
+	I _xzone,xzone;
+	S **znbuf;
+	S *znpos,*znmul;
+	I *znidx;
 
 	outlet *outmin,*outmax; // float outlets	
 	
 	V outputmin() { ToOutFloat(outmin,curmin*s2u); }
 	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
 	
+	V do_xzone(I xz = -1);
+
 	inline V setpos(F pos)
 	{
 		if(pos < curmin) pos = curmin;
@@ -86,9 +90,7 @@ private:
 	DEFSIGCALL(posfun);
 	virtual V m_signal(I n,S *const *in,S *const *out) 
 	{ 
-#ifdef MAXMSP // in max/msp the dsp tree is not rebuilt upon buffer resize
-		if(buf->Update()) m_refresh();
-#endif
+		bufchk();
 		posfun(n,in,out); 
 	}
 
@@ -98,7 +100,7 @@ private:
 	FLEXT_CALLBACK_F(m_max)
 	
 	FLEXT_CALLBACK_F(m_xzone)
-	FLEXT_CALLBACK_F(m_xsymm)
+	FLEXT_CALLBACK_V(m_xshape)
 
 	FLEXT_CALLBACK_1(m_loop,xs_loop)
 };
@@ -117,7 +119,8 @@ V xgroove::setup(t_class *)
 
 xgroove::xgroove(I argc,t_atom *argv):
 	loopmode(xsl_loop),curpos(0),
-	xzone(0),xsymm(0),znbuf(NULL),znmul(NULL),
+	_xzone(0),xzone(0),
+	znbuf(NULL),znmul(NULL),znidx(NULL),znpos(NULL),
 	bidir(1)
 {
 	I argi = 0;
@@ -161,18 +164,30 @@ xgroove::xgroove(I argc,t_atom *argv):
 	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
 
 	FLEXT_ADDMETHOD_F(0,"xzone",m_xzone);
-	FLEXT_ADDMETHOD_F(0,"xsymm",m_xsymm);
+	FLEXT_ADDMETHOD_(0,"xshape",m_xshape);
 
 	outmin = GetOut(outchns+1);
 	outmax = GetOut(outchns+2);
-	
+
+	znbuf = new S *[outchns];
+	for(I i = 0; i < outchns; ++i) znbuf[i] = new S[0];
+	znmul = new S[0];
+	znpos = new S[0];
+	znidx = new I[0];
+
 	m_reset();
 }
 
 xgroove::~xgroove()
 {
-	if(znbuf) delete[] znbuf;
+	if(znbuf) {
+		for(I i = 0; i < outchns; ++i) delete[] znbuf[i]; 
+		delete[] znbuf;
+	}
+
 	if(znmul) delete[] znmul;
+	if(znpos) delete[] znpos;
+	if(znidx) delete[] znidx;
 }
 
 V xgroove::m_units(xs_unit mode)
@@ -188,6 +203,7 @@ V xgroove::m_min(F mn)
 {
 	xsample::m_min(mn);
 	m_pos(curpos*s2u);
+	do_xzone();
 	outputmin();
 }
 
@@ -195,6 +211,7 @@ V xgroove::m_max(F mx)
 {
 	xsample::m_max(mx);
 	m_pos(curpos*s2u);
+	do_xzone();
 	outputmax();
 }
 
@@ -208,6 +225,7 @@ V xgroove::m_all()
 	xsample::m_all();
 	outputmin();
 	outputmax();
+	do_xzone();
 }
 
 BL xgroove::m_reset()
@@ -215,6 +233,39 @@ BL xgroove::m_reset()
 	curpos = 0; 
 	bidir = 1;
 	return xsample::m_reset();
+}
+
+V xgroove::m_xzone(F xz) 
+{
+	bufchk();
+	do_xzone(xz < 0?0:xz/s2u); 
+}
+
+V xgroove::do_xzone(I xz) 
+{ 
+	// set nominal value
+	if(xz >= 0)	_xzone = xz;
+
+	// store old value
+	I xzo = xzone;
+	// play length
+	I curlen = curmax-curmin;
+
+	// set actual value
+	xzone = _xzone > curlen?curlen:_xzone;
+
+	if(xzo != xzone) {
+		delete[] znmul; znmul = new S[xzone];
+
+		for(I i = 0; i < xzone; ++i) 
+			znmul[i] = (F)(i+0.5)/xzone;
+	}
+
+	s_dsp(); 
+}
+
+V xgroove::m_xshape(I argc,t_atom *argv) 
+{ 
 }
 
 V xgroove::m_loop(xs_loop lp) 
@@ -311,9 +362,12 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	BL lpbang = false;
 
 	const I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
+	I xz = xzone;
+	if(xz > plen) xz = plen;
+	const I lmin = smin+xz,lmax = smax-xz;
 
 	if(buf && plen > 0) {
-	/*
+		BL inzn = false;
 		register D o = curpos;
 
 		for(I i = 0; i < n; ++i) {	
@@ -329,15 +383,34 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 				lpbang = true;
 			}
 
-			F o = scale(o);
-			pos[i] = offs;
+			if(o >= lmax) 
+				o -= lmax-smin;
+
+			if(o < lmin) {
+				register F inp = o-smin;
+				znidx[i] = (I)inp;
+				znpos[i] = scale(lmax+inp);
+				inzn = true;
+			}
+			else
+				znidx[i] = 0,znpos[i] = 0;
+
+			pos[i] = scale(o);
 			o += spd;
 		}
 		// normalize and store current playing position
 		setpos(o);
 
 		playfun(n,&pos,outvecs); 
-	*/
+		if(inzn) {
+			playfun(n,&znpos,znbuf); 
+
+			//! \todo do some interpolation here!!
+
+			for(I o = 0; o < outchns; ++o)
+				for(I i = 0; i < n; ++i)
+					outvecs[o][i] = outvecs[o][i]*znmul[znidx[i]]+znbuf[o][i]*znmul[xzone-znidx[i]];
+		}
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);
@@ -390,18 +463,26 @@ V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 
 V xgroove::s_dsp()
 {
-	if(znbuf) { 
-		delete[] znbuf; znbuf = NULL; 
-		delete[] znmul; znmul = NULL; 
-	}
-
 	if(doplay) {
 		switch(loopmode) {
 		case xsl_once: SETSIGFUN(posfun,SIGFUN(s_pos_once)); break;
 		case xsl_loop: 
 			if(xzone > 0) {
-				znbuf = new S[Blocksize()];
-				znmul = new S[Blocksize()];
+				static I pblksz = 0;
+				const I blksz = Blocksize();
+
+				if(pblksz != blksz) {
+					for(I o = 0; o < outchns; ++o) {
+						delete[] znbuf[o]; 
+						znbuf[o] = new S[blksz]; 
+					}
+				
+					delete[] znpos; znpos = new S[blksz];
+					delete[] znidx;	znidx = new I[blksz];
+
+					pblksz = blksz;
+				}
+
 				SETSIGFUN(posfun,SIGFUN(s_pos_loopzn)); 
 			}
 			else
@@ -414,7 +495,6 @@ V xgroove::s_dsp()
 		SETSIGFUN(posfun,SIGFUN(s_pos_off));
 	xinter::s_dsp();
 }
-
 
 
 
@@ -447,10 +527,10 @@ V xgroove::m_help()
 	post("\tbang/start: start playing");
 	post("\tstop: stop playing");
 	post("\trefresh: checks buffer and refreshes outlets");
-	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
+	post("\tunits 0/1/2/3: set units to frames/buffer size/ms/s");
 	post("\tsclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
 	post("\txzone {unit}: length of loop crossfade zone");
-	post("\txsymm -1...1: symmetry of crossfade zone");
+//	post("\txshape -1...1: symmetry of crossfade zone");
 	post("");
 } 
 
@@ -463,9 +543,9 @@ V xgroove::m_print()
 	// print all current settings
 	post("%s - current settings:",thisName());
 	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
-	post("out channels = %i, samples/unit = %.3f, scale mode = %s",outchns,(F)(1./s2u),sclmode_txt[sclmode]); 
+	post("out channels = %i, frames/unit = %.3f, scale mode = %s",outchns,(F)(1./s2u),sclmode_txt[sclmode]); 
 	post("loop = %s, interpolation = %s",loop_txt[(I)loopmode],interp_txt[interp >= xsi_none && interp <= xsi_lin?interp:xsi_none]); 
-	post("loop crossfade zone = %.3f, symmetry = %f",(F)(xzone*s2u),xsymm); 
+	post("loop crossfade zone = %.3f",(F)(xzone*s2u)); 
 	post("");
 }
 
@@ -491,9 +571,11 @@ V xgroove::m_assist(long msg, long arg, char *s)
 			case 0:
 				sprintf(s,"Position currently played"); break;
 			case 1:
-				sprintf(s,"Starting point (rounded to sample)"); break;
+				sprintf(s,"Starting point (rounded to frame)"); break;
 			case 2:
-				sprintf(s,"Ending point (rounded to sample)"); break;
+				sprintf(s,"Ending point (rounded to frame)"); break;
+			case 3:
+				sprintf(s,"Bang on loop end/rollover"); break;
 			}
 		break;
 	}

@@ -74,9 +74,7 @@ private:
 	DEFSIGCALL(recfun);
 	virtual V m_signal(I n,S *const *in,S *const *out) 
 	{ 
-#ifdef MAXMSP // in max/msp the dsp tree is not rebuilt upon buffer resize
-		if(buf->Update()) m_refresh();
-#endif
+		bufchk();
 		recfun(n,in,out); 
 	}
 
@@ -439,7 +437,7 @@ V xrecord::m_help()
 	post("\tbang/start: start recording");
 	post("\tstop: stop recording");
 	post("\trefresh: checks buffer and refreshes outlets");
-	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
+	post("\tunits 0/1/2/3: set units to frames/buffer size/ms/s");
 	post("\tsclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
 	post("\tdraw [{float}]: redraw buffer immediately (arg omitted) or periodic (in ms)");
 	post("");
@@ -452,7 +450,7 @@ V xrecord::m_print()
 	// print all current settings
 	post("%s - current settings:",thisName());
 	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
-	post("in channels = %i, samples/unit = %.3f, scale mode = %s",inchns,(F)(1./s2u),sclmode_txt[sclmode]); 
+	post("in channels = %i, frames/unit = %.3f, scale mode = %s",inchns,(F)(1./s2u),sclmode_txt[sclmode]); 
 	post("sigmode = %s, append = %s, loop = %s, mixmode = %s",sigmode?"yes":"no",appmode?"yes":"no",doloop?"yes":"no",mixmode?"yes":"no"); 
 	post("");
 }
@@ -484,9 +482,11 @@ V xrecord::m_assist(L msg,L arg,C *s)
 		case 0:
 			sprintf(s,"Current position of recording"); break;
 		case 1:
-			sprintf(s,"Starting point (rounded to sample)"); break;
+			sprintf(s,"Starting point (rounded to frame)"); break;
 		case 2:
-			sprintf(s,"Ending point (rounded to sample)"); break;
+			sprintf(s,"Ending point (rounded to frame)"); break;
+		case 3:
+			sprintf(s,"Bang on loop end/rollover"); break;
 		}
 		break;
 	}

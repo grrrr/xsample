@@ -114,6 +114,8 @@ protected:
 
 	inline F scale(F smp) const { return (smp-sclmin)*sclmul; }
 
+	BL bufchk() { if(buf->Update()) { m_refresh(); return true; } return false; }
+
 private:
 
 	FLEXT_CALLBACK(m_start)
