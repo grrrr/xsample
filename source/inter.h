@@ -128,14 +128,14 @@ TMPLDEF V xinter::st_play4(const S *bdt,const I smin,const I smax,const I n,cons
 		register I oint = (I)o,ointm,oint1,oint2;
 
 		if(oint <= smin) { 
-			if(oint < smin) oint = smin,o = smin;
+			if(oint < smin) oint = smin,o = (float)smin;
 			// position is first simple
 			ointm = smin; // first sample 
 			oint1 = oint+1;
 			oint2 = oint1+1;
 		}
 		else if(oint >= maxo-2) { 
-			if(oint > maxo) oint = maxo,o = smax;
+			if(oint > maxo) oint = maxo,o = (float)smax;
 			ointm = oint-1;
 			oint1 = oint >= maxo?maxo:oint+1;
 			oint2 = oint1 >= maxo?maxo:oint1+1;

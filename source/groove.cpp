@@ -93,7 +93,11 @@ private:
 
 	DEFSIGFUN(s_pos_off);
 	DEFSIGFUN(s_pos_once);
+	DEFSIGFUN(s_pos_c_once);
+	DEFSIGFUN(s_pos_a_once);
 	DEFSIGFUN(s_pos_loop);
+	DEFSIGFUN(s_pos_c_loop);
+	DEFSIGFUN(s_pos_a_loop);
 	DEFSIGFUN(s_pos_loopzn);
 	DEFSIGFUN(s_pos_bidir);
 
@@ -132,7 +136,7 @@ private:
 };
 
 
-FLEXT_LIB_DSP_V("xgroove~",xgroove)
+FLEXT_LIB_DSP_V("xgroove~",xgroove) 
 
 
 V xgroove::setup(t_classid c)
@@ -419,7 +423,7 @@ V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
+	const D smin = curmin,smax = curmax,plen = smax-smin; //curlen;
 
 	if(buf && plen > 0) {
 		register D o = curpos;
@@ -444,6 +448,48 @@ V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
 		s_pos_off(n,invecs,outvecs);
 		
 	if(lpbang) ToOutBang(outchns+3);
+}
+
+// \TODO optimize that for spd = const!
+V xgroove::s_pos_c_once(I n,S *const *invecs,S *const *outvecs)
+{
+	const S spd = *invecs[0];
+	S *pos = outvecs[outchns];
+	BL lpbang = false;
+
+	const D smin = curmin,smax = curmax,plen = smax-smin; //curlen;
+
+	if(buf && plen > 0) {
+		register D o = curpos;
+
+		for(I i = 0; i < n; ++i) {	
+			if(o >= smax) { o = smax; lpbang = true; }
+			else if(o < smin) { o = smin; lpbang = true; }
+			
+			pos[i] = o;
+			o += spd;
+		}
+		// normalize and store current playing position
+		setpos(o);
+
+		playfun(n,&pos,outvecs); 
+
+		arrscale(n,pos,pos);
+	} 
+	else 
+		s_pos_off(n,invecs,outvecs);
+		
+	if(lpbang) ToOutBang(outchns+3);
+}
+
+V xgroove::s_pos_a_once(I n,S *const *invecs,S *const *outvecs)
+{
+	const S *speed = invecs[0];
+	if(speed[0] == speed[n-1]) 
+		// assume constant speed
+		s_pos_c_once(n,invecs,outvecs);
+	else
+		s_pos_once(n,invecs,outvecs);
 }
 
 V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
@@ -484,6 +530,55 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 		s_pos_off(n,invecs,outvecs);
 		
 	if(lpbang) ToOutBang(outchns+3);
+}
+
+// \TODO optimize that for spd = const!
+V xgroove::s_pos_c_loop(I n,S *const *invecs,S *const *outvecs)
+{
+	const S spd = *invecs[0];
+	S *pos = outvecs[outchns];
+	BL lpbang = false;
+
+	const D smin = curmin,smax = curmax,plen = smax-smin; //curlen;
+
+	if(buf && plen > 0) {
+		register D o = curpos;
+
+		for(I i = 0; i < n; ++i) {	
+			// normalize offset
+			if(!(o < smax)) {  // faster than o >= smax
+				o = fmod(o-smin,plen)+smin;
+				lpbang = true;
+			}
+			else if(o < smin) {
+				o = fmod(o-smin,plen)+smax; 
+				lpbang = true;
+			}
+
+			pos[i] = o;
+			o += spd;
+		}
+		// normalize and store current playing position
+		setpos(o);
+
+		playfun(n,&pos,outvecs); 
+
+		arrscale(n,pos,pos);
+	} 
+	else 
+		s_pos_off(n,invecs,outvecs);
+		
+	if(lpbang) ToOutBang(outchns+3);
+}
+
+V xgroove::s_pos_a_loop(I n,S *const *invecs,S *const *outvecs)
+{
+	const S *speed = invecs[0];
+	if(speed[0] == speed[n-1]) 
+		// assume constant speed
+		s_pos_c_loop(n,invecs,outvecs);
+	else
+		s_pos_loop(n,invecs,outvecs);
 }
 
 V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
