@@ -96,6 +96,8 @@ FLEXT_LIB_DSP_V("xrecord~",xrecord)
 
 V xrecord::setup(t_classid c)
 {
+	DefineHelp(c,"xrecord~");
+
 	FLEXT_CADDMETHOD_F(c,0,"pos",m_pos);
 	FLEXT_CADDMETHOD_F(c,0,"min",m_min);
 	FLEXT_CADDMETHOD_F(c,0,"max",m_max);

@@ -19,7 +19,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xplay:
 	public xinter
 {
-	FLEXT_HEADER(xplay,xinter)
+	FLEXT_HEADER_S(xplay,xinter,setup)
 
 public:
 	xplay(I argc,const t_atom *argv);
@@ -30,6 +30,8 @@ public:
 	virtual V m_print();
 	
 private:
+	static V setup(t_classid c);
+
 	virtual V m_signal(I n,S *const *in,S *const *out) 
 	{ 
 		bufchk();
@@ -39,6 +41,10 @@ private:
 
 FLEXT_LIB_DSP_V("xplay~",xplay)
 
+V xplay::setup(t_classid c)
+{
+	DefineHelp(c,"xplay~");
+}
 
 xplay::xplay(I argc,const t_atom *argv)
 {
