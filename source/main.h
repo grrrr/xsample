@@ -11,8 +11,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 #include "prefix.h"
 
-#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 406)
-#error You need at least flext version 0.4.6
+#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 500)
+#error You need at least flext version 0.5.0
 #endif
 
 #define XSAMPLE_VERSION "0.3.1pre4"
@@ -215,6 +215,13 @@ protected:
 
     //! return 0...invalid, 1...changed, -1...unchanged
 	int ChkBuffer(bool refr = false);
+    
+    typedef flext::buffer::lock_t lock_t;
+
+    //! Lock buffer (buffer must be checked ok)
+    lock_t Lock() { return buf.Lock(); }
+    //! Unlock buffer (buffer must be checked ok)
+    void Unlock(lock_t l) { buf.Unlock(l); }
 
     void ResetRange() 
     { 

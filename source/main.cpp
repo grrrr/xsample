@@ -18,6 +18,7 @@ static void xsample_main()
 	flext::post("  xrecord~, xplay~, xgroove~   ");
     flext::post("  (C)2001-2005 Thomas Grill    ");
 #ifdef FLEXT_DEBUG
+    flext::post("");
     flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);
 #endif
 	flext::post("-------------------------------");
@@ -72,14 +73,23 @@ bool xsample::Finalize()
 }
 
 int xsample::ChkBuffer(bool refresh) 
-{        
+{      
+    if(!buf.Ok()) return 0;
+    
     if(buf.Update()) {
+#ifdef FLEXT_DEBUG
+        post("%s - buffer update!",thisName());
+#endif
         Update(xsc_buffer);
-        if(refresh) Refresh();
-        return buf.Valid()?1:0;
+        if(refresh) { 
+            Refresh();
+            return buf.Ok() && buf.Valid()?1:0;
+        }
+        else 
+            return buf.Valid()?1:0;
     }
     else
-        return -1;
+        return buf.Valid()?-1:0;
 }
 
 /* called after all buffer objects have been created in the patch */
@@ -99,9 +109,9 @@ void xsample::m_set(int argc,const t_atom *argv)
 
 void xsample::m_min(float mn)
 {
-    ChkBuffer(true);
+    int ret = ChkBuffer(true);
 
-	if(s2u) {
+	if(ret && s2u) {
 		long cmn = CASTINT<long>(mn/s2u+0.5f);  // conversion to samples
 
 		if(cmn < 0) 
@@ -117,9 +127,9 @@ void xsample::m_min(float mn)
 
 void xsample::m_max(float mx)
 {
-    ChkBuffer(true);
+    int ret = ChkBuffer(true);
 
-	if(s2u) {
+	if(ret && s2u) {
 		long cmx = CASTINT<long>(mx/s2u+0.5f);  // conversion to samples
 
 		if(cmx > buf.Frames()) 
@@ -137,6 +147,10 @@ void xsample::m_dsp(int /*n*/,t_sample *const * /*insigs*/,t_sample *const * /*o
 {
 	// this is hopefully called at change of sample rate ?!
 
+#ifdef FLEXT_DEBUG
+        post("%s - DSP reset!",thisName());
+#endif
+
     // for PD at least this is also called if a table has been deleted...
     // then we must reset the buffer
 
@@ -153,11 +167,9 @@ void xsample::DoUpdate(unsigned int flags)
     if(flags&xsc_buffer)
         buf.Set();
 
-    if(flags&xsc_range) {
-        if(buf.Valid()) {
-            if(curmin < 0) curmin = 0;
-		    if(curmax > buf.Frames()) curmax = buf.Frames();
-        }
+    if(flags&xsc_range && buf.Ok()) {
+        if(curmin < 0) curmin = 0;
+        if(curmax > buf.Frames()) curmax = buf.Frames();
     }
 
     if(flags&xsc_units) {
@@ -166,7 +178,7 @@ void xsample::DoUpdate(unsigned int flags)
 			    s2u = 1;
 			    break;
 		    case xsu_buffer: // buffer size
-			    s2u = buf.Frames()?1.f/buf.Frames():0;
+			    s2u = buf.Ok() && buf.Frames()?1.f/buf.Frames():0;
 			    break;
 		    case xsu_ms: // ms
 			    s2u = 1000.f/Samplerate();
@@ -186,7 +198,7 @@ void xsample::DoUpdate(unsigned int flags)
 			    sclmin = curmin; sclmul = s2u;
 			    break;
 		    case xss_buffer: // unity between 0 and buffer size
-			    sclmin = 0; sclmul = buf.Frames()?1.f/buf.Frames():0;
+			    sclmin = 0; sclmul = buf.Ok() && buf.Frames()?1.f/buf.Frames():0;
 			    break;
 		    case xss_loop:	// unity between recmin and recmax
 			    sclmin = curmin; sclmul = curmin < curmax?1.f/(curmax-curmin):0;

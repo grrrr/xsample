@@ -89,10 +89,14 @@ void xplay::m_signal(int n,t_sample *const *in,t_sample *const *out)
 
 	// check whether buffer is invalid or changed
 	if(ret) {
+        const lock_t l = Lock();
+        
 		// convert position units to frames
 		arrmul(n,in[0],out[0]);
 		// call resample routine
 		playfun(n,out,out); 
+        
+        Unlock(l);
 
         Refresh();
 	}

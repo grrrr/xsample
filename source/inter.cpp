@@ -38,7 +38,7 @@ void xinter::DoUpdate(unsigned int flags)
 		    default:	SETSIGFUN(zerofun,TMPLFUN(s_play0,-1,-1));
 	    }
 
-	    if(doplay) {
+	    if(doplay && buf.Ok()) {
 		    if(interp == xsi_4p) 
 			    switch(buf.Channels()*1000+outchns) {
 				    case 1001:	SETSIGFUN(playfun,TMPLFUN(s_play4,1,1)); break;

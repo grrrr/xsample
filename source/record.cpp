@@ -391,7 +391,11 @@ void xrecord::m_signal(int n,t_sample *const *in,t_sample *const *out)
 
     if(ret) {
 		// call the appropriate dsp function
-		recfun(n,in,out); 
+        
+        const lock_t l = Lock();
+		recfun(n,in,out);
+        Unlock(l);
+         
         Refresh();
     }
 	else
