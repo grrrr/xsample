@@ -1,16 +1,16 @@
 #ifndef __XSAMPLE_H
 #define __XSAMPLE_H
 
-#define VERSION "0.2"
+#define VERSION "0.21"
 
 
-#include <_cppext.h>
+#include <flext.h>
 
 #ifdef PD
 extern "C" {
-EXT_EXTERN V xrecord_tilde_setup();
-EXT_EXTERN V xplay_tilde_setup();
-EXT_EXTERN V xgroove_tilde_setup();
+FLEXT_EXT V xrecord_tilde_setup();
+FLEXT_EXT V xplay_tilde_setup();
+FLEXT_EXT V xgroove_tilde_setup();
 }
 #endif
 
@@ -31,9 +31,9 @@ EXT_EXTERN V xgroove_tilde_setup();
 
 
 class xs_obj:
-	public dsp_obj
+	public flext_dsp
 {
-	CPPEXTERN_HEADER(xs_obj,dsp_obj)
+	FLEXT_HEADER(xs_obj,flext_dsp)
 	
 public:
 	xs_obj();

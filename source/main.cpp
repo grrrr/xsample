@@ -5,7 +5,7 @@ extern "C" {
 #endif
 
 #ifdef PD
-EXT_EXTERN void xsample_setup()
+FLEXT_EXT void xsample_setup()
 {
 	post("xsample objects, (C)2001,2002 Thomas Grill");
 	post("xsample: xrecord~, xplay~, xgroove~");

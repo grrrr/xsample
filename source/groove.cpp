@@ -15,15 +15,13 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #pragma warning (disable:4244)
 #endif
 
-#define OBJNAME "xgroove~"
-
 
 //#define DEBUG 
 
 class xgroove_obj:
 	public xs_obj
 {
-	CPPEXTERN_HEADER(xgroove_obj,xs_obj)
+	FLEXT_HEADER(xgroove_obj,xs_obj)
 
 public:
 	xgroove_obj(I argc,t_atom *argv);
@@ -89,7 +87,7 @@ private:
 
 
 
-CPPEXTERN_NEW_WITH_GIMME(OBJNAME,xgroove_obj)
+FLEXT_NEW_WITH_GIMME("xgroove~",xgroove_obj)
 
 V xgroove_obj::cb_setup(t_class *c)
 {
@@ -114,7 +112,7 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 {
 #ifdef DEBUG
 	if(argc < 1) {
-		post(OBJNAME " - Warning: no buffer defined");
+		post("%s - Warning: no buffer defined",thisName());
 	} 
 #endif
 	
@@ -454,12 +452,12 @@ V xgroove_obj::m_dsp(t_signal **sp)
 
 V xgroove_obj::m_help()
 {
-	post(OBJNAME " - part of xsample objects");
+	post("%s - part of xsample objects",thisName());
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
 #ifdef MAXMSP
-	post("Arguments: " OBJNAME " [buffer] [channels=1]");
+	post("Arguments: %s [buffer] [channels=1]",thisName());
 #else
-	post("Arguments: " OBJNAME " [buffer]");
+	post("Arguments: %s [buffer]",thisName());
 #endif
 	post("Inlets: 1:Messages/Speed signal, 2:Min position, 3:Max position");
 	post("Outlets: 1:Audio signal, 2:Position signal, 3:Min position (rounded), 4:Max position (rounded)");	
@@ -488,7 +486,7 @@ V xgroove_obj::m_print()
 	static const C sclmode_txt[][20] = {"units","units in loop","buffer","loop"};
 
 	// print all current settings
-	post(OBJNAME " - current settings:");
+	post("%s - current settings:",thisName());
 	post("bufname = '%s',buflen = %.3f",buf->Name(),(F)(buf->Frames()*s2u)); 
 	post("samples/unit = %.3f, scale mode = %s",(F)(1./s2u),sclmode_txt[sclmode]); 
 	post("loop = %s, interpolation = %s",doloop?"yes":"no",interp?"yes":"no"); 
@@ -537,7 +535,7 @@ extern "C" {
 #endif
 
 #ifdef PD
-EXT_EXTERN V xgroove_tilde_setup()
+FLEXT_EXT V xgroove_tilde_setup()
 #elif defined(MAXMSP)
 V main()
 #endif

@@ -14,7 +14,6 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #pragma warning (disable:4244)
 #endif
 
-#define OBJNAME "xplay~"
 
 //#define DEBUG 
 
@@ -22,7 +21,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xplay_obj:
 	public xs_obj
 {
-	CPPEXTERN_HEADER(xplay_obj,xs_obj)
+	FLEXT_HEADER(xplay_obj,xs_obj)
 
 public:
 	xplay_obj(I argc, t_atom *argv);
@@ -64,7 +63,7 @@ private:
 	static t_int *dspmeth(t_int *w); 
 };
 
-CPPEXTERN_NEW_WITH_GIMME(OBJNAME,xplay_obj)
+FLEXT_NEW_WITH_GIMME("xplay~",xplay_obj)
 
 
 V xplay_obj::cb_setup(t_class *c)
@@ -282,12 +281,12 @@ V xplay_obj::m_dsp(t_signal **sp)
 
 V xplay_obj::m_help()
 {
-	post(OBJNAME " - part of xsample objects");
+	post("%s - part of xsample objects",thisName());
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
 #ifdef MAXMSP
-	post("Arguments: " OBJNAME " [buffer] [channels=1]");
+	post("Arguments: %s [buffer] [channels=1]",thisName());
 #else
-	post("Arguments: " OBJNAME " [buffer]");
+	post("Arguments: %s [buffer]",thisName());
 #endif
 	post("Inlets: 1:Messages/Position signal");
 	post("Outlets: 1:Audio signal");	
@@ -308,7 +307,7 @@ V xplay_obj::m_help()
 V xplay_obj::m_print()
 {
 	// print all current settings
-	post(OBJNAME " - current settings:");
+	post("%s - current settings:",thisName());
 	post("bufname = '%s',buflen = %.3f",buf->Name(),(F)(buf->Frames()*s2u)); 
 	post("samples/unit = %.3f,interpolation = %s",(F)(1./s2u),interp?"yes":"no"); 
 	post("");
@@ -343,7 +342,7 @@ extern "C" {
 #endif
 
 #ifdef PD
-EXT_EXTERN V xplay_tilde_setup()
+FLEXT_EXT V xplay_tilde_setup()
 #elif defined(MAXMSP)
 V main()
 #endif

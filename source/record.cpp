@@ -15,12 +15,11 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #pragma warning (disable:4244)
 #endif
 
-#define OBJNAME "xrecord~"
 
 class xrec_obj:
 	public xs_obj
 {
-	CPPEXTERN_HEADER(xrec_obj,xs_obj)
+	FLEXT_HEADER(xrec_obj,xs_obj)
 
 public:
 	xrec_obj(I argc,t_atom *argv);
@@ -96,7 +95,7 @@ private:
 };
 
 
-CPPEXTERN_NEW_WITH_GIMME(OBJNAME,xrec_obj)
+FLEXT_NEW_WITH_GIMME("xrecord~",xrec_obj)
 
 V xrec_obj::cb_setup(t_class *c)
 {
@@ -460,12 +459,12 @@ V xrec_obj::m_dsp(t_signal **sp)
 
 V xrec_obj::m_help()
 {
-	post(OBJNAME " - part of xsample objects");
+	post("%s - part of xsample objects",thisName());
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
 #ifdef MAXMSP
-	post("Arguments: " OBJNAME " [buffer] [channels=1]");
+	post("Arguments: %s [buffer] [channels=1]",thisName());
 #else
-	post("Arguments: " OBJNAME " [buffer]");
+	post("Arguments: %s [buffer]",thisName());
 #endif
 	post("Inlets: 1:Messages/Audio signal, 2:Trigger signal, 3:Min point, 4: Max point");
 	post("Outlets: 1:Position signal, 2:Min point, 3:Max point");	
@@ -497,7 +496,7 @@ V xrec_obj::m_print()
 	static const C sclmode_txt[][20] = {"units","units in loop","buffer","loop"};
 
 	// print all current settings
-	post(OBJNAME " - current settings:");
+	post("%s - current settings:",thisName());
 	post("bufname = '%s',buflen = %.3f",buf->Name(),(F)(buf->Frames()*s2u)); 
 	post("samples/unit = %.3f, scale mode = %s",(F)(1./s2u),sclmode_txt[sclmode]); 
 	post("sigmode = %s, append = %s, loop = %s, mixmode = %s",sigmode?"yes":"no",appmode?"yes":"no",doloop?"yes":"no",mixmode?"yes":"no"); 
@@ -549,7 +548,7 @@ extern "C" {
 #endif
 
 #ifdef PD
-EXT_EXTERN V xrecord_tilde_setup()
+FLEXT_EXT V xrecord_tilde_setup()
 #elif defined(MAXMSP)
 V main()
 #endif
