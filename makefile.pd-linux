@@ -65,8 +65,8 @@ $(HELPDIR):
 install-help:: $(HELPDIR)
 
 install-help:: ./pd
+	chmod 644 $^/*.*
 	cp $^/*.* $(HELPDIR)
-#	chown -R root.root $(HELPDIR)
 
 
 .PHONY: clean
