@@ -1,11 +1,9 @@
 /*
-
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2004 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001-2005 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
-
 */
 
 #include "main.h"
@@ -26,116 +24,104 @@ class xgroove:
 	FLEXT_HEADER_S(xgroove,xinter,setup)
 
 public:
-	xgroove(I argc,const t_atom *argv);
-	~xgroove();
+	xgroove(int argc,const t_atom *argv);
+	virtual ~xgroove();
 
-	virtual BL Init();
-		
-	virtual V m_help();
-	virtual V m_print();
+	void m_pos(float pos)
+    {
+	    setpos(s2u?pos/s2u:0);
+        Update(xsc_pos,true);
+    }
 
-	virtual V m_units(xs_unit mode = xsu__);
+    inline void m_posmod(float pos) { setposmod(pos?pos/s2u:0); } // motivated by Tim Blechmann
 
-	virtual BL m_reset();
+	inline void mg_pos(float &v) const { v = curpos*s2u; }
 
-	virtual V m_pos(F pos);
-	inline V m_posmod(F pos) { setposmod(pos?pos/s2u:0); } // motivated by Tim Blechmann
-	virtual V m_all();
-	virtual V m_min(F mn);
-	virtual V m_max(F mx);
-
-	V ms_xfade(I xf);
-	V ms_xshape(I sh);
-
-	V ms_xzone(F xz);
-	V mg_xzone(F &xz) { xz = _xzone*s2u; }
-
-	enum xs_loop {
-		xsl__ = -1,  // don't change
-		xsl_once = 0,xsl_loop,xsl_bidir
-	};
 
 	enum xs_fade {
-		xsf__ = -1,  // don't change
 		xsf_keeplooppos = 0,xsf_keeplooplen,xsf_keepfade,xsf_inside
 	};
 
 	enum xs_shape {
-		xss__ = -1,  // don't change
 		xss_lin = 0,xss_qsine,xss_hsine
 	};
 
-	V m_loop(xs_loop lp = xsl__);
+
+	void ms_xfade(int xf)
+    { 
+	    xfade = (xs_fade)xf;
+        Update(xsc_fade,true);
+    }
+
+    void ms_xshape(int sh);
+
+	void ms_xzone(float xz);
+	void mg_xzone(float &xz) { xz = _xzone*s2u; }
+
+	void m_loop(xs_loop lp)
+    { 
+	    loopmode = lp,bidir = 1;
+        Update(xsc_loop,true);
+    }
 	
 protected:
 
-	xs_loop loopmode;
-	D curpos;  // in samples
-	I bidir;
+	double curpos;  // in samples
+	float bidir; // +1 or -1
 
-	F _xzone,xzone;
-    L znsmin,znsmax;
+	float _xzone,xzone;
+    long znsmin,znsmax;
 	xs_fade xfade;
-	I xshape;
-	S **znbuf;
-	S *znpos,*znmul,*znidx;
-	I pblksz;
+	int xshape;
+	t_sample **znbuf;
+	t_sample *znpos,*znmul,*znidx;
+	int pblksz;
 
-	inline V outputmin() { ToOutFloat(outchns+1,curmin*s2u); }
-	inline V outputmax() { ToOutFloat(outchns+2,curmax*s2u); }
-	
-	inline V setpos(D pos)
+	inline void setpos(double pos)
 	{
 		if(pos < znsmin) curpos = znsmin;
 		else if(pos > znsmax) curpos = znsmax;
 		else curpos = pos;
 	}
 
-	inline V setposmod(D pos)
+	inline void setposmod(double pos)
 	{
-		D p = pos-znsmin;
+		double p = pos-znsmin;
 		if(p >= 0) curpos = znsmin+fmod(p,znsmax-znsmin);
 		else curpos = znsmax+fmod(p,znsmax-znsmin);
 	}
 
-	inline V mg_pos(F &v) const { v = curpos*s2u; }
+    virtual void DoReset();
+    virtual void DoUpdate(unsigned int flags);
+
+	virtual void m_help();
+	virtual void m_print();
+	virtual void m_signal(int n,t_sample *const *in,t_sample *const *out);
 
 private:
-	static V setup(t_classid c);
+	static void setup(t_classid c);
 
-	virtual V s_dsp();
+    //! return true if something has changed
+	bool do_xzone();
 
 	DEFSIGFUN(s_pos_off);
 	DEFSIGFUN(s_pos_once);
-	DEFSIGFUN(s_pos_c_once);
-	DEFSIGFUN(s_pos_a_once);
 	DEFSIGFUN(s_pos_loop);
-	DEFSIGFUN(s_pos_c_loop);
-	DEFSIGFUN(s_pos_a_loop);
 	DEFSIGFUN(s_pos_loopzn);
 	DEFSIGFUN(s_pos_bidir);
 
 	DEFSIGCALL(posfun);
-
 	DEFSTCALL(zonefun);
 
-	V do_xzone();
-
-	virtual V m_signal(I n,S *const *in,S *const *out) 
-	{ 
-		if(bufchk())
-			posfun(n,in,out); 
-		else
-			zerofun(n,in,out);
-	}
-
-	static S fade_lin[],fade_qsine[],fade_hsine[];
+	static t_sample fade_lin[],fade_qsine[],fade_hsine[];
 
 	FLEXT_CALLBACK_F(m_pos)
 	FLEXT_CALLBACK_F(m_posmod)
 	FLEXT_CALLBACK_F(m_min)
 	FLEXT_CALLBACK_F(m_max)
 	FLEXT_CALLBACK(m_all)
+
+    FLEXT_CALLSET_E(m_loop,xs_loop)
 
 	FLEXT_CALLSET_I(ms_xfade)
 	FLEXT_ATTRGET_I(xfade)
@@ -147,23 +133,21 @@ private:
 	FLEXT_CALLVAR_F(mg_pos,m_pos)
 	FLEXT_CALLSET_F(m_min)
 	FLEXT_CALLSET_F(m_max)
-	FLEXT_CALLSET_E(m_loop,xs_loop)
-	FLEXT_ATTRGET_E(loopmode,xs_loop)
 };
 
 
 FLEXT_LIB_DSP_V("xgroove~",xgroove) 
 
 
-S xgroove::fade_lin[XZONE_TABLE+1];
-S xgroove::fade_qsine[XZONE_TABLE+1];
-S xgroove::fade_hsine[XZONE_TABLE+1];
+t_sample xgroove::fade_lin[XZONE_TABLE+1];
+t_sample xgroove::fade_qsine[XZONE_TABLE+1];
+t_sample xgroove::fade_hsine[XZONE_TABLE+1];
 
 #ifndef PI
 #define PI 3.14159265358979f
 #endif
 
-V xgroove::setup(t_classid c)
+void xgroove::setup(t_classid c)
 {
 	DefineHelp(c,"xgroove~");
 
@@ -196,14 +180,14 @@ V xgroove::setup(t_classid c)
 	}
 }
 
-xgroove::xgroove(I argc,const t_atom *argv):
-	loopmode(xsl_loop),curpos(0),bidir(1),
+xgroove::xgroove(int argc,const t_atom *argv):
+	curpos(0),bidir(1),
 	_xzone(0),xzone(0),
 	xfade(xsf_keeplooppos),xshape(xss_lin),
 	znpos(NULL),znmul(NULL),znidx(NULL),
 	pblksz(0)
 {
-	I argi = 0;
+	int argi = 0;
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	if(argc > argi && CanbeInt(argv[argi])) {
 		outchns = GetAInt(argv[argi]);
@@ -211,11 +195,9 @@ xgroove::xgroove(I argc,const t_atom *argv):
 	}
 #endif
 
-
 	if(argc > argi && IsSymbol(argv[argi])) {
 
-        buf = new buffer(GetSymbol(argv[argi]),true);
-
+        buf.Set(GetSymbol(argv[argi]),true);
 		argi++;
 		
 #if FLEXT_SYS == FLEXT_SYS_MAX
@@ -227,14 +209,12 @@ xgroove::xgroove(I argc,const t_atom *argv):
 		}
 #endif
 	}
-    else
-        buf = new buffer(NULL,true);
 
-	AddInSignal("Signal of playing speed"); // speed signal
+    AddInSignal("Signal of playing speed"); // speed signal
 	AddInFloat("Starting point"); // min play pos
 	AddInFloat("Ending point"); // max play pos
-	for(I ci = 0; ci < outchns; ++ci) {
-		C tmp[30];
+	for(int ci = 0; ci < outchns; ++ci) {
+		char tmp[30];
 		STD::sprintf(tmp,"Audio signal channel %i",ci+1); 
 		AddOutSignal(tmp); // output
 	}
@@ -244,16 +224,17 @@ xgroove::xgroove(I argc,const t_atom *argv):
 	AddOutBang("Bang on loop end/rollover");  // loop bang
 	
 	// don't know vector size yet -> wait for m_dsp
-	znbuf = new S *[outchns];
-	for(I i = 0; i < outchns; ++i) znbuf[i] = NULL;
+	znbuf = new t_sample *[outchns];
+	for(int i = 0; i < outchns; ++i) znbuf[i] = NULL;
 
-	ms_xshape(xshape);
+    // initialize crossfade shape
+    ms_xshape(xshape);
 }
 
 xgroove::~xgroove()
 {
 	if(znbuf) {
-		for(I i = 0; i < outchns; ++i) if(znbuf[i]) FreeAligned(znbuf[i]); 
+		for(int i = 0; i < outchns; ++i) if(znbuf[i]) FreeAligned(znbuf[i]); 
 		delete[] znbuf;
 	}
 
@@ -261,80 +242,22 @@ xgroove::~xgroove()
 	if(znidx) FreeAligned(znidx);
 }
 
-BL xgroove::Init()
+void xgroove::DoReset()
 {
-	if(xinter::Init()) {
-		m_reset();
-		return true;
-	}
-	else
-		return false;
-}
-		
-V xgroove::m_units(xs_unit mode)
-{
-	xsample::m_units(mode);  // calls bufchk()
-	
-	m_sclmode();  // calls bufchk() again.... \todo optimize that!!
-	outputmin();
-	outputmax();
-}
-
-V xgroove::m_min(F mn)
-{
-	xsample::m_min(mn);
-	m_pos(curpos*s2u);
-//	do_xzone();
-	s_dsp();
-	outputmin();
-}
-
-V xgroove::m_max(F mx)
-{
-	xsample::m_max(mx);
-	m_pos(curpos*s2u);
-//	do_xzone();
-	s_dsp();
-	outputmax();
-}
-
-V xgroove::m_pos(F pos)
-{
-	setpos(pos && s2u?pos/s2u:0);
-}
-
-V xgroove::m_all()
-{
-	xsample::m_all();
-//	do_xzone();
-	s_dsp();
-	outputmin();
-	outputmax();
-}
-
-BL xgroove::m_reset()
-{
+    xinter::DoReset();
 	curpos = 0; 
 	bidir = 1;
-	return xsample::m_reset();
 }
 
-V xgroove::ms_xfade(I xf) 
+void xgroove::ms_xzone(float xz) 
 { 
-	xfade = (xs_fade)xf;
-	//	do_xzone();
-	s_dsp(); 
+	ChkBuffer(true);
+
+	_xzone = (xz < 0 || !s2u)?0:xz/s2u; 
+    Update(xsc_fade,true);
 }
 
-V xgroove::ms_xzone(F xz) 
-{ 
-	bufchk();
-	_xzone = xz < 0 || !s2u?0:xz/s2u; 
-//	do_xzone();
-	s_dsp(); 
-}
-
-V xgroove::ms_xshape(I sh) 
+void xgroove::ms_xshape(int sh) 
 { 
 	xshape = (xs_shape)sh;
 	switch(xshape) {
@@ -349,105 +272,10 @@ V xgroove::ms_xshape(I sh)
 	// no need to recalc the fade zone here
 }
 
-V xgroove::do_xzone()
+
+void xgroove::s_pos_off(int n,t_sample *const *invecs,t_sample *const *outvecs)
 {
-	// \todo do we really need this?
-	if(!s2u) return; // this can happen if DSP is off 
-
-	xzone = _xzone; // make a copy for changing it
-
-	if(xfade == xsf_inside) { 
-		// fade zone goes inside the loop -> loop becomes shorter
-
-		// \todo what about round-off?
-		const L maxfd = (curmax-curmin)/2;
-		if(xzone > maxfd) xzone = maxfd;
-
-		znsmin = curmin,znsmax = curmax;
-	}
-	else if(xfade == xsf_keepfade) { 
-		// try to keep fade zone
-		// change of loop bounds may happen
-
-		// restrict xzone to half of buffer
-		const L maxfd = buf->Frames()/2;
-		if(xzone > maxfd) xzone = maxfd;
-
-		// \todo what about round-off?
-		znsmin = curmin-(L)(xzone/2);
-		znsmax = curmax+(L)(xzone/2);
-
-		// widen loop if xzone doesn't fit into it
-		// \todo check formula
-		L lack = (L)ceil((xzone*2-(znsmax-znsmin))/2);
-		if(lack > 0) znsmin -= lack,znsmax += lack;
-
-		// check buffer limits and shift bounds if necessary
-		if(znsmin < 0) {
-			znsmax -= znsmin;
-			znsmin = 0;
-		}
-		if(znsmax > buf->Frames())
-			znsmax = buf->Frames();
-	}
-	else if(xfade == xsf_keeplooplen) { 
-		// try to keep loop length
-		// shifting of loop bounds may happen
-
-		const L plen = curmax-curmin;
-		if(xzone > plen) xzone = plen;
-		const L maxfd = buf->Frames()-plen;
-		if(xzone > maxfd) xzone = maxfd;
-
-		// \todo what about round-off?
-		znsmin = curmin-(L)(xzone/2);
-		znsmax = curmax+(L)(xzone/2);
-
-		// check buffer limits and shift bounds if necessary
-		// both cases can't happen because of xzone having been limited above
-		if(znsmin < 0) {
-			znsmax -= znsmin;
-			znsmin = 0;
-		}
-		else if(znsmax > buf->Frames()) {
-			znsmin -= znsmax-buf->Frames();
-			znsmax = buf->Frames();
-		}
-	}
-	else if(xfade == xsf_keeplooppos) { 
-		// try to keep loop position and length
-
-		// restrict fade zone to maximum length 
-		const L plen = curmax-curmin;
-		if(xzone > plen) xzone = plen;
-
-		// \todo what about round-off?
-		znsmin = curmin-(L)(xzone/2);
-		znsmax = curmax+(L)(xzone/2);
-
-		L ovr = znsmax-buf->Frames();
-		if(-znsmin > ovr) ovr = -znsmin;
-		if(ovr > 0) {
-			znsmin += ovr;
-			znsmax -= ovr;
-			xzone -= ovr*2;
-		}
-	}
-
-	FLEXT_ASSERT(znsmin <= znsmax && (znsmax-znsmin) >= xzone*2);
-}
-
-V xgroove::m_loop(xs_loop lp) 
-{ 
-	loopmode = lp; 
-	bidir = 1;
-	s_dsp();
-}
-	
-
-V xgroove::s_pos_off(I n,S *const *invecs,S *const *outvecs)
-{
-	S *pos = outvecs[outchns];
+	t_sample *pos = outvecs[outchns];
 
 	SetSamples(pos,n,curpos);
 	
@@ -456,19 +284,19 @@ V xgroove::s_pos_off(I n,S *const *invecs,S *const *outvecs)
 	SetSamples(pos,n,scale(curpos));
 }
 
-V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
+void xgroove::s_pos_once(int n,t_sample *const *invecs,t_sample *const *outvecs)
 {
-	const S *speed = invecs[0];
-	S *pos = outvecs[outchns];
-	BL lpbang = false;
+	const t_sample *speed = invecs[0];
+	t_sample *pos = outvecs[outchns];
+	bool lpbang = false;
 
-	const D smin = curmin,smax = curmax,plen = smax-smin;
+	const double smin = curmin,smax = curmax,plen = smax-smin;
 
-	if(buf && plen > 0) {
-		register D o = curpos;
+	if(plen > 0) {
+		register double o = curpos;
 
-		for(I i = 0; i < n; ++i) {	
-			const S spd = speed[i];  // must be first because the vector is reused for output!
+		for(int i = 0; i < n; ++i) {	
+			const t_sample spd = speed[i];  // must be first because the vector is reused for output!
 			
 			if(!(o < smax)) { o = smax; lpbang = true; }
 			else if(o < smin) { o = smin; lpbang = true; }
@@ -489,66 +317,24 @@ V xgroove::s_pos_once(I n,S *const *invecs,S *const *outvecs)
 	if(lpbang) ToOutBang(outchns+3);
 }
 
-// \TODO optimize that for spd = const!
-V xgroove::s_pos_c_once(I n,S *const *invecs,S *const *outvecs)
+void xgroove::s_pos_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
 {
-	const S spd = *invecs[0];
-	S *pos = outvecs[outchns];
-	BL lpbang = false;
-
-	const D smin = curmin,smax = curmax,plen = smax-smin;
-
-	if(buf && plen > 0) {
-		register D o = curpos;
-
-		for(I i = 0; i < n; ++i) {	
-			if(!(o < smax)) { o = smax; lpbang = true; }
-			else if(o < smin) { o = smin; lpbang = true; }
-			
-			pos[i] = o;
-			o += spd;
-		}
-		// normalize and store current playing position
-		setpos(o);
-
-		playfun(n,&pos,outvecs); 
-
-		arrscale(n,pos,pos);
-	} 
-	else 
-		s_pos_off(n,invecs,outvecs);
-		
-	if(lpbang) ToOutBang(outchns+3);
-}
-
-V xgroove::s_pos_a_once(I n,S *const *invecs,S *const *outvecs)
-{
-	const S *speed = invecs[0];
-	if(speed[0] == speed[n-1]) 
-		// assume constant speed
-		s_pos_c_once(n,invecs,outvecs);
-	else
-		s_pos_once(n,invecs,outvecs);
-}
-
-V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
-{
-	const S *speed = invecs[0];
-	S *pos = outvecs[outchns];
-	BL lpbang = false;
+	const t_sample *speed = invecs[0];
+	t_sample *pos = outvecs[outchns];
+	bool lpbang = false;
 
 #ifdef __VEC__
 	// prefetch cache
 	vec_dst(speed,GetPrefetchConstant(1,n>>2,0),0);
 #endif
 
-	const D smin = curmin,smax = curmax,plen = smax-smin;
+	const double smin = curmin,smax = curmax,plen = smax-smin;
 
-	if(buf && plen > 0) {
-		register D o = curpos;
+	if(plen > 0) {
+		register double o = curpos;
 
-		for(I i = 0; i < n; ++i) {	
-			const S spd = speed[i];  // must be first because the vector is reused for output!
+		for(int i = 0; i < n; ++i) {	
+			const t_sample spd = speed[i];  // must be first because the vector is reused for output!
 
 			// normalize offset
 			if(!(o < smax)) {  // faster than o >= smax
@@ -580,82 +366,33 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 	if(lpbang) ToOutBang(outchns+3);
 }
 
-// \TODO optimize that for spd = const!
-V xgroove::s_pos_c_loop(I n,S *const *invecs,S *const *outvecs)
+void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvecs)
 {
-	const S spd = *invecs[0];
-	S *pos = outvecs[outchns];
-	BL lpbang = false;
-
-	const D smin = curmin,smax = curmax,plen = smax-smin;
-
-	if(buf && plen > 0) {
-		register D o = curpos;
-
-		for(I i = 0; i < n; ++i) {	
-			// normalize offset
-			if(!(o < smax)) {  // faster than o >= smax
-				o = fmod(o-smin,plen)+smin;
-				lpbang = true;
-			}
-			else if(o < smin) {
-				o = fmod(o-smin,plen)+smax; 
-				lpbang = true;
-			}
-
-			pos[i] = o;
-			o += spd;
-		}
-		// normalize and store current playing position
-		setpos(o);
-
-		playfun(n,&pos,outvecs); 
-
-		arrscale(n,pos,pos);
-	} 
-	else 
-		s_pos_off(n,invecs,outvecs);
-		
-	if(lpbang) ToOutBang(outchns+3);
-}
-
-V xgroove::s_pos_a_loop(I n,S *const *invecs,S *const *outvecs)
-{
-	const S *speed = invecs[0];
-	if(speed[0] == speed[n-1]) 
-		// assume constant speed
-		s_pos_c_loop(n,invecs,outvecs);
-	else
-		s_pos_loop(n,invecs,outvecs);
-}
-
-V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
-{
-	const S *speed = invecs[0];
-	S *pos = outvecs[outchns];
-	BL lpbang = false;
+	const t_sample *speed = invecs[0];
+	t_sample *pos = outvecs[outchns];
+	bool lpbang = false;
 
 	FLEXT_ASSERT(xzone);
 
-	const F xz = xzone,xf = (F)XZONE_TABLE/xz;
+	const float xz = xzone,xf = (float)XZONE_TABLE/xz;
 
     // adapt the playing bounds to the current cross-fade zone
-    const L smin = znsmin,smax = znsmax,plen = smax-smin;
+    const long smin = znsmin,smax = znsmax,plen = smax-smin;
 
 	// temporary storage
-	const L cmin = curmin,cmax = curmax;
+	const long cmin = curmin,cmax = curmax;
 	// hack -> set curmin/curmax to loop extremes so that sampling functions (playfun) don't get confused
 	curmin = smin,curmax = smax;
 
-	if(buf && plen > 0) {
-		BL inzn = false;
-		register D o = curpos;
+	if(plen > 0) {
+		bool inzn = false;
+		register double o = curpos;
 
 		// calculate inner cross-fade boundaries
-		const D lmin = smin+xz,lmax = smax-xz,lsh = lmax-lmin+xz;
-		const D lmin2 = lmin-xz/2,lmax2 = lmax+xz/2;
+		const double lmin = smin+xz,lmax = smax-xz,lsh = lmax-lmin+xz;
+		const double lmin2 = lmin-xz/2,lmax2 = lmax+xz/2;
 
- 		for(I i = 0; i < n; ++i) {	
+ 		for(int i = 0; i < n; ++i) {	
 			// normalize offset
             if(o < smin) {
 				o = fmod(o-smin,plen)+smax; 
@@ -666,9 +403,8 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 				lpbang = true;
 			}
 
-#if 1
 			if(o < lmin) {
-				register F inp;
+				register float inp;
 				if(o < lmin2) {
 					// in first half of early cross-fade zone
 					// this happens only once, then the offset is normalized to the end
@@ -678,20 +414,20 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 					// now lmax <= o <= lmax2
 					lpbang = true;
 
-					inp = xz-(F)(o-lmax);  // 0 <= inp < xz
+					inp = xz-(float)(o-lmax);  // 0 <= inp < xz
 					znpos[i] = lmin-inp;
 				}
 				else { 
 					// in second half of early cross-fade zone
 
-					inp = xz+(F)(o-lmin);  // 0 <= inp < xz
+					inp = xz+(float)(o-lmin);  // 0 <= inp < xz
 					znpos[i] = lmax+inp;
 				}
 				znidx[i] = inp*xf;
 				inzn = true;
 			}
 			else if(!(o < lmax)) {
-				register F inp;
+				register float inp;
 				if(!(o < lmax2)) {
 					// in second half of late cross-fade zone
 					// this happens only once, then the offset is normalized to the beginning
@@ -700,12 +436,12 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 					// now lmin2 <= o <= lmin
 					lpbang = true;
 
-					inp = xz+(F)(o-lmin);  // 0 <= inp < xz
+					inp = xz+(float)(o-lmin);  // 0 <= inp < xz
 					znpos[i] = lmax+inp;
 				}
 				else { 
 					// in first half of late cross-fade zone
-					inp = xz-(F)(o-lmax);  // 0 <= inp < xz
+					inp = xz-(float)(o-lmax);  // 0 <= inp < xz
 					znpos[i] = lmin-inp;
 				}
 				znidx[i] = inp*xf;
@@ -714,30 +450,9 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 			else
 				znidx[i] = XZONE_TABLE,znpos[i] = 0;
 
-			const S spd = speed[i];  // must be first because the vector is reused for output!
+			const t_sample spd = speed[i];  // must be first because the vector is reused for output!
 			pos[i] = o;
 			o += spd;
-#else
-			if(o >= lmax) { 
-				o -= lsh; 
-				lpbang = true; 
-			}
-
-			if(o < lmin) {
-				register F inp = (F)(o-smin); // 0 <= inp < xz
-				znpos[i] = lmax+inp;
-				znidx[i] = inp*xf;
-				inzn = true;
-			}
-			else {
-				znpos[i] = 0;
-				znidx[i] = XZONE_TABLE;
-			}
-
-			const S spd = speed[i];  // must be first because the vector is reused for output!
-			pos[i] = o;
-			o += spd;
-#endif
 		}
 
 		// normalize and store current playing position
@@ -759,11 +474,11 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 			arrscale(n,znidx,znpos,XZONE_TABLE,-1);
 			
 			// calculate fade coefficients by sampling from the fade curve
-			zonefun(znmul,0,XZONE_TABLE+1,n,1,1,&znidx,&znidx);
-			zonefun(znmul,0,XZONE_TABLE+1,n,1,1,&znpos,&znpos);
+			zonefun(znmul,0,XZONE_TABLE+1,n,1,1,&znidx,&znidx,false);
+			zonefun(znmul,0,XZONE_TABLE+1,n,1,1,&znpos,&znpos,false);
 
 			// mix voices for all channels
-			for(I o = 0; o < outchns; ++o) {
+			for(int o = 0; o < outchns; ++o) {
 				MulSamples(outvecs[o],outvecs[o],znidx,n);
 				MulSamples(znbuf[o],znbuf[o],znpos,n);
 				AddSamples(outvecs[o],outvecs[o],znbuf[o],n);
@@ -778,29 +493,30 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 	if(lpbang) ToOutBang(outchns+3);
 }
 
-V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
+void xgroove::s_pos_bidir(int n,t_sample *const *invecs,t_sample *const *outvecs)
 {
-	const S *speed = invecs[0];
-	S *pos = outvecs[outchns];
-	BL lpbang = false;
+	const t_sample *speed = invecs[0];
+	t_sample *pos = outvecs[outchns];
+	bool lpbang = false;
 
-	const I smin = curmin,smax = curmax,plen = smax-smin;
+	const int smin = curmin,smax = curmax,plen = smax-smin;
 
-	if(buf && plen > 0) {
-		register D o = curpos;
-		register F bd = bidir;
+	if(plen > 0) {
+		register double o = curpos;
+		register float bd = bidir;
 
-		for(I i = 0; i < n; ++i) {	
-			const S spd = speed[i];  // must be first because the vector is reused for output!
+		for(int i = 0; i < n; ++i) {	
+			const t_sample spd = speed[i];  // must be first because the vector is reused for output!
 
 			// normalize offset
+            // \todo at the moment fmod doesn't take bidirectionality into account!!
 			if(!(o < smax)) {
-				o = smax-fmod(o-smin,plen); // mirror the position at smax
+				o = smax-fmod(o-smax,plen); // mirror the position at smax
 				bd = -bd;
 				lpbang = true;
 			}
 			else if(o < smin) {
-				o = smin-fmod(o-smin,plen); // mirror the position at smin
+				o = smin+fmod(smin-o,plen); // mirror the position at smin
 				bd = -bd;
 				lpbang = true;
 			}
@@ -811,79 +527,202 @@ V xgroove::s_pos_bidir(I n,S *const *invecs,S *const *outvecs)
 		// normalize and store current playing position
 		setpos(o);
 
-		bidir = (I)bd;
+		bidir = bd;
 		playfun(n,&pos,outvecs); 
 
 		arrscale(n,pos,pos);
 	} 
-	else 
+    else
 		s_pos_off(n,invecs,outvecs);
 		
 	if(lpbang) ToOutBang(outchns+3);
 }
 
+void xgroove::m_signal(int n,t_sample *const *in,t_sample *const *out) 
+{ 
+    int ret = ChkBuffer(true);
 
-V xgroove::s_dsp()
-{
-	if(doplay) {
-        // xzone might not be set yet (is done in do_xzone() )
-		do_xzone(); // recalculate (s2u may have been 0 before)
+    if(ret) {
+        FLEXT_ASSERT(buf.Valid());
+        
+        const lock_t l = Lock();
+		posfun(n,in,out); 
+        Unlock(l);
 
-		switch(loopmode) {
-		case xsl_once: 
-			SETSIGFUN(posfun,SIGFUN(s_pos_once)); 
-			break;
-		case xsl_loop: 
-			if(xzone > 0) {
-				const I blksz = Blocksize();
-
-				if(pblksz != blksz) {
-					for(I o = 0; o < outchns; ++o) {
-						if(znbuf[o]) FreeAligned(znbuf[o]); 
-						znbuf[o] = (S *)NewAligned(blksz*sizeof(S)); 
-					}
-				
-					if(znpos) FreeAligned(znpos); 
-					znpos = (S *)NewAligned(blksz*sizeof(S));
-					if(znidx) FreeAligned(znidx);
-					znidx = (S *)NewAligned(blksz*sizeof(S));
-
-					pblksz = blksz;
-				}
-
-				SETSIGFUN(posfun,SIGFUN(s_pos_loopzn)); 
-
-				// linear interpolation should be just ok for fade zone, no?
-				switch(outchns) {
-					case 1:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,1)); break;
-					case 2:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,2)); break;
-					case 4:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,4)); break;
-					default: SETSTFUN(zonefun,TMPLSTF(st_play2,1,-1));
-				}
-			}
-			else
-				SETSIGFUN(posfun,SIGFUN(s_pos_loop)); 
-			break;
-		case xsl_bidir: 
-			SETSIGFUN(posfun,SIGFUN(s_pos_bidir)); 
-			break;
-        default: ; // just to prevent warning
-		}
-	}
+        Refresh();
+    }
 	else
-		SETSIGFUN(posfun,SIGFUN(s_pos_off));
-	xinter::s_dsp();
+		zerofun(n,in,out);
 }
 
 
+void xgroove::DoUpdate(unsigned int flags)
+{
+    xinter::DoUpdate(flags);
 
-V xgroove::m_help()
+    if(flags&xsc_range) {
+        // output new range
+	    ToOutFloat(outchns+1,curmin*s2u);
+	    ToOutFloat(outchns+2,curmax*s2u);
+    }
+
+    if(flags&(xsc_fade|xsc_range))
+        if(do_xzone()) flags |= xsc_play;
+
+    if(flags&(xsc_pos|xsc_range))
+        // normalize position
+        setpos(curpos);
+
+    // loop zone must already be set
+    if(flags&xsc_play) {
+	    if(doplay) {
+		    switch(loopmode) {
+		    case xsl_once: 
+			    SETSIGFUN(posfun,SIGFUN(s_pos_once)); 
+			    break;
+		    case xsl_loop: 
+			    if(xzone > 0) {
+				    const int blksz = Blocksize();
+
+				    if(pblksz != blksz) {
+					    for(int o = 0; o < outchns; ++o) {
+						    if(znbuf[o]) FreeAligned(znbuf[o]); 
+						    znbuf[o] = (t_sample *)NewAligned(blksz*sizeof(t_sample)); 
+					    }
+    				
+					    if(znpos) FreeAligned(znpos); 
+					    znpos = (t_sample *)NewAligned(blksz*sizeof(t_sample));
+					    if(znidx) FreeAligned(znidx);
+					    znidx = (t_sample *)NewAligned(blksz*sizeof(t_sample));
+
+					    pblksz = blksz;
+				    }
+
+				    SETSIGFUN(posfun,SIGFUN(s_pos_loopzn)); 
+
+				    // linear interpolation should be just ok for fade zone, no?
+				    switch(outchns) {
+					    case 1:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,1)); break;
+					    case 2:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,2)); break;
+					    case 4:	SETSTFUN(zonefun,TMPLSTF(st_play2,1,4)); break;
+					    default: SETSTFUN(zonefun,TMPLSTF(st_play2,1,-1));
+				    }
+			    }
+			    else
+				    SETSIGFUN(posfun,SIGFUN(s_pos_loop)); 
+			    break;
+		    case xsl_bidir: 
+			    SETSIGFUN(posfun,SIGFUN(s_pos_bidir)); 
+			    break;
+            default: ; // just to prevent warning
+		    }
+	    }
+	    else
+		    SETSIGFUN(posfun,SIGFUN(s_pos_off));
+    }
+}
+
+bool xgroove::do_xzone()
+{
+	// \todo do we really need this?
+	if(!s2u) return false; // this can happen if DSP is off 
+
+    const long frames = buf.Frames();
+    if(!frames) return false;
+
+	xzone = _xzone; // make a copy for changing it
+
+	if(xfade == xsf_inside) { 
+		// fade zone goes inside the loop -> loop becomes shorter
+
+		// \todo what about round-off?
+		const long maxfd = (curmax-curmin)/2;
+		if(xzone > maxfd) xzone = maxfd;
+
+		znsmin = curmin,znsmax = curmax;
+	}
+	else if(xfade == xsf_keepfade) { 
+		// try to keep fade zone
+		// change of loop bounds may happen
+
+		// restrict xzone to half of buffer
+		const long maxfd = frames/2;
+		if(xzone > maxfd) xzone = maxfd;
+
+		// \todo what about round-off?
+        const long hzone = CASTINT<long>(xzone/2.f);
+		znsmin = curmin-hzone;
+		znsmax = curmax+hzone;
+
+		// widen loop if xzone doesn't fit into it
+		// \todo check formula
+		long lack = CASTINT<long>(ceil((xzone*2.f-(znsmax-znsmin))/2.f));
+		if(lack > 0) znsmin -= lack,znsmax += lack;
+
+		// check buffer limits and shift bounds if necessary
+		if(znsmin < 0) {
+			znsmax -= znsmin;
+			znsmin = 0;
+		}
+		if(znsmax > frames) 
+            znsmax = frames;
+	}
+	else if(xfade == xsf_keeplooplen) { 
+		// try to keep loop length
+		// shifting of loop bounds may happen
+
+		const long plen = curmax-curmin;
+		if(xzone > plen) xzone = plen;
+		const long maxfd = frames-plen;
+		if(xzone > maxfd) xzone = maxfd;
+
+		// \todo what about round-off?
+        const long hzone = CASTINT<long>(xzone/2.f);
+		znsmin = curmin-hzone;
+		znsmax = curmax+hzone;
+
+		// check buffer limits and shift bounds if necessary
+		// both cases can't happen because of xzone having been limited above
+		if(znsmin < 0) {
+			znsmax -= znsmin;
+			znsmin = 0;
+		}
+		else if(znsmax > frames) {
+			znsmin -= znsmax-frames;
+			znsmax = frames;
+		}
+	}
+	else if(xfade == xsf_keeplooppos) { 
+		// try to keep loop position and length
+
+		// restrict fade zone to maximum length 
+		const long plen = curmax-curmin;
+		if(xzone > plen) xzone = plen;
+
+		// \todo what about round-off?
+        const long hzone = CASTINT<long>(xzone/2.f);
+		znsmin = curmin-hzone;
+		znsmax = curmax+hzone;
+
+		long ovr = znsmax-frames;
+		if(-znsmin > ovr) ovr = -znsmin;
+		if(ovr > 0) {
+			znsmin += ovr;
+			znsmax -= ovr;
+			xzone -= ovr*2;
+		}
+	}
+
+	FLEXT_ASSERT(znsmin <= znsmax && (znsmax-znsmin) >= xzone*2.f);
+
+    return true;
+}
+
+
+void xgroove::m_help()
 {
 	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
-#ifdef FLEXT_DEBUG
-	post("compiled on " __DATE__ " " __TIME__);
-#endif
-	post("(C) Thomas Grill, 2001-2004");
+	post("(C) Thomas Grill, 2001-2005");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
@@ -915,18 +754,17 @@ V xgroove::m_help()
 	post("");
 } 
 
-V xgroove::m_print()
+void xgroove::m_print()
 {
-	static const C *sclmode_txt[] = {"units","units in loop","buffer","loop"};
-	static const C *interp_txt[] = {"off","4-point","linear"};
-	static const C *loop_txt[] = {"once","looping","bidir"};
+	static const char *sclmode_txt[] = {"units","units in loop","buffer","loop"};
+	static const char *interp_txt[] = {"off","4-point","linear"};
+	static const char *loop_txt[] = {"once","looping","bidir"};
 
 	// print all current settings
 	post("%s - current settings:",thisName());
-	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
-	post("out channels = %i, frames/unit = %.3f, scale mode = %s",outchns,(F)(1./s2u),sclmode_txt[sclmode]); 
-	post("loop = %s, interpolation = %s",loop_txt[(I)loopmode],interp_txt[interp >= xsi_none && interp <= xsi_lin?interp:xsi_none]); 
-	post("loop crossfade zone = %.3f",(F)(xzone*s2u)); 
+	post("bufname = '%s', length = %.3f, channels = %i",buf.Name(),(float)(buf.Frames()*s2u),buf.Channels()); 
+	post("out channels = %i, frames/unit = %.3f, scale mode = %s",outchns,(float)(1./s2u),sclmode_txt[sclmode]); 
+	post("loop = %s, interpolation = %s",loop_txt[(int)loopmode],interp_txt[interp >= xsi_none && interp <= xsi_lin?interp:xsi_none]); 
+	post("loop crossfade zone = %.3f",(float)(xzone*s2u)); 
 	post("");
 }
-

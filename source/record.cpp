@@ -1,11 +1,9 @@
 /*
-
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2004 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001-2005 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
-
 */
 
 #include "main.h"
@@ -22,53 +20,54 @@ class xrecord:
 	FLEXT_HEADER_S(xrecord,xsample,setup)
 
 public:
-	xrecord(I argc,const t_atom *argv);
+	xrecord(int argc,const t_atom *argv);
 	
-	virtual BL Init();
-		
-	virtual V m_help();
-	virtual V m_print();
-	
-	virtual I m_set(I argc,const t_atom *argv);
+	void m_pos(float pos)
+    {
+	    curpos = pos?CASTINT<long>(pos/s2u+.5):0;
+        Update(xsc_pos);
+        Refresh();
+    }
 
-	virtual V m_pos(F pos);
-	virtual V m_all();
-	virtual V m_start();
-	virtual V m_stop();
+	inline void mg_pos(float &v) const { v = curpos*s2u; }
 
-	virtual BL m_reset();
+    void m_start();
+	void m_stop();
 
-	virtual V m_units(xs_unit md = xsu__);
-	virtual V m_min(F mn);
-	virtual V m_max(F mx);
+	inline void m_append(bool app) 
+    { 
+        appmode = app;
+        Update(xsc_play);
+        if(!appmode) m_pos(0); 
+    }
 
-	inline V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
-
-	virtual V m_draw(I argc,const t_atom *argv);	
+	void m_draw(int argc,const t_atom *argv);	
 
 protected:
-	I inchns;
-	BL sigmode,appmode;
-	F drintv;
+	int inchns;
+	bool sigmode,appmode;
+	float drintv;
 
-	BL dorec,doloop;
-    I mixmode;
-	L curpos;  // in samples
+	bool dorec,doloop;
+    int mixmode;
+	long curpos;  // in samples
 
-	inline V outputmin() { ToOutFloat(1,curmin*s2u); }
-	inline V outputmax() { ToOutFloat(2,curmax*s2u); }
-
-	inline V mg_pos(F &v) const { v = curpos*s2u; }
+    virtual void DoReset();
+    virtual void DoUpdate(unsigned int flags);
+	
+	virtual void m_help();
+	virtual void m_print();
+	virtual void m_signal(int n,t_sample *const *in,t_sample *const *out);
 	
 private:
-	static V setup(t_classid c);
-
-	virtual V s_dsp();
+	static void setup(t_classid c);
 
 	TMPLSIGFUN(s_rec);
 
 	DEFSIGCALL(recfun);
-	virtual V m_signal(I n,S *const *in,S *const *out);
+
+	FLEXT_CALLBACK(m_start)
+	FLEXT_CALLBACK(m_stop)
 
 	FLEXT_CALLVAR_F(mg_pos,m_pos)
 	FLEXT_CALLBACK(m_all)
@@ -90,9 +89,13 @@ private:
 FLEXT_LIB_DSP_V("xrecord~",xrecord)
 
 
-V xrecord::setup(t_classid c)
+void xrecord::setup(t_classid c)
 {
 	DefineHelp(c,"xrecord~");
+
+	FLEXT_CADDBANG(c,0,m_start);
+	FLEXT_CADDMETHOD_(c,0,"start",m_start);
+	FLEXT_CADDMETHOD_(c,0,"stop",m_stop);
 
 	FLEXT_CADDATTR_VAR(c,"pos",mg_pos,m_pos);
 	FLEXT_CADDATTR_VAR(c,"min",mg_min,m_min);
@@ -107,14 +110,14 @@ V xrecord::setup(t_classid c)
 	FLEXT_CADDATTR_VAR(c,"append",appmode,m_append);
 }
 
-xrecord::xrecord(I argc,const t_atom *argv):
+xrecord::xrecord(int argc,const t_atom *argv):
 	inchns(1),
 	sigmode(false),appmode(true),
 	drintv(0),
 	dorec(false),doloop(false),
     mixmode(0)
 {
-	I argi = 0;
+	int argi = 0;
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	if(argc > argi && CanbeInt(argv[argi])) {
 		inchns = GetAInt(argv[argi]);
@@ -123,7 +126,7 @@ xrecord::xrecord(I argc,const t_atom *argv):
 #endif
 
 	if(argc > argi && IsSymbol(argv[argi])) {
-		buf = new buffer(GetSymbol(argv[argi]),true);
+		buf.Set(GetSymbol(argv[argi]),true);
 		argi++;
 
 #if FLEXT_SYS == FLEXT_SYS_MAX
@@ -135,11 +138,9 @@ xrecord::xrecord(I argc,const t_atom *argv):
 		}
 #endif
 	}
-	else
-		buf = new buffer(NULL,true);
 
-	for(I ci = 0; ci < inchns; ++ci) {
-		C tmp[40];
+    for(int ci = 0; ci < inchns; ++ci) {
+		char tmp[40];
 		STD::sprintf(tmp,ci == 0?"Messages/audio channel %i":"Audio channel %i",ci+1);
 		AddInSignal(tmp);  // audio signals
 	}
@@ -155,127 +156,69 @@ xrecord::xrecord(I argc,const t_atom *argv):
 	FLEXT_ADDMETHOD(inchns+2,m_max);
 }
 
-
-BL xrecord::Init()
-{
-	if(xsample::Init()) {
-		m_reset();
-		return true;
-	}
-	else
-		return false;
-}
-		
-V xrecord::m_units(xs_unit mode)
-{
-	xsample::m_units(mode);
-
-	m_sclmode();
-	outputmin();
-	outputmax();
-}
-
-V xrecord::m_min(F mn)
-{
-	xsample::m_min(mn);
-	m_pos(curpos*s2u);
-	outputmin();
-}
-
-V xrecord::m_max(F mx)
-{
-	xsample::m_max(mx);
-	m_pos(curpos*s2u);
-	outputmax();
-}
-
-V xrecord::m_all()
-{
-	xsample::m_all();
-	outputmin();
-	outputmax();
-}
-
-V xrecord::m_pos(F pos)
-{
-	curpos = pos?(L)(pos/s2u+.5):0;
-
-	if(curpos < curmin) curpos = curmin;
-	else if(curpos > curmax) curpos = curmax;
-}
-
-
-I xrecord::m_set(I argc,const t_atom *argv)
-{
-	I r = xsample::m_set(argc,argv);
-	if(r) 
-        // buffer parameters have changed, reset pos/min/max
-        m_reset(); 
-	return r;
-}
-
-V xrecord::m_start() 
+void xrecord::m_start() 
 { 
-	if(!sigmode && !appmode) m_pos(0); 
-	m_refresh(); 
-	dorec = true; 
-	buf->SetRefrIntv(drintv);
-	s_dsp();
+    ChkBuffer();
+
+    if(!sigmode && !appmode) { curpos = 0; Update(xsc_pos); }
+
+    dorec = true; 
+    Update(xsc_startstop);
+    Refresh();
 }
 
-V xrecord::m_stop() 
+void xrecord::m_stop() 
 { 
-	dorec = false; 
-	buf->Dirty(true);
-	buf->SetRefrIntv(0);
-	s_dsp();
+    ChkBuffer();
+    dorec = false; 
+    Update(xsc_startstop);
+    Refresh();
 }
 
-BL xrecord::m_reset()
+void xrecord::DoReset()
 {
+    xsample::DoReset();
 	curpos = 0;
-	return xsample::m_reset();
 }
 
-V xrecord::m_draw(I argc,const t_atom *argv)
+void xrecord::m_draw(int argc,const t_atom *argv)
 {
 	if(argc >= 1) {
-		drintv = GetInt(argv[0]);
-		if(dorec) buf->SetRefrIntv(drintv);
+		drintv = GetAInt(argv[0]);
+		if(dorec) buf.SetRefrIntv(drintv);
 	}
 	else
-		buf->Dirty(true);
+		buf.Dirty(true);
 }
 	
-	
-TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
+TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outvecs)
 {
-	SIGCHNS(BCHNS,buf->Channels(),ICHNS,inchns);
+	SIGCHNS(BCHNS,buf.Channels(),ICHNS,inchns);
 
-	const S *const *sig = invecs;
-	register I si = 0;
-	const S *on = invecs[inchns];
-	S *pos = outvecs[0];
+	const t_sample *const *sig = invecs;
+	register int si = 0;
+	const t_sample *on = invecs[inchns];
+	t_sample *pos = outvecs[0];
 
-	BL lpbang = false;
-	register const F pf = sclmul;
-	register L o = curpos;
+	bool lpbang = false;
+	register const float pf = sclmul;
+	register long o = curpos;
 	
 	if(o < curmin) o = curmin;
 
-//	if(buf && dorec && curlen > 0) {
-	if(buf && dorec && curmax > curmin) {
+	if(dorec && curmax > curmin) {
 		while(n) {
-			L ncur = curmax-o; // at max to buffer or recording end
+			long ncur = curmax-o; // at max to buffer or recording end
 
 			if(ncur <= 0) {	// end of buffer
 				if(doloop) { 
-					o = curmin;
-//					ncur = curlen;
-					ncur = curmax-o;
+					ncur = curmax-(o = curmin);
 				}
-				else 
-					m_stop(); // loop expired;
+                else {
+					// loop expired;
+                    dorec = false; 
+                    Update(xsc_startstop);
+                }
 					
 				lpbang = true;
 			}
@@ -284,9 +227,9 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 
 			if(ncur > n) ncur = n;
 			
-			register I i;
-			register S *bf = buf->Data()+o*BCHNS;
-			register F p = scale(o);
+			register int i;
+			register t_sample *bf = buf.Data()+o*BCHNS;
+			register float p = scale(o);
 
 			if(sigmode) {
 				if(appmode) {
@@ -295,7 +238,7 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 					switch(mixmode) {
                     case 0:
 						for(i = 0; i < ncur; ++i,++si) {	
-							if(*(on++) >= 0) {
+							if(!(*(on++) < 0)) {
 								for(int ci = 0; ci < ICHNS; ++ci)
 									bf[ci] = sig[ci][si];	
 								bf += BCHNS;
@@ -307,8 +250,8 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
                         break;
                     case 1:
 						for(i = 0; i < ncur; ++i,++si) {	
-							register const S g = *(on++);
-							if(g >= 0) {
+							register const t_sample g = *(on++);
+							if(!(g < 0)) {
 								for(int ci = 0; ci < ICHNS; ++ci)
 									bf[ci] = bf[ci]*(1.-g)+sig[ci][si]*g;
 								bf += BCHNS;
@@ -320,7 +263,7 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
                         break;
                     case 2:
 						for(i = 0; i < ncur; ++i,++si) {	
-							if(*(on++) >= 0) {
+							if(!(*(on++) < 0)) {
 								for(int ci = 0; ci < ICHNS; ++ci)
 									bf[ci] += sig[ci][si];	
 								bf += BCHNS;
@@ -337,7 +280,7 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 					switch(mixmode) {
                         case 0: {
 						    for(i = 0; i < ncur; ++i,++si) {	
-							    if(*(on++) >= 0)
+							    if(!(*(on++) < 0))
 							    { 	
 								    for(int ci = 0; ci < ICHNS; ++ci)
 									    bf[ci] = sig[ci][si];	
@@ -346,15 +289,15 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 							    }
 							    else {
 								    *(pos++) = p = scale(o = 0);
-								    bf = buf->Data();
+								    bf = buf.Data();
 							    }
 						    }
                             break;
                         }
                         case 1: {
 						    for(i = 0; i < ncur; ++i,++si) {	
-							    register const S g = *(on++);
-							    if(g >= 0) {
+							    register const t_sample g = *(on++);
+							    if(!(g < 0)) {
 								    for(int ci = 0; ci < ICHNS; ++ci)
 									    bf[ci] = bf[ci]*(1.-g)+sig[ci][si]*g;
 								    bf += BCHNS;
@@ -362,14 +305,14 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 							    }
 							    else {
 								    *(pos++) = p = scale(o = 0);
-								    bf = buf->Data();
+								    bf = buf.Data();
 							    }
 						    }
                             break;
                         }
                         case 2: {
 						    for(i = 0; i < ncur; ++i,++si) {	
-							    if(*(on++) >= 0)
+							    if(!(*(on++) < 0))
 							    { 	
 								    for(int ci = 0; ci < ICHNS; ++ci)
 									    bf[ci] += sig[ci][si];	
@@ -378,7 +321,7 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 							    }
 							    else {
 								    *(pos++) = p = scale(o = 0);
-								    bf = buf->Data();
+								    bf = buf.Data();
 							    }
 						    }
                             break;
@@ -393,8 +336,8 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 				switch(mixmode) {
                     case 0: {
 					    for(int ci = 0; ci < ICHNS; ++ci) {	
-						    register S *b = bf+ci;
-						    register const F *s = sig[ci]+si;
+						    register t_sample *b = bf+ci;
+						    register const float *s = sig[ci]+si;
 						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) 
                                 *b = *s;	
 					    }
@@ -403,7 +346,7 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
                     }
                     case 1: {
 					    for(i = 0; i < ncur; ++i,++si) {	
-						    register const S w = *(on++);
+						    register const t_sample w = *(on++);
 						    for(int ci = 0; ci < ICHNS; ++ci)
 							    bf[ci] = bf[ci]*(1.-w)+sig[ci][si]*w;
 						    bf += BCHNS;
@@ -412,9 +355,10 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
                     }
                     case 2: {
 					    for(int ci = 0; ci < ICHNS; ++ci) {	
-						    register S *b = bf+ci;
-						    register const F *s = sig[ci]+si;
-						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) *b += *s;	
+						    register t_sample *b = bf+ci;
+						    register const float *s = sig[ci]+si;
+						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) 
+                                *b += *s;	
 					    }
 					    si += ncur;
                         break;
@@ -430,52 +374,81 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 		} 
 		curpos = o;
 		
-		buf->Dirty(); 
+		buf.Dirty(); 
 	}
 
 	if(n) {
-		register F p = scale(o);
+		register float p = scale(o);
 		while(n--) *(pos++) = p;
 	}
 	
 	if(lpbang) ToOutBang(3);
 }
 
-V xrecord::m_signal(I n,S *const *in,S *const *out) 
+void xrecord::m_signal(int n,t_sample *const *in,t_sample *const *out) 
 { 
-	if(bufchk()) 
+    int ret = ChkBuffer(true);
+
+    if(ret) {
 		// call the appropriate dsp function
-		recfun(n,in,out); 
+        
+        const lock_t l = Lock();
+		recfun(n,in,out);
+        Unlock(l);
+         
+        Refresh();
+    }
 	else
 		// set position signal to zero
 		ZeroSamples(out[0],n);
 }
 
-V xrecord::s_dsp()
+void xrecord::DoUpdate(unsigned int flags)
 {
-	switch(buf->Channels()*1000+inchns) {
-	case 1001:	SETSIGFUN(recfun,TMPLFUN(s_rec,1,1));	break;
-	case 1002:	SETSIGFUN(recfun,TMPLFUN(s_rec,1,2));	break;
-	case 2001:	SETSIGFUN(recfun,TMPLFUN(s_rec,2,1));	break;
-	case 2002:	SETSIGFUN(recfun,TMPLFUN(s_rec,2,2));	break;
-	case 4001:
-	case 4002:
-	case 4003:	SETSIGFUN(recfun,TMPLFUN(s_rec,4,-1));	break;
-	case 4004:	SETSIGFUN(recfun,TMPLFUN(s_rec,4,4));	break;
-	default:	SETSIGFUN(recfun,TMPLFUN(s_rec,-1,-1));	break;
-	}
+    xsample::DoUpdate(flags);
+
+    if(flags&(xsc_pos|xsc_range)) {
+	    if(curpos < curmin) curpos = curmin;
+	    else if(curpos > curmax) curpos = curmax;
+    }
+
+    if(flags&xsc_range) {
+	    ToOutFloat(1,curmin*s2u);
+	    ToOutFloat(2,curmax*s2u);
+    }
+
+    if(flags&xsc_transport && buf.Ok()) {
+        if(dorec)
+        	buf.SetRefrIntv(drintv);
+        else {
+	        buf.Dirty(true);
+	        buf.SetRefrIntv(0);
+        }
+    }
+
+    if(flags&xsc_play) {
+	    switch(buf.Channels()*1000+inchns) {
+	    case 1001:	SETSIGFUN(recfun,TMPLFUN(s_rec,1,1));	break;
+	    case 1002:	SETSIGFUN(recfun,TMPLFUN(s_rec,1,2));	break;
+	    case 2001:	SETSIGFUN(recfun,TMPLFUN(s_rec,2,1));	break;
+	    case 2002:	SETSIGFUN(recfun,TMPLFUN(s_rec,2,2));	break;
+	    case 4001:
+	    case 4002:
+	    case 4003:	SETSIGFUN(recfun,TMPLFUN(s_rec,4,-1));	break;
+	    case 4004:	SETSIGFUN(recfun,TMPLFUN(s_rec,4,4));	break;
+	    default:	SETSIGFUN(recfun,TMPLFUN(s_rec,-1,-1));	break;
+	    }
+    }
 }
 
 
-
-
-V xrecord::m_help()
+void xrecord::m_help()
 {
 	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
 #ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2004");
+	post("(C) Thomas Grill, 2001-2005");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
@@ -506,15 +479,14 @@ V xrecord::m_help()
 	post("");
 }
 
-V xrecord::m_print()
+void xrecord::m_print()
 {
-	static const C sclmode_txt[][20] = {"units","units in loop","buffer","loop"};
+	static const char sclmode_txt[][20] = {"units","units in loop","buffer","loop"};
 
 	// print all current settings
 	post("%s - current settings:",thisName());
-	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
-	post("in channels = %i, frames/unit = %.3f, scale mode = %s",inchns,(F)(1./s2u),sclmode_txt[sclmode]); 
+	post("bufname = '%s', length = %.3f, channels = %i",buf.Name(),(float)(buf.Frames()*s2u),buf.Channels()); 
+	post("in channels = %i, frames/unit = %.3f, scale mode = %s",inchns,(float)(1./s2u),sclmode_txt[sclmode]); 
 	post("sigmode = %s, append = %s, loop = %s, mixmode = %i",sigmode?"yes":"no",appmode?"yes":"no",doloop?"yes":"no",mixmode); 
 	post("");
 }
-

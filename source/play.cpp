@@ -1,11 +1,9 @@
 /*
-
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2004 Thomas Grill (xovo@gmx.net)
+Copyright (c) 2001-2005 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
-
 */
 
 #include "main.h"
@@ -22,29 +20,40 @@ class xplay:
 	FLEXT_HEADER_S(xplay,xinter,setup)
 
 public:
-	xplay(I argc,const t_atom *argv);
+	xplay(int argc,const t_atom *argv);
+
+	void m_loop(xs_loop lp)
+    { 
+	    loopmode = lp;
+        Update(xsc_loop,true);
+    }
 	
-	virtual BL Init();
-		
-	virtual V m_help();
-	virtual V m_print();
+protected:
+	virtual void m_help();
+	virtual void m_print();
+	virtual void m_signal(int n,t_sample *const *in,t_sample *const *out);
 	
 private:
-	static V setup(t_classid c);
+	static void setup(t_classid c);
 
-	virtual V m_signal(I n,S *const *in,S *const *out);
+    FLEXT_CALLSET_E(m_loop,xs_loop)
 };
 
 FLEXT_LIB_DSP_V("xplay~",xplay)
 
-V xplay::setup(t_classid c)
+void xplay::setup(t_classid c)
 {
 	DefineHelp(c,"xplay~");
+
+	FLEXT_CADDATTR_VAR_E(c,"loop",loopmode,m_loop);
 }
 
-xplay::xplay(I argc,const t_atom *argv)
+xplay::xplay(int argc,const t_atom *argv)
 {
-	I argi = 0;
+    // set the loopmode to non-wrapping (for sample interpolation)
+    loopmode = xsl_once;
+
+	int argi = 0;
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	if(argc > argi && CanbeInt(argv[argi])) {
 		outchns = GetAInt(argv[argi]);
@@ -53,7 +62,7 @@ xplay::xplay(I argc,const t_atom *argv)
 #endif
 
 	if(argc > argi && IsSymbol(argv[argi])) {
-		buf = new buffer(GetSymbol(argv[argi]),true);
+		buf.Set(GetSymbol(argv[argi]),true);
 		argi++;
 		
 #if FLEXT_SYS == FLEXT_SYS_MAX
@@ -65,37 +74,31 @@ xplay::xplay(I argc,const t_atom *argv)
 		}
 #endif
 	}
-	else
-		buf = new buffer(NULL,true);
 
-	AddInSignal("Messages and Signal of playing position");  // pos signal
-	for(I ci = 0; ci < outchns; ++ci) {
-		C tmp[30];
+    AddInSignal("Messages and Signal of playing position");  // pos signal
+	for(int ci = 0; ci < outchns; ++ci) {
+		char tmp[30];
 		STD::sprintf(tmp,"Audio signal channel %i",ci+1); 
 		AddOutSignal(tmp);
 	}
-	
-	m_reset();
 }
 
-BL xplay::Init()
-{
-	if(xinter::Init()) {
-		m_reset();
-		return true;
-	}
-	else
-		return false;
-}
-	
-V xplay::m_signal(I n,S *const *in,S *const *out) 
+void xplay::m_signal(int n,t_sample *const *in,t_sample *const *out) 
 { 
+	int ret = ChkBuffer(true);
+
 	// check whether buffer is invalid or changed
-	if(bufchk()) {
+	if(ret) {
+        const lock_t l = Lock();
+        
 		// convert position units to frames
 		arrmul(n,in[0],out[0]);
 		// call resample routine
 		playfun(n,out,out); 
+        
+        Unlock(l);
+
+        Refresh();
 	}
 	else
 		zerofun(n,out,out);
@@ -103,13 +106,13 @@ V xplay::m_signal(I n,S *const *in,S *const *out)
 	
 
 
-V xplay::m_help()
+void xplay::m_help()
 {
 	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
 #ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2004");
+	post("(C) Thomas Grill, 2001-2005");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
@@ -120,7 +123,7 @@ V xplay::m_help()
 	post("Methods:");
 	post("\thelp: shows this help");
 	post("\tset name: set buffer");
-	post("\tenable 0/1: turn dsp calculation off/on");	
+	post("\tenable 0/1: turn dsp calculation off/on");
 	post("\tprint: print current settings");
 	post("\tbang/start: begin playing");
 	post("\tstop: stop playing");
@@ -128,17 +131,16 @@ V xplay::m_help()
 	post("\trefresh: checks buffer and refreshes outlets");
 	post("\t@units 0/1/2/3: set units to samples/buffer size/ms/s");
 	post("\t@interp 0/1/2: set interpolation to off/4-point/linear");
+	post("\t@loop 0/1/2: sets looping (interpolation) to off/forward/bidirectional");
 	post("");
 }
 
-V xplay::m_print()
+void xplay::m_print()
 {
-	const C *interp_txt[] = {"off","4-point","linear"};
+	const char *interp_txt[] = {"off","4-point","linear"};
 	// print all current settings
 	post("%s - current settings:",thisName());
-	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
-	post("out channels = %i, samples/unit = %.3f, interpolation = %s",outchns,(F)(1./s2u),interp_txt[interp >= xsi_none && interp <= xsi_lin?interp:xsi_none]); 
+	post("bufname = '%s', length = %.3f, channels = %i",buf.Name(),(float)(buf.Frames()*s2u),buf.Channels()); 
+	post("out channels = %i, samples/unit = %.3f, interpolation = %s",outchns,(float)(1./s2u),interp_txt[interp >= xsi_none && interp <= xsi_lin?interp:xsi_none]); 
 	post("");
 }
-
-

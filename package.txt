@@ -1,12 +1,8 @@
 NAME=xsample
 
-BUILDCLASS=ext
-BUILDMODE=release
-BUILDTYPE=single
+SRCDIR=source
 
 PRECOMPILE=prefix.h
 
-SRCDIR=source
-
 SRCS=main.cpp play.cpp groove.cpp record.cpp inter.cpp
-HDRS=main.h inter.h
+HDRS=prefix.h main.h inter.h

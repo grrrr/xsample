@@ -12,3 +12,4 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 #include <flext.h>
 
+#include <math.h>

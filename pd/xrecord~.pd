@@ -1,4 +1,4 @@
-#N canvas 58 17 869 651 12;
+#N canvas 58 17 877 659 12;
 #X obj 18 83 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1
 -1;
 #X msg 17 103 stop;
@@ -34,7 +34,7 @@
 #X msg 572 320 sigmode \$1;
 #X msg 425 417 print;
 #X obj 579 425 hsl 128 15 -0.001 1 0 1 empty empty empty 20 8 0 8 -225271
--1 -1 3200 1;
+-1 -1 2800 1;
 #X msg 601 347 mixmode \$1;
 #X floatatom 645 443 8 0 0 0 - - -;
 #X obj 427 530 metro 30;
@@ -83,14 +83,11 @@
 #X obj 516 529 xrecord~ \$0-buf;
 #X obj 18 12 cnv 15 800 40 empty empty xrecord~ 10 22 0 24 -260818
 -1 0;
-#X text 224 31 http://www.parasitaere-kapazitaeten.net;
-#X text 224 12 buffer-based signal recorder \, (C)2001-2004 Thomas
-Grill;
 #X text 202 253 min/max points;
 #X obj 201 241 nbx 5 14 0 1e+037 0 1 empty empty min 0 -6 0 10 -225271
--1 -1 78 256;
+-1 -1 0 256;
 #X obj 258 241 nbx 5 14 0 1e+037 0 1 empty empty max 0 -6 0 10 -225271
--1 -1 276 256;
+-1 -1 10002 256;
 #X obj 190 365 nbx 5 14 0 1e+037 0 1 empty empty min 0 -6 0 10 -262131
 -1 -1 0 256;
 #X obj 247 365 nbx 5 14 0 1e+037 0 1 empty empty max 0 -6 0 10 -262131
@@ -104,9 +101,12 @@ Grill;
 #X obj 674 574 nbx 5 14 0 1e+037 0 1 empty empty max 0 -6 0 10 -262131
 -1 -1 10000 256;
 #X obj 618 500 nbx 5 14 0 1e+037 0 1 empty empty min 0 -6 0 10 -225271
--1 -1 78 256;
+-1 -1 0 256;
 #X obj 675 500 nbx 5 14 0 1e+037 0 1 empty empty max 0 -6 0 10 -225271
--1 -1 276 256;
+-1 -1 10000 256;
+#X text 224 31 http://grrrr.org/ext;
+#X text 224 12 buffer-based signal recorder \, (C)2001-2005 Thomas
+Grill;
 #X connect 0 0 67 0;
 #X connect 1 0 67 0;
 #X connect 3 0 67 0;
@@ -155,14 +155,14 @@ Grill;
 #X connect 62 0 60 0;
 #X connect 63 0 27 0;
 #X connect 67 0 4 0;
-#X connect 67 1 75 0;
-#X connect 67 2 76 0;
-#X connect 67 3 78 0;
+#X connect 67 1 73 0;
+#X connect 67 2 74 0;
+#X connect 67 3 76 0;
 #X connect 67 4 58 0;
 #X connect 68 0 16 0;
-#X connect 68 1 80 0;
-#X connect 68 2 81 0;
-#X connect 73 0 67 2;
-#X connect 74 0 67 3;
-#X connect 82 0 68 2;
-#X connect 83 0 68 3;
+#X connect 68 1 78 0;
+#X connect 68 2 79 0;
+#X connect 71 0 67 2;
+#X connect 72 0 67 3;
+#X connect 80 0 68 2;
+#X connect 81 0 68 3;

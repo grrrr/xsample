@@ -20,17 +20,22 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="1"
-				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="c:\programme\audio\pd\src,f:\prog\max\flext\source"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="0"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="TRUE"
+				OptimizeForProcessor="3"
+				AdditionalIncludeDirectories="c:\programme\audio\pd\src;..\flext\source"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=2"
 				StringPooling="TRUE"
-				RuntimeLibrary="4"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="prefix.h"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -40,7 +45,7 @@
 				OutputFile="pd-msvc\xsample.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="c:\programme\audio\pd\bin,..\flext\pd-msvc\"
+				AdditionalLibraryDirectories="c:\programme\audio\pd\bin"
 				ImportLibrary=".\pd-msvc\r/xsample.lib"
 				TargetMachine="1"/>
 			<Tool
@@ -84,11 +89,12 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="c:\programme\audio\pd\src,f:\prog\max\flext\source"
+				AdditionalIncludeDirectories="c:\programme\audio\pd\src;..\flext\source"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=2"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="5"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="prefix.h"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -98,11 +104,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pd.lib flext_d-pdwin.lib"
+				AdditionalDependencies="pd.lib"
 				OutputFile="$(outdir)/xsample.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="c:\programme\audio\pd\bin\,..\flext\pd-msvc\"
+				AdditionalLibraryDirectories="c:\programme\audio\pd\bin\"
 				GenerateDebugInformation="TRUE"
 				ImportLibrary=".\pd-msvc\d/xsample.lib"
 				TargetMachine="1"/>
@@ -154,6 +160,7 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="prefix.h"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -275,9 +282,10 @@
 				AdditionalIncludeDirectories="&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\max-includes&quot;;&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\msp-includes&quot;;..\flext\source"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1"
 				StringPooling="TRUE"
-				RuntimeLibrary="1"
+				RuntimeLibrary="0"
 				StructMemberAlignment="2"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="prefix.h"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
@@ -332,17 +340,21 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
+				Optimization="2"
 				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="1"
-				OptimizeForProcessor="2"
+				InlineFunctionExpansion="0"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="TRUE"
+				OptimizeForProcessor="3"
 				AdditionalIncludeDirectories="&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\max-includes&quot;;&quot;C:\data\prog\audio\maxmspsdk_win\4.5 headers\c74support\msp-includes&quot;;..\flext\source"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;FLEXT_SYS=1"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				StructMemberAlignment="2"
 				BufferSecurityCheck="FALSE"
+				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="prefix.h"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -393,9 +405,6 @@
 		<Filter
 			Name="doc"
 			Filter="">
-			<File
-				RelativePath="make-files.txt">
-			</File>
 			<File
 				RelativePath="readme.txt">
 			</File>
