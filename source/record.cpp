@@ -79,20 +79,20 @@ private:
 #endif
 	static t_int *dspmeth(t_int *w);
 	
-	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
-	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
+	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
+	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
 
-	static V cb_pos(V *c,F pos) { thisClass(c)->m_pos(pos); }
-	static V cb_min(V *c,F mn) { thisClass(c)->m_min(mn); }
-	static V cb_max(V *c,F mx) { thisClass(c)->m_max(mx); }
+	static V cb_pos(V *c,F pos) { thisObject(c)->m_pos(pos); }
+	static V cb_min(V *c,F mn) { thisObject(c)->m_min(mn); }
+	static V cb_max(V *c,F mx) { thisObject(c)->m_max(mx); }
 
-	static V cb_loop(V *c,FI lp) { thisClass(c)->m_loop(lp != 0); }
+	static V cb_loop(V *c,FI lp) { thisObject(c)->m_loop(lp != 0); }
 
-	static V cb_mixmode(V *c,FI md) { thisClass(c)->m_mixmode(md != 0); }
-	static V cb_sigmode(V *c,FI md) { thisClass(c)->m_sigmode(md != 0); }
-	static V cb_append(V *c,FI md) { thisClass(c)->m_append(md != 0); }
+	static V cb_mixmode(V *c,FI md) { thisObject(c)->m_mixmode(md != 0); }
+	static V cb_sigmode(V *c,FI md) { thisObject(c)->m_sigmode(md != 0); }
+	static V cb_append(V *c,FI md) { thisObject(c)->m_append(md != 0); }
 
-	static V cb_draw(V *c,t_symbol *,I argc,t_atom *argv) { thisClass(c)->m_draw(argc,argv); }	
+	static V cb_draw(V *c,t_symbol *,I argc,t_atom *argv) { thisObject(c)->m_draw(argc,argv); }	
 };
 
 

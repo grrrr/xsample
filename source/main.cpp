@@ -48,14 +48,14 @@ xs_obj::xs_obj():
 {}
 	
 
-V xs_obj::cb_set(V *c,t_symbol *,I argc,t_atom *argv) { thisClass(c)->m_set(argc,argv); }
-V xs_obj::cb_print(V *c) { thisClass(c)->m_print(); }	
-V xs_obj::cb_refresh(V *c) { thisClass(c)->m_refresh(); }	
-V xs_obj::cb_reset(V *c) { thisClass(c)->m_reset(); }	
+V xs_obj::cb_set(V *c,t_symbol *,I argc,t_atom *argv) { thisObject(c)->m_set(argc,argv); }
+V xs_obj::cb_print(V *c) { thisObject(c)->m_print(); }	
+V xs_obj::cb_refresh(V *c) { thisObject(c)->m_refresh(); }	
+V xs_obj::cb_reset(V *c) { thisObject(c)->m_reset(); }	
 
-V xs_obj::cb_units(V *c,FI md) { thisClass(c)->m_units((xs_unit)(I)md); }
-V xs_obj::cb_interp(V *c,FI md) { thisClass(c)->m_interp((xs_intp)(I)md); }
-V xs_obj::cb_sclmode(V *c,FI md) { thisClass(c)->m_sclmode((xs_sclmd)(I)md); }
+V xs_obj::cb_units(V *c,FI md) { thisObject(c)->m_units((xs_unit)(I)md); }
+V xs_obj::cb_interp(V *c,FI md) { thisObject(c)->m_interp((xs_intp)(I)md); }
+V xs_obj::cb_sclmode(V *c,FI md) { thisObject(c)->m_sclmode((xs_sclmd)(I)md); }
 
 
 I xs_obj::m_set(I argc, t_atom *argv)

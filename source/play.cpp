@@ -54,9 +54,9 @@ protected:
 private:
 	virtual V m_dsp(t_signal **sp);
 
-	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
-	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
-	static V cb_reset(t_class *c) { thisClass(c)->m_reset(); }
+	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
+	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
+	static V cb_reset(t_class *c) { thisObject(c)->m_reset(); }
 
 #ifdef TMPLOPT
 	template <int _BCHNS_,int _OCHNS_>

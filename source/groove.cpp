@@ -72,19 +72,19 @@ protected:
 private:
 	virtual V m_dsp(t_signal **sp);
 
-	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
-	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
+	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
+	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
 
 #ifdef TMPLOPT
 	template <int _BCHNS_,int _OCHNS_>
 #endif
 	static t_int *dspmeth(t_int *w);
 
-	static V cb_pos(V *c,F pos) { thisClass(c)->m_pos(pos); }
-	static V cb_min(V *c,F mn) { thisClass(c)->m_min(mn); }
-	static V cb_max(V *c,F mx) { thisClass(c)->m_max(mx); }
+	static V cb_pos(V *c,F pos) { thisObject(c)->m_pos(pos); }
+	static V cb_min(V *c,F mn) { thisObject(c)->m_min(mn); }
+	static V cb_max(V *c,F mx) { thisObject(c)->m_max(mx); }
 
-	static V cb_loop(V *c,FI lp) { thisClass(c)->m_loop(lp != 0); }
+	static V cb_loop(V *c,FI lp) { thisObject(c)->m_loop(lp != 0); }
 };
 
 
