@@ -230,6 +230,9 @@ xgroove::xgroove(int argc,const t_atom *argv):
 	// don't know vector size yet -> wait for m_dsp
 	znbuf = new t_sample *[outchns];
 	for(int i = 0; i < outchns; ++i) znbuf[i] = NULL;
+
+    // initialize crossfade shape
+    ms_xshape(xshape);
 }
 
 xgroove::~xgroove()
