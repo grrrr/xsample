@@ -65,7 +65,7 @@ protected:
 	V outputmax() { outlet_float(outmax,curmax*s2u); }
 
 #ifdef TMPLOPT
-	template <int _BCHNS_,int _OCHNS_>
+	template <I _BCHNS_,I _OCHNS_>
 #endif
 	V signal(I n,const F *speed,F *pos);  // this is the dsp method
 	
@@ -76,7 +76,7 @@ private:
 	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
 
 #ifdef TMPLOPT
-	template <int _BCHNS_,int _OCHNS_>
+	template <I _BCHNS_,I _OCHNS_>
 #endif
 	static t_int *dspmeth(t_int *w);
 
@@ -248,6 +248,8 @@ t_int *xgroove_obj::dspmeth(t_int *w)
 
 #ifdef TMPLOPT
 template <int _BCHNS_,int _OCHNS_>
+#else
+template <int _BCHNS_>
 #endif
 V xgroove_obj::signal(I n,const F *speed,F *pos)
 {
@@ -435,11 +437,10 @@ V xgroove_obj::m_dsp(t_signal **sp)
 		case 202:
 			dsp_add(dspmeth<2,2>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
 			break;
-		case 204:
-			dsp_add(dspmeth<2,4>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
-			break;
+		case 401:
 		case 402:
-			dsp_add(dspmeth<4,2>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+		case 403:
+			dsp_add(dspmeth<4,0>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
 			break;
 		case 404:
 			dsp_add(dspmeth<4,4>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);

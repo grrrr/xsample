@@ -17,7 +17,7 @@ EXT_EXTERN V xgroove_tilde_setup();
 
 #if !defined(_MSC_VER) && !defined(__GNUC__)
 // MS VC 6.0 can't handle <int,int> templates?!
-// GNUC dies at compile
+// GNUC 2.95.2 dies at compile
 #define TMPLOPT
 #endif
 

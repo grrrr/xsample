@@ -438,11 +438,10 @@ V xrec_obj::m_dsp(t_signal **sp)
 		case 202:
 			dsp_add(dspmeth<2,2>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
-		case 204:
-			dsp_add(dspmeth<2,4>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
-			break;
+		case 401:
 		case 402:
-			dsp_add(dspmeth<4,2>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+		case 403:
+			dsp_add(dspmeth<4,0>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		case 404:
 			dsp_add(dspmeth<4,4>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
