@@ -51,7 +51,8 @@ protected:
 	BL sigmode,appmode;
 	F drintv;
 
-	BL dorec,doloop,mixmode;
+	BL dorec,doloop;
+    I mixmode;
 	L curpos;  // in samples
 
 	inline V outputmin() { ToOutFloat(1,curmin*s2u); }
@@ -77,7 +78,7 @@ private:
 	FLEXT_CALLBACK_F(m_max)
 
 	FLEXT_ATTRVAR_B(doloop)
-	FLEXT_ATTRVAR_B(mixmode)
+	FLEXT_ATTRVAR_I(mixmode)
 	FLEXT_ATTRVAR_B(sigmode)
 	FLEXT_CALLSET_B(m_append)
 	FLEXT_ATTRGET_B(appmode)
@@ -108,7 +109,7 @@ V xrecord::setup(t_classid c)
 
 xrecord::xrecord(I argc,const t_atom *argv):
 	dorec(false),
-	sigmode(false),mixmode(false),
+	sigmode(false),mixmode(0),
 	appmode(true),doloop(false),
 	drintv(0),
 	inchns(1)
@@ -291,7 +292,8 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 				if(appmode) {
 					// append to current position
 				
-					if(!mixmode) {
+					switch(mixmode) {
+                    case 0:
 						for(i = 0; i < ncur; ++i,++si) {	
 							if(*(on++) >= 0) {
 								for(int ci = 0; ci < ICHNS; ++ci)
@@ -302,8 +304,8 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 							else 
 								*(pos++) = p;
 						}
-					}
-					else {
+                        break;
+                    case 1:
 						for(i = 0; i < ncur; ++i,++si) {	
 							register const S g = *(on++);
 							if(g >= 0) {
@@ -315,11 +317,25 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 							else 
 								*(pos++) = p;
 						}
-					}
+                        break;
+                    case 2:
+						for(i = 0; i < ncur; ++i,++si) {	
+							if(*(on++) >= 0) {
+								for(int ci = 0; ci < ICHNS; ++ci)
+									bf[ci] += sig[ci][si];	
+								bf += BCHNS;
+								*(pos++) = p,p += pf,++o;
+							}
+							else 
+								*(pos++) = p;
+						}
+                        break;
+                    }
 				}
 				else {  
 					// don't append
-					if(!mixmode) {
+					switch(mixmode) {
+                    case 0: 
 						for(i = 0; i < ncur; ++i,++si) {	
 							if(*(on++) >= 0)
 							{ 	
@@ -333,8 +349,8 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 								bf = buf->Data();
 							}
 						}
-					}
-					else {
+                        break;
+                    case 1:
 						for(i = 0; i < ncur; ++i,++si) {	
 							register const S g = *(on++);
 							if(g >= 0) {
@@ -348,6 +364,22 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 								bf = buf->Data();
 							}
 						}
+                        break;
+                    case 2:
+						for(i = 0; i < ncur; ++i,++si) {	
+							if(*(on++) >= 0)
+							{ 	
+								for(int ci = 0; ci < ICHNS; ++ci)
+									bf[ci] += sig[ci][si];	
+								bf += BCHNS;
+								*(pos++) = p,p += pf,++o;
+							}
+							else {
+								*(pos++) = p = scale(o = 0);
+								bf = buf->Data();
+							}
+						}
+                        break;
 					}
 				}
 			}
@@ -355,22 +387,33 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 				// message mode
 				
 				// Altivec optimization for that!
-				if(!mixmode) {
+				switch(mixmode) {
+                case 0:
 					for(int ci = 0; ci < ICHNS; ++ci) {	
 						register S *b = bf+ci;
 						register const F *s = sig[ci];
 						for(i = 0; i < ncur; ++i,b += BCHNS,++s) *b = *s;	
 					}
 					si += ncur;
-				}
-				else {
+                    break;
+                case 1:
 					for(i = 0; i < ncur; ++i,++si) {	
 						register const S w = *(on++);
 						for(int ci = 0; ci < ICHNS; ++ci)
 							bf[ci] = bf[ci]*(1.-w)+sig[ci][si]*w;
 						bf += BCHNS;
 					}
+                    break;
+                case 2:
+					for(int ci = 0; ci < ICHNS; ++ci) {	
+						register S *b = bf+ci;
+						register const F *s = sig[ci];
+						for(i = 0; i < ncur; ++i,b += BCHNS,++s) *b += *s;	
+					}
+					si += ncur;
+                    break;
 				}
+
 				for(i = 0; i < ncur; ++i) {
 					*(pos++) = p,p += pf,++o;
 				}
@@ -442,7 +485,7 @@ V xrecord::m_help()
 	post("\t@sigmode 0/1: specify message or signal triggered recording");
 	post("\t@append 0/1: reset recording position or append to current position");
 	post("\t@loop 0/1: switches looping off/on");
-	post("\t@mixmode 0/1: specify if audio signal should be mixed in");
+	post("\t@mixmode 0/1/2: specify how audio signal should be mixed in (none,mixed,added)");
 	post("\tmin {unit}: set minimum recording point");
 	post("\tmax {unit}: set maximum recording point");
 	post("\tall: select entire buffer length");
@@ -464,7 +507,7 @@ V xrecord::m_print()
 	post("%s - current settings:",thisName());
 	post("bufname = '%s', length = %.3f, channels = %i",buf->Name(),(F)(buf->Frames()*s2u),buf->Channels()); 
 	post("in channels = %i, frames/unit = %.3f, scale mode = %s",inchns,(F)(1./s2u),sclmode_txt[sclmode]); 
-	post("sigmode = %s, append = %s, loop = %s, mixmode = %s",sigmode?"yes":"no",appmode?"yes":"no",doloop?"yes":"no",mixmode?"yes":"no"); 
+	post("sigmode = %s, append = %s, loop = %s, mixmode = %i",sigmode?"yes":"no",appmode?"yes":"no",doloop?"yes":"no",mixmode); 
 	post("");
 }
 

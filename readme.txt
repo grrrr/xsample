@@ -123,6 +123,7 @@ Version history:
 - makefiles for command line MSVC++, BCC, cygwin GCC
 - better handling of non-existent buffers
 - fixed flext-related error on setting buffers
+- xrecord~: mixmode has now 3 states (off, mix-in, add)
 
 0.2.4:
 - according to flext 0.2.3 changed sample type to t_sample (S)

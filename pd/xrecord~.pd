@@ -1,4 +1,4 @@
-#N canvas 134 12 859 612 12;
+#N canvas 134 12 861 614 12;
 #X obj 14 15 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1
 -1;
 #X msg 13 35 stop;
@@ -43,12 +43,10 @@
 1;
 #X msg 556 263 sigmode \$1;
 #X msg 409 360 print;
-#X obj 581 353 hsl 128 15 -0.001 1 0 1 empty empty empty 20 8 0 8 -225271
+#X obj 563 368 hsl 128 15 -0.001 1 0 1 empty empty empty 20 8 0 8 -225271
 -1 -1 3200 1;
-#X obj 537 291 tgl 15 0 empty empty empty 20 8 0 8 -225271 -1 -1 1
-1;
-#X msg 557 288 mixmode \$1;
-#X floatatom 629 381 8 0 0 0 - - -;
+#X msg 585 290 mixmode \$1;
+#X floatatom 629 386 8 0 0 0 - - -;
 #X obj 411 473 metro 30;
 #X obj 18 247 metro 30;
 #X obj 640 21 osc~ 10;
@@ -71,13 +69,12 @@
 #X text 26 270 position signal;
 #X text 619 238 looping on/off;
 #X text 644 264 signal mode on/off;
-#X text 700 381 trigger signal;
+#X text 698 379 trigger signal;
 #X text 379 121 <----- message triggered;
 #X text 173 368 signal triggered ------->;
 #X text 493 185 click to activate auto update;
 #X text 432 271 start;
 #X text 450 295 stop;
-#X text 538 307 mix-in by trigger signal on/off;
 #X msg 153 170 all;
 #X msg 488 206 100;
 #X obj 521 426 line~;
@@ -89,6 +86,11 @@
 #X obj 541 28 tgl 15 1 empty empty empty 20 8 0 8 -225271 -1 -1 0 1
 ;
 #X obj 561 24 noise~;
+#X obj 538 292 hradio 15 1 0 3 empty empty empty 0 -6 0 8 -262144 -1
+-1 0;
+#X text 559 309 mixmode (off \, mix-in \, add);
+#X text 566 339 by the trigger signal;
+#X text 565 326 the amount of mixing-in is given;
 #X connect 0 0 7 0;
 #X connect 1 0 7 0;
 #X connect 4 0 7 2;
@@ -96,10 +98,10 @@
 #X connect 7 0 9 0;
 #X connect 7 1 2 0;
 #X connect 7 2 3 0;
-#X connect 7 4 72 0;
+#X connect 7 4 70 0;
 #X connect 8 0 7 0;
 #X connect 9 0 10 0;
-#X connect 11 0 41 0;
+#X connect 11 0 40 0;
 #X connect 12 0 7 0;
 #X connect 13 0 14 0;
 #X connect 14 0 7 0;
@@ -115,7 +117,7 @@
 #X connect 24 2 21 0;
 #X connect 25 0 24 0;
 #X connect 26 0 27 0;
-#X connect 28 0 40 0;
+#X connect 28 0 39 0;
 #X connect 29 0 30 0;
 #X connect 30 0 24 0;
 #X connect 31 0 32 0;
@@ -123,27 +125,27 @@
 #X connect 33 0 34 0;
 #X connect 34 0 24 0;
 #X connect 35 0 24 0;
-#X connect 36 0 39 0;
-#X connect 36 0 70 0;
-#X connect 37 0 38 0;
-#X connect 38 0 24 0;
-#X connect 40 0 26 0;
-#X connect 41 0 9 0;
-#X connect 42 0 46 0;
-#X connect 43 0 7 0;
-#X connect 44 0 24 0;
-#X connect 46 0 45 0;
-#X connect 47 0 46 1;
-#X connect 48 0 45 0;
-#X connect 49 0 48 1;
-#X connect 50 0 48 0;
-#X connect 50 1 48 0;
-#X connect 67 0 7 0;
-#X connect 68 0 32 0;
-#X connect 69 0 24 1;
-#X connect 70 0 69 0;
+#X connect 36 0 38 0;
+#X connect 36 0 68 0;
+#X connect 37 0 24 0;
+#X connect 39 0 26 0;
+#X connect 40 0 9 0;
+#X connect 41 0 45 0;
+#X connect 42 0 7 0;
+#X connect 43 0 24 0;
+#X connect 45 0 44 0;
+#X connect 46 0 45 1;
+#X connect 47 0 44 0;
+#X connect 48 0 47 1;
+#X connect 49 0 47 0;
+#X connect 49 1 47 0;
+#X connect 65 0 7 0;
+#X connect 66 0 32 0;
+#X connect 67 0 24 1;
+#X connect 68 0 67 0;
+#X connect 69 0 7 0;
 #X connect 71 0 7 0;
-#X connect 73 0 7 0;
-#X connect 74 0 45 0;
-#X connect 75 0 74 1;
-#X connect 76 0 74 0;
+#X connect 72 0 44 0;
+#X connect 73 0 72 1;
+#X connect 74 0 72 0;
+#X connect 75 0 37 0;
