@@ -164,7 +164,7 @@ V xgroove::m_max(F mx)
 
 V xgroove::m_pos(F pos)
 {
-	curpos = pos/s2u;
+	curpos = pos?pos/s2u:0;
 	if(curpos < curmin) curpos = curmin;
 	else if(curpos > curmax) curpos = curmax;
 }

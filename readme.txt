@@ -60,6 +60,7 @@ Version history:
 - corrected Max/MSP assist method for multi-channel
 - fixed xplay~ help method 
 - changed syntax to x*~ [channels=1] [buffer] for future enhancements
+- fixed small bug concerning startup position in xgroove~ and xrecord~
 
 0.2.1:
 - no leftmost float inlet for position setting - use pos method
@@ -91,6 +92,7 @@ features:
 
 tests:
 - test graphics update behavior in Max (all done automatically ?)
+- overthink startup sequence of set buffer,set units,set sclmode,set pos/min/max
 
 bugs:
 no unfixed known

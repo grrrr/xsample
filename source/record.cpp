@@ -177,7 +177,7 @@ V xrecord::m_max(F mx)
 
 V xrecord::m_pos(F pos)
 {
-	curpos = (L)(pos/s2u+.5);
+	curpos = pos?(L)(pos/s2u+.5):0;
 	if(curpos < curmin) curpos = curmin;
 	else if(curpos > curmax) curpos = curmax;
 }

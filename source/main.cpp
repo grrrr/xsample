@@ -82,10 +82,10 @@ V xsample::m_reset()
 	if(buf->Set())	
 		m_dsp(0,NULL,NULL); // channel count may have changed
 	
-	m_min(0);
-    m_max(buf->Frames()*s2u);
 	m_units();
 	m_sclmode();	
+	m_min(0);
+    m_max(buf->Frames()*s2u);
 }
 
 V xsample::m_loadbang() 
