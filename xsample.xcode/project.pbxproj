@@ -56,8 +56,8 @@
 		};
 		0867D69AFE84028FC02AAC07 = {
 			children = (
-				E9974E060770761500206F68,
-				E9974E04077075E800206F68,
+				E94AC9630789EEA300AE1770,
+				E94AC9610789EE8700AE1770,
 				E9974DFA0770750400206F68,
 				E9974DFB0770750400206F68,
 			);
@@ -158,7 +158,7 @@
 		D2AAC09B05546B4700DB518D = {
 			buildActionMask = 2147483647;
 			files = (
-				E9974E05077075E800206F68,
+				E94AC9640789EEA300AE1770,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -210,6 +210,34 @@
 //E92
 //E93
 //E94
+		E94AC9610789EE8700AE1770 = {
+			isa = PBXFileReference;
+			lastKnownFileType = archive.ar;
+			name = "libflext-max_sd.a";
+			path = "/usr/local/lib/libflext-max_sd.a";
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		E94AC9620789EE8700AE1770 = {
+			fileRef = E94AC9610789EE8700AE1770;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E94AC9630789EEA300AE1770 = {
+			isa = PBXFileReference;
+			lastKnownFileType = archive.ar;
+			name = "libflext-pd_sd.a";
+			path = "/usr/local/lib/libflext-pd_sd.a";
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		E94AC9640789EEA300AE1770 = {
+			fileRef = E94AC9630789EEA300AE1770;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		E9974DE50770749400206F68 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -331,28 +359,6 @@
 			refType = 0;
 			sourceTree = "<absolute>";
 		};
-		E9974E04077075E800206F68 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libflext_s.a;
-			path = /Volumes/Daten/Prog/pdmax/flext/build/libflext_s.a;
-			refType = 0;
-			sourceTree = "<absolute>";
-		};
-		E9974E05077075E800206F68 = {
-			fileRef = E9974E04077075E800206F68;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		E9974E060770761500206F68 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = "libflext-max_s.a";
-			path = "/Volumes/Daten/Prog/pdmax/flext/build/libflext-max_s.a";
-			refType = 0;
-			sourceTree = "<absolute>";
-		};
 		E9974E2B07707D1400206F68 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -397,7 +403,7 @@
 			files = (
 				E9974E5C0770851700206F68,
 				E9974E5B0770851500206F68,
-				E9974E5A0770851200206F68,
+				E94AC9620789EE8700AE1770,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -475,12 +481,6 @@
 		};
 		E9974E59077084DA00206F68 = {
 			fileRef = E9974E58077084DA00206F68;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		E9974E5A0770851200206F68 = {
-			fileRef = E9974E060770761500206F68;
 			isa = PBXBuildFile;
 			settings = {
 			};

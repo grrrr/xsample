@@ -1,9 +1,5 @@
 NAME=xsample
 
-BUILDCLASS=ext
-BUILDMODE=release
-BUILDTYPE=single
-
 SRCDIR=source
 
 PRECOMPILE=prefix.h
