@@ -35,18 +35,6 @@ FLEXT_EXT V xsample_setup()
 
 // ------------------------------
 
-V xsample::cb_setup(t_class *c)
-{
-	FLEXT_ADDMETHOD_G(c,"set",m_set);
-	FLEXT_ADDMETHOD(c,"print",m_print);
-	FLEXT_ADDMETHOD(c,"refresh",m_refresh);
-	FLEXT_ADDMETHOD(c,"reset",m_reset);
-
-	FLEXT_ADDMETHOD_E(c,"units",m_units);
-	FLEXT_ADDMETHOD_E(c,"interp",m_interp);
-	FLEXT_ADDMETHOD_E(c,"sclmode",m_sclmode);
-}
-
 xsample::xsample():
 	buf(NULL),
 #ifdef PD
@@ -57,7 +45,16 @@ xsample::xsample():
 	interp(xsi_4p),
 	sclmode(xss_unitsinbuf),
 	curmin(0),curmax(1<<30)
-{}
+{
+	FLEXT_ADDMETHOD_(0,"set",m_set);
+	FLEXT_ADDMETHOD_(0,"print",m_print);
+	FLEXT_ADDMETHOD_(0,"refresh",m_refresh);
+	FLEXT_ADDMETHOD_(0,"reset",m_reset);
+
+	FLEXT_ADDMETHOD_E(0,"units",m_units);
+	FLEXT_ADDMETHOD_E(0,"interp",m_interp);
+	FLEXT_ADDMETHOD_E(0,"sclmode",m_sclmode);
+}
 	
 xsample::~xsample()
 {

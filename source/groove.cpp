@@ -19,7 +19,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xgroove:
 	public xsample
 {
-	FLEXT_HEADER(xgroove,xsample)
+	FLEXT_HEADER_S(xgroove,xsample)
 
 public:
 	xgroove(I argc,t_atom *argv);
@@ -84,18 +84,6 @@ V xgroove::cb_setup(t_class *c)
 #ifndef PD
 	post("loaded xgroove~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");
 #endif
-
-	FLEXT_ADDFLOAT_N(c,1,m_min);
-	FLEXT_ADDFLOAT_N(c,2,m_max);
-	FLEXT_ADDMETHOD_1(c,"min",m_min,F); 
-	FLEXT_ADDMETHOD_1(c,"max",m_max,F);
-	FLEXT_ADDMETHOD_1(c,"pos",m_pos,F);
-
-	FLEXT_ADDBANG(c,m_start);
-	FLEXT_ADDMETHOD(c,"start",m_start);
-	FLEXT_ADDMETHOD(c,"stop",m_stop);
-
-	FLEXT_ADDMETHOD_B(c,"loop",m_loop);
 }
 
 xgroove::xgroove(I argc,t_atom *argv):
@@ -125,6 +113,19 @@ xgroove::xgroove(I argc,t_atom *argv):
 	add_out_signal(); // position
 	add_out_float(2); // play min & max	
 	setup_inout();
+
+	FLEXT_ADDMETHOD(1,m_min);
+	FLEXT_ADDMETHOD(2,m_max);
+	FLEXT_ADDMETHOD_1(0,"min",m_min,F); 
+	FLEXT_ADDMETHOD_1(0,"max",m_max,F);
+	FLEXT_ADDMETHOD_1(0,"pos",m_pos,F);
+
+	FLEXT_ADDBANG(0,m_start);
+	FLEXT_ADDMETHOD_(0,"start",m_start);
+	FLEXT_ADDMETHOD_(0,"stop",m_stop);
+
+	FLEXT_ADDMETHOD_1(0,"loop",m_loop,BL);
+
 
 	outmin = get_out(outchns+1);
 	outmax = get_out(outchns+2);
@@ -383,7 +384,10 @@ V xgroove::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 V xgroove::m_help()
 {
-	post("%s - part of xsample objects, version " XSAMPLE_VERSION " compiled on " __DATE__ " " __TIME__,thisName());
+	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
+#ifdef _DEBUG
+	post("compiled on " __DATE__ " " __TIME__);
+#endif
 	post("(C) Thomas Grill, 2001-2002");
 #ifdef MAXMSP
 	post("Arguments: %s [channels=1] [buffer]",thisName());

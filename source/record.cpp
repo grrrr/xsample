@@ -9,7 +9,6 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 */
 
 #include "main.h"
-//#include <math.h>
 
 #ifdef _MSC_VER
 #pragma warning (disable:4244)
@@ -19,7 +18,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xrecord:
 	public xsample
 {
-	FLEXT_HEADER(xrecord,xsample)
+	FLEXT_HEADER_S(xrecord,xsample)
 
 public:
 	xrecord(I argc,t_atom *argv);
@@ -91,23 +90,6 @@ V xrecord::cb_setup(t_class *c)
 #ifndef PD
 	post("loaded xrecord~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");
 #endif
-
-	FLEXT_ADDBANG(c,m_start);
-	FLEXT_ADDMETHOD(c,"start",m_start);
-	FLEXT_ADDMETHOD(c,"stop",m_stop);
-
-	FLEXT_ADDMETHOD_1(c,"pos",m_pos,F);
-	FLEXT_ADDFLOAT_N(c,2,m_min);
-	FLEXT_ADDFLOAT_N(c,3,m_max);
-	FLEXT_ADDMETHOD_1(c,"min",m_min,F);
-	FLEXT_ADDMETHOD_1(c,"max",m_max,F);
-	
-	FLEXT_ADDMETHOD_B(c,"loop",m_loop);
-	FLEXT_ADDMETHOD_B(c,"mixmode",m_mixmode);
-	FLEXT_ADDMETHOD_B(c,"sigmode",m_sigmode);
-	FLEXT_ADDMETHOD_B(c,"append",m_append);
-	
-	FLEXT_ADDMETHOD_G(c,"draw",m_draw);
 }
 
 
@@ -140,6 +122,23 @@ xrecord::xrecord(I argc,t_atom *argv):
 	add_out_signal();  // pos signal
 	add_out_float(2); // min & max
 	setup_inout();
+
+	FLEXT_ADDBANG(0,m_start);
+	FLEXT_ADDMETHOD_(0,"start",m_start);
+	FLEXT_ADDMETHOD_(0,"stop",m_stop);
+
+	FLEXT_ADDMETHOD_1(0,"pos",m_pos,F);
+	FLEXT_ADDMETHOD(2,m_min);
+	FLEXT_ADDMETHOD(3,m_max);
+	FLEXT_ADDMETHOD_1(0,"min",m_min,F);
+	FLEXT_ADDMETHOD_1(0,"max",m_max,F);
+	
+	FLEXT_ADDMETHOD_1(0,"loop",m_loop,BL);
+	FLEXT_ADDMETHOD_1(0,"mixmode",m_mixmode,BL);
+	FLEXT_ADDMETHOD_1(0,"sigmode",m_sigmode,BL);
+	FLEXT_ADDMETHOD_1(0,"append",m_append,BL);
+	
+	FLEXT_ADDMETHOD_(0,"draw",m_draw);
 
 	outmin = get_out(1);
 	outmax = get_out(2);
@@ -390,7 +389,10 @@ V xrecord::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 V xrecord::m_help()
 {
-	post("%s - part of xsample objects, version " XSAMPLE_VERSION " compiled on " __DATE__ " " __TIME__,thisName());
+	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
+#ifdef _DEBUG
+	post("compiled on " __DATE__ " " __TIME__);
+#endif
 	post("(C) Thomas Grill, 2001-2002");
 #ifdef MAXMSP
 	post("Arguments: %s [channels=1] [buffer]",thisName());

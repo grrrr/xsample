@@ -18,7 +18,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xplay:
 	public xsample
 {
-	FLEXT_HEADER(xplay,xsample)
+	FLEXT_HEADER_S(xplay,xsample)
 
 public:
 	xplay(I argc, t_atom *argv);
@@ -58,10 +58,6 @@ V xplay::cb_setup(t_class *c)
 #ifndef PD
 	post("loaded xplay~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");
 #endif
-
-	FLEXT_ADDBANG(c,m_start);
-	FLEXT_ADDMETHOD(c,"start",m_start);
-	FLEXT_ADDMETHOD(c,"stop",m_stop);
 }
 
 
@@ -88,6 +84,10 @@ xplay::xplay(I argc, t_atom *argv):
 	add_in_signal();  // pos signal
 	add_out_signal(outchns);
 	setup_inout();
+
+	FLEXT_ADDBANG(0,m_start);
+	FLEXT_ADDMETHOD_(0,"start",m_start);
+	FLEXT_ADDMETHOD_(0,"stop",m_stop);
 
 #ifdef PD
 	m_loadbang();  // in PD loadbang is not called upon object creation
@@ -230,7 +230,10 @@ V xplay::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 V xplay::m_help()
 {
-	post("%s - part of xsample objects, version " XSAMPLE_VERSION " compiled on " __DATE__ " " __TIME__,thisName());
+	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
+#ifdef _DEBUG
+	post("compiled on " __DATE__ " " __TIME__);
+#endif
 	post("(C) Thomas Grill, 2001-2002");
 #ifdef MAXMSP
 	post("Arguments: %s [channels=1] [buffer]",thisName());
