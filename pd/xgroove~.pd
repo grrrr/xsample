@@ -1,220 +1,285 @@
-#N canvas 90 37 923 642 12;
-#X obj 225 248 hsl 128 15 0.001 3 1 1 empty empty empty 20 8 0 8 -225271
--1 -1 9300 1;
-#X floatatom 222 269 8 0 0 0 - - -;
-#X floatatom 291 311 8 0 0 0 - - -;
-#X floatatom 376 311 8 0 0 0 - - -;
-#X floatatom 277 419 8 0 0 0 - - -;
-#X floatatom 362 419 8 0 0 0 - - -;
-#X obj 355 487 loadbang;
-#X obj 271 514 snapshot~;
-#X msg 215 74 loop \$1;
-#X obj 28 9 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1 -1
-;
-#X msg 27 29 stop;
-#N canvas 0 22 450 300 graph7 0;
-#X array buf 300 float 1;
-#A 0 -0.582363 -0.691892 -0.787404 -0.866945 -0.928937 -0.972085 -0.995541
--0.998834 -0.981862 -0.945015 -0.889003 -0.814977 -0.724451 -0.61922
--0.501456 -0.373526 -0.238025 -0.0977039 0.0445999 0.185999 0.32363
-0.454698 0.576562 0.686728 0.782985 0.863382 0.926264 0.970396 0.994847
-0.99914 0.983202 0.947311 0.892244 0.819087 0.729329 0.624807 0.507601
-0.380121 0.244937 0.104787 -0.0374852 -0.178997 -0.316882 -0.448349
--0.570721 -0.681541 -0.778536 -0.859758 -0.92357 -0.968641 -0.994105
--0.999411 -0.984463 -0.949585 -0.895432 -0.823155 -0.734191 -0.630344
--0.513736 -0.386701 -0.251839 -0.111872 0.0303626 0.171983 0.310115
-0.441964 0.564863 0.676301 0.774049 0.856099 0.920802 0.966862 0.993299
-0.999629 0.985693 0.951778 0.898595 0.827173 0.739006 0.635861 0.519824
-0.393264 0.258724 0.118945 -0.0232443 -0.164962 -0.30334 -0.435566
--0.558966 -0.671048 -0.769513 -0.852401 -0.918006 -0.965005 -0.99247
--0.999788 -0.986869 -0.953946 -0.901683 -0.831168 -0.743785 -0.641342
--0.525904 -0.3998 -0.265603 -0.126018 0.0161191 0.157931 0.296538 0.429142
-0.553044 0.665739 0.764956 0.848646 0.915158 0.963118 0.991554 0.999919
-0.987988 0.956055 0.904748 0.835094 0.748535 0.646789 0.531944 0.406322
-0.272459 0.13308 -0.00899858 -0.150893 -0.289734 -0.422695 -0.547099
--0.660411 -0.760337 -0.844873 -0.912259 -0.961177 -0.990614 -0.999967
--0.989077 -0.958117 -0.907755 -0.839002 -0.753231 -0.652213 -0.537965
--0.412819 -0.279312 -0.140138 0.00187238 0.143845 0.282902 0.416234
-0.541116 0.655044 0.755694 0.841024 0.909331 0.959182 0.989612 0.99999
-0.990087 0.960142 0.910718 0.842848 0.757905 0.657587 0.543957 0.419296
-0.286139 0.147188 0.00524875 -0.136795 -0.276066 -0.409741 -0.535123
--0.649643 -0.75101 -0.837158 -0.90633 -0.957157 -0.988561 -0.999946
--0.991073 -0.962097 -0.913646 -0.846662 -0.762527 -0.662949 -0.549918
--0.425756 -0.292961 -0.15423 -0.0123749 0.129731 0.26921 0.403233 0.52908
-0.644218 0.746283 0.833235 0.903305 0.955055 0.987472 0.999857 0.991988
-0.964027 0.916507 0.850435 0.767117 0.668254 0.555861 0.432186 0.299763
-0.161263 0.019495 -0.122669 -0.262344 -0.396705 -0.523029 -0.638745
--0.741533 -0.829275 -0.900221 -0.952932 -0.986312 -0.999726 -0.992864
--0.965886 -0.919348 -0.854154 -0.771671 -0.673542 -0.561762 -0.438609
--0.306552 -0.168292 -0.0266195 0.115592 0.255464 0.390152 0.516939
-0.633253 0.736723 0.82528 0.897096 0.950738 0.985126 0.999526 0.993692
-0.967708 0.922114 0.85785 0.776175 0.678789 0.567642 0.444989 0.313328
-0.175306 0.0337374 -0.108516 -0.248569 -0.38359 -0.510829 -0.627721
--0.731898 -0.821227 -0.893933 -0.948509 -0.983866 -0.999301 -0.994457
--0.969482 -0.924852 -0.861476 -0.780662 -0.684 -0.573494 -0.451363
--0.320082 -0.18232 -0.0408586 0.101429 0.241663 0.376994 0.504694 0.622158
-0.727016 0.817152 0.890707 0.946232 0.98257 0.998995 0.995196 0.971196
-0.927537 0.865077 0.785079 0.689188;
-#X coords 0 1 299 -1 300 200 1;
-#X restore 573 199 graph;
-#X obj 22 561 dac~;
-#X msg 27 69 reset;
-#X text 293 291 min/max points;
-#X text 429 515 position;
-#X text 50 6 start;
-#X text 67 27 stop;
-#X msg 26 95 help;
-#X text 383 242 speed;
-#X text 304 262 (float or signal);
-#X msg 25 161 set buf2;
-#X msg 26 136 set buf;
-#X msg 369 71 interp \$1;
-#X msg 249 310 all;
-#X obj 191 344 xgroove~ buf;
-#X text 212 2 looping mode;
-#X text 367 -2 interpolation;
-#X obj 215 24 vdl 15 0 0 3 empty empty empty 0 -6 0 8 -262144 -1 -1
-0;
-#X text 234 21 once;
-#X text 234 37 forward;
-#X obj 368 21 vdl 15 0 0 3 empty empty empty 0 -6 0 8 -262144 -1 -1
-0;
-#X text 388 17 none;
-#X text 389 50 linear;
-#X obj 215 138 vdl 15 0 0 4 empty empty empty 0 -6 0 8 -262144 -1 -1
-0;
-#X text 214 115 units;
-#X msg 215 203 units \$1;
-#X obj 365 138 vdl 15 0 0 4 empty empty empty 0 -6 0 8 -262144 -1 -1
-0;
-#X msg 366 202 sclmode \$1;
-#X text 234 135 frames;
-#X text 234 167 ms;
-#X text 234 182 s;
-#X text 385 150 units in loop;
-#X text 385 166 buffer;
-#X text 385 181 loop;
-#X text 385 134 units in buffer;
-#X obj 769 92 osc~ 1000;
-#X obj 769 150 tabwrite~ buf;
-#X obj 754 70 bng 15 250 50 0 empty empty empty 0 -6 0 8 -225271 -1
+#N canvas 312 42 925 590 12;
+#X obj 215 253 hsl 128 15 0.001 3 1 1 empty empty speed 0 -8 0 10 -225271
+-1 -1 9500 1;
+#X floatatom 212 271 8 0 0 0 - - -;
+#X msg 603 169 loop \$1;
+#X obj 28 72 bng 15 250 50 0 empty empty empty 20 8 0 8 -258699 -1
 -1;
-#X msg 802 120 stop;
-#X obj 323 345 print A;
-#X msg 24 298 getattributes;
-#X msg 23 325 getmin;
-#N canvas 0 22 450 300 graph2 0;
-#X array buf2 300 float 0;
-#X coords 0 1 299 -1 300 140 1;
-#X restore 573 458 graph;
-#X obj 271 576 tabwrite~ buf2;
-#X obj 23 535 *~;
-#X obj 79 540 hsl 128 15 0.0001 1 1 0 empty empty empty -2 -6 0 8 -261689
--1 -1 0 1;
-#X obj 77 560 nbx 5 14 -1e+37 1e+37 0 0 empty empty empty 0 -6 0 10
--261689 -1 -1 0 256;
+#X msg 27 92 stop;
+#N canvas 0 0 450 300 graph7 0;
+#X array \$0-buf 300 float 1;
+#A 0 -0.839747 -0.754139 -0.653263 -0.539126 -0.414078 -0.280635 -0.141504
+0.000492073 0.142479 0.281579 0.414975 0.539954 0.654004 0.754786 0.840279
+0.908753 0.958789 0.989418 0.999981 0.990281 0.960531 0.911285 0.843594
+0.758801 0.658626 0.545119 0.420547 0.287463 0.148552 0.00662906 -0.135428
+-0.274738 -0.408483 -0.533953 -0.648592 -0.750102 -0.836398 -0.905748
+-0.956757 -0.988351 -0.999937 -0.991251 -0.962473 -0.914213 -0.847394
+-0.763422 -0.663977 -0.55107 -0.427008 -0.29428 -0.155594 -0.013755
+0.128363 0.267882 0.401968 0.527909 0.643161 0.745362 0.832475 0.902708
+0.954646 0.987258 0.999832 0.992166 0.964387 0.917059 0.851166 0.767999
+0.669283 0.557004 0.43343 0.301082 0.162624 0.0208751 -0.121299 -0.261011
+-0.39544 -0.521849 -0.637684 -0.740608 -0.828501 -0.899623 -0.952507
+-0.986084 -0.999701 -0.993024 -0.966246 -0.919884 -0.854871 -0.772553
+-0.674559 -0.562905 -0.439846 -0.307865 -0.169653 -0.0279992 0.114221
+0.254129 0.38888 0.515759 0.632181 0.73579 0.824504 0.896483 0.950313
+0.984882 0.999483 0.993853 0.968051 0.92265 0.858553 0.777044 0.679806
+0.568776 0.446226 0.314637 0.176665 0.0351171 -0.107144 -0.247232 -0.382316
+-0.509641 -0.626648 -0.730953 -0.82044 -0.89332 -0.948068 -0.983621
+-0.999242 -0.9946 -0.969825 -0.925372 -0.862179 -0.781519 -0.685006
+-0.574627 -0.452593 -0.32139 -0.183677 -0.0422376 0.100056 0.240322
+0.375716 0.503506 0.621075 0.72607 0.816351 0.890079 0.945791 0.982309
+0.998936 0.995323 0.971523 0.928057 0.865764 0.785935 0.690186 0.580434
+0.458934 0.328126 0.19067 0.0493521 -0.0929673 -0.233403 -0.369109
+-0.497332 -0.615488 -0.721152 -0.812215 -0.886819 -0.94344 -0.980963
+-0.998583 -0.995978 -0.973199 -0.930676 -0.869315 -0.790322 -0.695317
+-0.586232 -0.465249 -0.33485 -0.197662 -0.0564676 0.0858711 0.226467
+0.362476 0.49114 0.609846 0.716207 0.808035 0.883498 0.941064 0.979541
+0.99819 0.99659 0.974801 0.933271 0.872803 0.794669 0.70042 0.591977
+0.471549 0.341549 0.204637 0.0635763 -0.0787726 -0.219528 -0.355829
+-0.484923 -0.604193 -0.711208 -0.803828 -0.88014 -0.938624 -0.978096
+-0.997725 -0.997158 -0.976368 -0.935795 -0.876273 -0.798968 -0.70549
+-0.597709 -0.477813 -0.348244 -0.211606 -0.0706864 0.0716672 0.212567
+0.349164 0.478677 0.598495 0.706189 0.799558 0.876742 0.936143 0.976578
+0.997236 0.997659 0.977886 0.938285 0.879669 0.803244 0.710514 0.603402
+0.48406 0.354905 0.218564 0.0777877 -0.0645622 -0.205605 -0.342478
+-0.472418 -0.592775 -0.701123 -0.795272 -0.873285 -0.933621 -0.975024
+-0.996669 -0.998136 -0.979343 -0.940727 -0.88304 -0.807454 -0.715522
+-0.609067 -0.490282 -0.361561 -0.225509 -0.0848913 0.0574491 0.198624
+0.335778 0.466119 0.587025 0.696025 0.790922 0.869805 0.931036 0.97342
+0.996069 0.998529 0.980775 0.943112 0.886359 0.811641 0.720466 0.614708
+0.496475 0.368189 0.232443 0.0919834 -0.0503387 -0.19164 -0.329058
+-0.459814 -0.581239 -0.690897;
+#X coords 0 1 299 -1 300 150 1;
+#X restore 573 269 graph;
+#X obj 44 529 dac~;
+#X msg 120 73 reset;
+#X text 299 321 min/max points;
+#X text 50 69 start;
+#X text 67 90 stop;
+#X msg 119 99 help;
+#X text 280 269 (float or signal);
+#X msg 749 167 interp \$1;
+#X msg 237 305 all;
+#X text 747 94 interpolation;
+#X text 622 116 once;
+#X text 768 116 none;
+#X text 768 148 linear;
+#X text 224 75 units;
+#X msg 225 163 units \$1;
+#X msg 358 163 sclmode \$1;
+#X text 244 127 ms;
+#X text 244 142 s;
+#X text 377 127 buffer;
+#X text 377 142 loop;
+#X obj 491 223 bng 15 250 50 0 empty empty empty 0 -6 0 8 -228992 -1
+-1;
+#X obj 335 349 print A;
+#N canvas 0 0 450 300 graph2 0;
+#X array \$0-scp 300 float 0;
+#X coords 0 1 299 -1 300 100 1;
+#X restore 573 447 graph;
+#X obj 53 498 *~;
+#X obj 89 486 hsl 128 15 0.0001 1 1 0 empty empty volume -2 -6 0 8
+-261689 -1 -1 0 1;
+#X obj 86 504 nbx 5 14 -1e+037 1e+037 0 0 empty empty empty 0 -6 0
+10 -261689 -1 -1 0 256;
 #X msg 25 249 pos \$1;
 #X msg 63 220 200;
 #X msg 25 221 100;
-#X text 23 201 set position;
-#X obj 270 488 metro 50;
-#X obj 788 70 nbx 5 14 0 1e+37 0 1 empty empty empty 0 -6 0 10 -225271
--1 -1 1000 256;
-#X text 718 47 generate oscillation;
-#X text 140 558 volume;
-#N canvas 83 212 459 293 loopzone 0;
-#X obj 29 235 outlet;
-#X msg 30 64 xzone \$1;
-#X obj 33 23 hsl 128 15 0 300 0 0 empty empty empty -2 -6 0 8 -262131
+#X obj 511 224 nbx 5 14 0 1e+037 0 1 empty empty frq 0 -6 0 10 -228992
+-1 -1 1100 256;
+#N canvas 83 212 407 313 loopzone 0;
+#X msg 28 84 xzone \$1;
+#X obj 31 43 hsl 128 15 0 300 0 0 empty empty empty -2 -6 0 8 -262131
 -1 -1 0 1;
-#X floatatom 30 44 5 0 0 0 - - -;
-#X msg 205 187 xfade \$1;
-#X obj 205 122 vdl 15 0 0 4 empty empty empty 0 -6 0 8 -262144 -1 -1
+#X floatatom 28 64 5 0 0 0 - - -;
+#X msg 203 207 xfade \$1;
+#X obj 203 142 vdl 15 0 0 4 empty empty empty 0 -6 0 8 -262144 -1 -1
 0;
-#X text 204 103 loop zone mode;
-#X text 224 121 keep loop pos;
-#X text 224 137 keep loop length;
-#X text 224 153 keep fade length;
-#X msg 49 185 xshape \$1;
-#X obj 50 135 vdl 15 0 0 3 empty empty empty 0 -6 0 8 -262144 -1 -1
+#X text 202 123 loop zone mode;
+#X text 222 141 keep loop pos;
+#X text 222 157 keep loop length;
+#X text 222 173 keep fade length;
+#X msg 47 205 xshape \$1;
+#X obj 48 155 vdl 15 0 0 3 empty empty empty 0 -6 0 8 -262144 -1 -1
 0;
-#X text 47 113 fade zone shape;
-#X text 69 132 linear;
-#X text 69 148 quarter sine;
-#X text 69 164 half sine;
-#X text 127 47 length of the loop zone;
-#X text 125 64 (in units);
-#X text 224 168 zone inside loop;
-#X connect 1 0 0 0;
+#X text 45 133 fade zone shape;
+#X text 67 152 linear;
+#X text 67 168 quarter sine;
+#X text 67 184 half sine;
+#X text 125 67 length of the loop zone;
+#X text 123 84 (in units);
+#X text 222 188 zone inside loop;
+#X text 21 9 xgroove~ crossfading loop zone;
+#X obj 27 255 s to-g;
+#X connect 0 0 19 0;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X connect 3 0 19 0;
+#X connect 4 0 3 0;
+#X connect 9 0 19 0;
+#X connect 10 0 9 0;
+#X restore 23 414 pd loopzone;
+#X text 118 137 set buffer;
+#X text 23 383 settings for;
+#X text 22 395 cross-fading loop zone;
+#X text 399 349 print attributes;
+#X obj 300 393 bng 15 250 50 0 empty empty loop_bang 0 -6 0 8 -262131
+-1 -1;
+#X text 357 60 scale mode;
+#X text 354 75 (pos message and position outlet);
+#X text 622 148 bidirectional;
+#X text 244 111 buffer size;
+#X obj 574 419 hsl 300 15 0 300 0 0 empty bufpos empty -2 -6 0 8 -262144
+-1 -1 0 1;
+#X obj 236 527 nbx 5 14 -1e+037 1e+037 0 0 empty empty position 0 -6
+0 10 -228992 -1 -1 0 256;
+#N canvas 0 0 470 320 watch 0;
+#X obj 163 18 loadbang;
+#X obj 88 80 snapshot~;
+#X obj 164 44 metro 50;
+#X obj 143 109 s bufpos;
+#X obj 176 196 outlet;
+#X obj 22 14 inlet~;
+#X obj 88 14 inlet~;
+#X obj 22 196 tabwrite~ \$0-scp;
+#X connect 0 0 2 0;
+#X connect 1 0 3 0;
+#X connect 1 0 4 0;
+#X connect 1 0 7 0;
+#X connect 2 0 1 0;
+#X connect 2 0 7 0;
+#X connect 5 0 7 0;
+#X connect 6 0 1 0;
+#X restore 235 492 pd watch;
+#X text 377 111 units in loop;
+#N canvas 0 0 842 609 genosc 0;
+#X obj 38 29 inlet;
+#X obj 64 94 osc~ 1000;
+#X obj 38 54 route bang;
+#X obj 37 134 tabwrite~ \$0-buf;
+#X connect 0 0 2 0;
+#X connect 1 0 3 0;
 #X connect 2 0 3 0;
-#X connect 3 0 1 0;
-#X connect 4 0 0 0;
-#X connect 5 0 4 0;
-#X connect 10 0 0 0;
-#X connect 11 0 10 0;
-#X restore 21 409 pd loopzone;
-#X text 102 137 set buffer;
-#X text 21 373 settings for;
-#X text 20 390 cross-fading loop zone;
-#X text 387 345 print attributes;
-#X obj 274 391 bng 15 250 50 0 empty empty empty 0 -6 0 8 -262144 -1
--1;
-#X text 294 388 bang on loop end;
-#X text 280 439 min/max points (sample rounded);
-#X text 365 99 scale mode;
-#X text 361 114 (pos message and position outlet);
-#X text 235 52 bidirectional;
-#X text 234 151 buffer size;
-#X obj 574 402 hsl 300 15 0 300 0 0 empty bufpos empty -2 -6 0 8 -262144
--1 -1 24497 1;
-#X obj 368 519 nbx 5 14 -1e+37 1e+37 0 0 empty empty empty 0 -6 0 10
--262144 -1 -1 245.785 256;
-#X obj 279 538 s bufpos;
-#X text 389 34 4-point (default);
-#X msg 93 325 getmax;
+#X connect 2 1 1 1;
+#X restore 491 244 pd genosc;
+#X text 600 97 loop mode;
+#X text 23 201 set position;
+#X obj 299 426 nbx 5 14 0 1e+037 0 1 empty empty min 0 -6 0 10 -262131
+-1 -1 0 256;
+#X obj 356 426 nbx 5 14 0 1e+037 0 1 empty empty max 0 -6 0 10 -262131
+-1 -1 300 256;
+#X obj 298 309 nbx 5 14 0 1e+037 0 1 empty empty min 0 -6 0 10 -225271
+-1 -1 78 256;
+#X obj 355 309 nbx 5 14 0 1e+037 0 1 empty empty max 0 -6 0 10 -225271
+-1 -1 276 256;
+#X text 244 95 frames (def.);
+#X text 377 96 units in buffer (def.);
+#X text 622 132 forward (def.);
+#X text 768 132 4-point (def.);
+#N canvas 12 194 482 399 attributes 0;
+#X msg 82 51 getattributes;
+#X msg 138 110 getmax;
+#X msg 81 110 getmin;
+#X text 200 52 dump all attributes;
+#X text 200 112 get min/max positions;
+#X msg 82 82 getbuffer;
+#X msg 80 139 getpos;
+#X text 140 139 get current position;
+#X text 167 82 get buffer name;
+#X msg 79 228 getloop;
+#X msg 79 253 getinterp;
+#X text 147 228 get loop mode;
+#X text 160 253 get interpolation mode;
+#X msg 79 174 getunits;
+#X text 152 174 get unit setting;
+#X msg 79 199 getsclmode;
+#X text 170 199 get scale mode;
+#X msg 79 292 getxfade;
+#X msg 78 342 getxshape;
+#X text 157 292 get crossfade mode;
+#X msg 79 317 getxzone;
+#X text 154 317 get crossfade length;
+#X text 156 344 get crossfade shape;
+#X text 19 12 xgroove~ attributes;
+#X obj 19 172 s to-g;
+#X connect 0 0 24 0;
+#X connect 1 0 24 0;
+#X connect 2 0 24 0;
+#X connect 5 0 24 0;
+#X connect 6 0 24 0;
+#X connect 9 0 24 0;
+#X connect 10 0 24 0;
+#X connect 13 0 24 0;
+#X connect 15 0 24 0;
+#X connect 17 0 24 0;
+#X connect 18 0 24 0;
+#X connect 20 0 24 0;
+#X restore 24 343 pd attributes;
+#X text 23 324 attribute stuff;
+#X text 490 264 generate;
+#X obj 26 10 cnv 15 850 40 empty empty xgroove~ 10 22 0 24 -260818
+-1 0;
+#X text 227 29 http://www.parasitaere-kapazitaeten.net;
+#X msg 105 221 1000;
+#X msg 96 249 posmod \$1;
+#X text 146 227 modulo;
+#X text 301 439 min/max points;
+#X text 299 454 (sample rounded);
+#X obj 603 120 vradio 15 1 0 3 empty empty empty 0 -6 0 8 -225271 -1
+-1 0;
+#X obj 749 119 vradio 15 1 0 3 empty empty empty 0 -6 0 8 -225271 -1
+-1 0;
+#X obj 225 99 vradio 15 1 0 4 empty empty empty 0 -6 0 8 -225271 -1
+-1 0;
+#X obj 358 99 vradio 15 1 0 4 empty empty empty 0 -6 0 8 -225271 -1
+-1 0;
+#X obj 136 168 s to-g;
+#X obj 298 197 s to-g;
+#X obj 61 278 s to-g;
+#X obj 180 304 r to-g;
+#X obj 704 201 s to-g;
+#X obj 191 349 xgroove~ \$0-buf;
+#X msg 26 136 set \$0-buf;
+#X msg 25 161 set \$0-buf2;
+#X text 227 10 varispeed sample player \, (C)2001-2004 Thomas Grill
+;
 #X connect 0 0 1 0;
-#X connect 1 0 25 0;
-#X connect 2 0 25 1;
-#X connect 3 0 25 2;
-#X connect 6 0 62 0;
-#X connect 7 0 79 0;
-#X connect 7 0 80 0;
-#X connect 8 0 25 0;
-#X connect 9 0 25 0;
-#X connect 10 0 25 0;
-#X connect 13 0 25 0;
-#X connect 18 0 25 0;
-#X connect 21 0 25 0;
-#X connect 22 0 25 0;
-#X connect 23 0 25 0;
-#X connect 24 0 25 0;
-#X connect 25 0 54 0;
-#X connect 25 0 55 0;
-#X connect 25 1 7 0;
-#X connect 25 2 4 0;
-#X connect 25 3 5 0;
-#X connect 25 4 71 0;
-#X connect 25 5 50 0;
-#X connect 28 0 8 0;
-#X connect 31 0 23 0;
-#X connect 34 0 36 0;
-#X connect 36 0 25 0;
-#X connect 37 0 38 0;
-#X connect 38 0 25 0;
-#X connect 46 0 47 0;
+#X connect 1 0 80 0;
+#X connect 2 0 79 0;
+#X connect 3 0 75 0;
+#X connect 4 0 75 0;
+#X connect 7 0 75 0;
+#X connect 11 0 75 0;
+#X connect 13 0 79 0;
+#X connect 14 0 80 0;
+#X connect 20 0 76 0;
+#X connect 21 0 76 0;
+#X connect 26 0 50 0;
+#X connect 29 0 6 0;
+#X connect 29 0 6 1;
+#X connect 30 0 29 1;
+#X connect 30 0 31 0;
+#X connect 32 0 77 0;
+#X connect 33 0 32 0;
+#X connect 34 0 32 0;
+#X connect 35 0 50 0;
 #X connect 48 0 47 0;
-#X connect 49 0 47 0;
-#X connect 51 0 25 0;
-#X connect 52 0 25 0;
-#X connect 55 0 12 0;
-#X connect 55 0 12 1;
-#X connect 56 0 55 1;
-#X connect 56 0 57 0;
-#X connect 58 0 25 0;
-#X connect 59 0 58 0;
-#X connect 60 0 58 0;
-#X connect 62 0 7 0;
-#X connect 62 0 54 0;
-#X connect 63 0 46 1;
-#X connect 66 0 25 0;
-#X connect 82 0 25 0;
+#X connect 55 0 80 1;
+#X connect 56 0 80 2;
+#X connect 66 0 67 0;
+#X connect 67 0 77 0;
+#X connect 71 0 2 0;
+#X connect 72 0 13 0;
+#X connect 73 0 20 0;
+#X connect 74 0 21 0;
+#X connect 78 0 80 0;
+#X connect 80 0 29 0;
+#X connect 80 0 48 0;
+#X connect 80 1 48 1;
+#X connect 80 2 53 0;
+#X connect 80 3 54 0;
+#X connect 80 4 41 0;
+#X connect 80 5 27 0;
+#X connect 81 0 75 0;
+#X connect 82 0 75 0;
