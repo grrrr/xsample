@@ -335,52 +335,55 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 				else {  
 					// don't append
 					switch(mixmode) {
-                    case 0: 
-						for(i = 0; i < ncur; ++i,++si) {	
-							if(*(on++) >= 0)
-							{ 	
-								for(int ci = 0; ci < ICHNS; ++ci)
-									bf[ci] = sig[ci][si];	
-								bf += BCHNS;
-								*(pos++) = p,p += pf,++o;
-							}
-							else {
-								*(pos++) = p = scale(o = 0);
-								bf = buf->Data();
-							}
-						}
-                        break;
-                    case 1:
-						for(i = 0; i < ncur; ++i,++si) {	
-							register const S g = *(on++);
-							if(g >= 0) {
-								for(int ci = 0; ci < ICHNS; ++ci)
-									bf[ci] = bf[ci]*(1.-g)+sig[ci][si]*g;
-								bf += BCHNS;
-								*(pos++) = p,p += pf,++o;
-							}
-							else {
-								*(pos++) = p = scale(o = 0);
-								bf = buf->Data();
-							}
-						}
-                        break;
-                    case 2:
-						for(i = 0; i < ncur; ++i,++si) {	
-							if(*(on++) >= 0)
-							{ 	
-								for(int ci = 0; ci < ICHNS; ++ci)
-									bf[ci] += sig[ci][si];	
-								bf += BCHNS;
-								*(pos++) = p,p += pf,++o;
-							}
-							else {
-								*(pos++) = p = scale(o = 0);
-								bf = buf->Data();
-							}
-						}
-                        break;
-					}
+                        case 0: {
+						    for(i = 0; i < ncur; ++i,++si) {	
+							    if(*(on++) >= 0)
+							    { 	
+								    for(int ci = 0; ci < ICHNS; ++ci)
+									    bf[ci] = sig[ci][si];	
+								    bf += BCHNS;
+								    *(pos++) = p,p += pf,++o;
+							    }
+							    else {
+								    *(pos++) = p = scale(o = 0);
+								    bf = buf->Data();
+							    }
+						    }
+                            break;
+                        }
+                        case 1: {
+						    for(i = 0; i < ncur; ++i,++si) {	
+							    register const S g = *(on++);
+							    if(g >= 0) {
+								    for(int ci = 0; ci < ICHNS; ++ci)
+									    bf[ci] = bf[ci]*(1.-g)+sig[ci][si]*g;
+								    bf += BCHNS;
+								    *(pos++) = p,p += pf,++o;
+							    }
+							    else {
+								    *(pos++) = p = scale(o = 0);
+								    bf = buf->Data();
+							    }
+						    }
+                            break;
+                        }
+                        case 2: {
+						    for(i = 0; i < ncur; ++i,++si) {	
+							    if(*(on++) >= 0)
+							    { 	
+								    for(int ci = 0; ci < ICHNS; ++ci)
+									    bf[ci] += sig[ci][si];	
+								    bf += BCHNS;
+								    *(pos++) = p,p += pf,++o;
+							    }
+							    else {
+								    *(pos++) = p = scale(o = 0);
+								    bf = buf->Data();
+							    }
+						    }
+                            break;
+					    }
+                    }
 				}
 			}
 			else { 
@@ -388,30 +391,33 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 				
 				// Altivec optimization for that!
 				switch(mixmode) {
-                case 0:
-					for(int ci = 0; ci < ICHNS; ++ci) {	
-						register S *b = bf+ci;
-						register const F *s = sig[ci];
-						for(i = 0; i < ncur; ++i,b += BCHNS,++s) *b = *s;	
-					}
-					si += ncur;
-                    break;
-                case 1:
-					for(i = 0; i < ncur; ++i,++si) {	
-						register const S w = *(on++);
-						for(int ci = 0; ci < ICHNS; ++ci)
-							bf[ci] = bf[ci]*(1.-w)+sig[ci][si]*w;
-						bf += BCHNS;
-					}
-                    break;
-                case 2:
-					for(int ci = 0; ci < ICHNS; ++ci) {	
-						register S *b = bf+ci;
-						register const F *s = sig[ci];
-						for(i = 0; i < ncur; ++i,b += BCHNS,++s) *b += *s;	
-					}
-					si += ncur;
-                    break;
+                    case 0: {
+					    for(int ci = 0; ci < ICHNS; ++ci) {	
+						    register S *b = bf+ci;
+						    register const F *s = sig[ci];
+						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) *b = *s;	
+					    }
+					    si += ncur;
+                        break;
+                    }
+                    case 1: {
+					    for(i = 0; i < ncur; ++i,++si) {	
+						    register const S w = *(on++);
+						    for(int ci = 0; ci < ICHNS; ++ci)
+							    bf[ci] = bf[ci]*(1.-w)+sig[ci][si]*w;
+						    bf += BCHNS;
+					    }
+                        break;
+                    }
+                    case 2: {
+					    for(int ci = 0; ci < ICHNS; ++ci) {	
+						    register S *b = bf+ci;
+						    register const F *s = sig[ci];
+						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) *b += *s;	
+					    }
+					    si += ncur;
+                        break;
+                    }
 				}
 
 				for(i = 0; i < ncur; ++i) {

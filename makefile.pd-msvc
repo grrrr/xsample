@@ -17,7 +17,7 @@ LIBS=pd.lib pthreadVC.lib flext-pdwin.lib
 # compiler definitions and flags
 DEFS=/DFLEXT_SYS=2
 
-CFLAGS=/GR- /GX- /GD /G6 /Ox /ML
+CFLAGS=/GR- /GX- /GD /G6 /Ox /EHsc /ML
 
 # the rest can stay untouched
 # ----------------------------------------------
