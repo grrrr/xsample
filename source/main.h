@@ -60,7 +60,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #define S t_sample
 
 
-#ifdef __MWERKS__
+#if defined(__MWERKS__) && !defined(__MACH__)
 	#define STD std
 #else
 	#define STD
