@@ -15,9 +15,10 @@ FLEXT_EXT V xgroove_tilde_setup();
 #endif
 
 
-#if !defined(_MSC_VER) && !defined(__GNUC__)
+#if !defined(_MSC_VER) && !defined(__GNUC__) && (!__MWERKS__)
 // MS VC 6.0 can't handle <int,int> templates?!
 // GNUC 2.95.2 dies at compile
+// CodeWarrior says: unimplemented C++ feature
 #define TMPLOPT
 #endif
 

@@ -380,7 +380,7 @@ V xgroove::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 			sigfun = &xgroove::signal<1,1>;	break;
 		case 102:
 			sigfun = &xgroove::signal<1,2>;	break;
-		case 201:
+		case 201: 
 			sigfun = &xgroove::signal<2,1>;	break;
 		case 202:
 			sigfun = &xgroove::signal<2,2>;	break;
