@@ -1,5 +1,4 @@
 xsample - extended sample objects for Max/MSP and pd (pure data)
-version 0.2.3
 
 Copyright (c) 2001,2002 Thomas Grill (xovo@gmx.net)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
