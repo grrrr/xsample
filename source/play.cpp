@@ -77,6 +77,8 @@ xplay::xplay(I argc, t_atom *argv)
 	AddInSignal();  // pos signal
 	AddOutSignal(outchns);
 	SetupInOut();
+	
+	m_reset();
 }
 
 

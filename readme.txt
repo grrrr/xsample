@@ -67,6 +67,8 @@ Version history:
 
 0.2.4:
 - according to flext 0.2.3 changed sample type to t_sample (S)
+- xrecord~: fixed mix mode bug
+- fixed argument buffer problem
 
 0.2.3:
 - using flext 0.2.2 - xsample is now a library under MaxMSP
@@ -121,3 +123,4 @@ tests:
 bugs:
 - PD: problems with timed buffer redrawing (takes a lot of cpu time) - flext bug?
 - Apple MPW doesn't correctly compile template optimization 
+- Max help files aren't correctly opened due to xsample objects residing in a library

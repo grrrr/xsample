@@ -153,6 +153,8 @@ xrecord::xrecord(I argc,t_atom *argv):
 
 	outmin = GetOut(1);
 	outmax = GetOut(2);
+	
+	m_reset();
 }
 
 
@@ -352,7 +354,7 @@ TMPLDEF V xrecord::s_rec(I n,S *const *invecs,S *const *outvecs)
 					for(i = 0; i < ncur; ++i,++si) {	
 						register const S w = *(on++);
 						for(int ci = 0; ci < ICHNS; ++ci)
-							bf[ci] = sig[ci][si]*w;
+							bf[ci] = bf[ci]*(1.-w)+sig[ci][si]*w;
 						bf += BCHNS;
 					}
 				}

@@ -143,6 +143,8 @@ xgroove::xgroove(I argc,t_atom *argv):
 
 	outmin = GetOut(outchns+1);
 	outmax = GetOut(outchns+2);
+	
+	m_reset();
 }
 
 
