@@ -374,12 +374,12 @@ V xgroove::do_xzone()
 		if(xzone > maxfd) xzone = maxfd;
 
 		// \todo what about round-off?
-		znsmin = curmin-xzone/2;
-		znsmax = curmax+xzone/2;
+		znsmin = curmin-(L)(xzone/2);
+		znsmax = curmax+(L)(xzone/2);
 
 		// widen loop if xzone doesn't fit into it
 		// \todo check formula
-		L lack = ceil((xzone*2-(znsmax-znsmin))/2);
+		L lack = (L)ceil((xzone*2-(znsmax-znsmin))/2);
 		if(lack > 0) znsmin -= lack,znsmax += lack;
 
 		// check buffer limits and shift bounds if necessary
@@ -400,8 +400,8 @@ V xgroove::do_xzone()
 		if(xzone > maxfd) xzone = maxfd;
 
 		// \todo what about round-off?
-		znsmin = curmin-xzone/2;
-		znsmax = curmax+xzone/2;
+		znsmin = curmin-(L)(xzone/2);
+		znsmax = curmax+(L)(xzone/2);
 
 		// check buffer limits and shift bounds if necessary
 		// both cases can't happen because of xzone having been limited above
@@ -422,8 +422,8 @@ V xgroove::do_xzone()
 		if(xzone > plen) xzone = plen;
 
 		// \todo what about round-off?
-		znsmin = curmin-xzone/2;
-		znsmax = curmax+xzone/2;
+		znsmin = curmin-(L)(xzone/2);
+		znsmax = curmax+(L)(xzone/2);
 
 		L ovr = znsmax-buf->Frames();
 		if(-znsmin > ovr) ovr = -znsmin;

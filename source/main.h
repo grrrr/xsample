@@ -113,7 +113,7 @@ public:
 	
 	enum xs_intp {
 		xsi__ = -1,  // don't change
-		xsi_none = 0,xsi_lin,xsi_4p
+		xsi_none = 0,xsi_4p,xsi_lin
 	};
 	
 	enum xs_sclmd {
