@@ -55,6 +55,7 @@ Version history:
 - changed dsp handling for flext 0.1.1 conformance
 - workarounds for buggy/incomplete compilers
 - prevent buffer warning message at patcher load (wait for loadbang)
+- fixed bug: current pos is reset when changing min or max points
 
 0.2.0: 
 - first version for flext

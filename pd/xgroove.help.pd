@@ -1,7 +1,7 @@
-#N canvas 265 184 681 381 12;
+#N canvas 236 54 700 537 12;
 #X obj 113 114 sig~ 1;
-#X obj 115 95 hsl 128 15 0 10 0 0 empty empty empty 20 8 0 8 -262144
--1 -1 0 1;
+#X obj 115 95 hsl 128 15 -5 5 0 1 empty empty empty 20 8 0 8 -262144
+-1 -1 7700 1;
 #X floatatom 169 114 5 0 0;
 #X floatatom 142 144 5 0 0;
 #X floatatom 190 144 5 0 0;
@@ -52,7 +52,7 @@
 -0.297143 -0.281429 -0.265714 -0.25 -0.22 -0.08;
 #X pop;
 #X obj 36 302 dac~;
-#X msg 14 107 reset;
+#X msg 13 78 reset;
 #X obj 69 177 xgroove~ buf;
 #X text 251 90 speed;
 #X text 238 149 min/max points;
@@ -65,6 +65,13 @@
 ;
 #X msg 123 42 interp \$1;
 #X text 201 43 interpolation on/off;
+#X msg 14 141 set buf2;
+#X obj 446 322 table buf2;
+#X floatatom 309 337 5 0 0;
+#X obj 309 310 soundfiler;
+#X msg 149 68 units 3;
+#X msg 13 113 set buf;
+#X msg 310 283 read -resize d:/snd/trio/1.wav buf2;
 #X connect 0 0 18 0;
 #X connect 1 0 0 0;
 #X connect 1 0 2 0;
@@ -85,3 +92,8 @@
 #X connect 18 3 6 0;
 #X connect 26 0 27 0;
 #X connect 27 0 18 0;
+#X connect 29 0 18 0;
+#X connect 32 0 31 0;
+#X connect 33 0 18 0;
+#X connect 34 0 18 0;
+#X connect 35 0 32 0;

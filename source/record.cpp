@@ -161,14 +161,14 @@ V xrecord::m_units(xs_unit mode)
 V xrecord::m_min(F mn)
 {
 	xsample::m_min(mn);
-	m_pos(curpos);
+	m_pos(curpos*s2u);
 	outputmin();
 }
 
 V xrecord::m_max(F mx)
 {
 	xsample::m_max(mx);
-	m_pos(curpos);
+	m_pos(curpos*s2u);
 	outputmax();
 }
 

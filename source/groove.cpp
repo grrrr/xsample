@@ -146,21 +146,21 @@ V xgroove::m_units(xs_unit mode)
 V xgroove::m_min(F mn)
 {
 	xsample::m_min(mn);
-	m_pos(curpos);
+	m_pos(curpos*s2u);
 	outputmin();
 }
 
 V xgroove::m_max(F mx)
 {
 	xsample::m_max(mx);
-	m_pos(curpos);
+	m_pos(curpos*s2u);
 	outputmax();
 }
 
 
 V xgroove::m_pos(F pos)
 {
-	curpos = pos/s2u;
+	curpos = (L)(pos/s2u+.5);
 	if(curpos < curmin) curpos = curmin;
 	else if(curpos > curmax) curpos = curmax;
 }
