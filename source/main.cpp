@@ -44,11 +44,11 @@ xs_obj::xs_obj():
 #endif
 	interp(xsi_4p),
 	sclmode(xss_unitsinbuf),
-	curmin(0),curmax(0)
+	curmin(0),curmax(BIGLONG)
 {}
 	
 
-V xs_obj::cb_set(V *c,t_symbol *s,I argc,t_atom *argv) { thisClass(c)->m_set(argc,argv); }
+V xs_obj::cb_set(V *c,t_symbol *,I argc,t_atom *argv) { thisClass(c)->m_set(argc,argv); }
 V xs_obj::cb_print(V *c) { thisClass(c)->m_print(); }	
 V xs_obj::cb_refresh(V *c) { thisClass(c)->m_refresh(); }	
 V xs_obj::cb_reset(V *c) { thisClass(c)->m_reset(); }	
@@ -75,6 +75,8 @@ V xs_obj::m_reset()
 	buf->Set();
 	m_min(0);
     m_max(buf->Frames()*s2u);
+	m_units();
+	m_sclmode();
 }
 
 V xs_obj::m_units(xs_unit mode)

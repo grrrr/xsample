@@ -30,7 +30,7 @@ public:
 	~xgroove_obj();
 
 #ifdef MAXMSP
-	virtual V m_loadbang() { buf->Set(); }
+	virtual V m_loadbang() { m_refresh(); }
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 
@@ -39,8 +39,8 @@ public:
 
 	virtual I m_set(I argc,t_atom *argv);
 
-	virtual V m_start() { doplay = true; }
-	virtual V m_stop() { doplay = false; }
+	virtual V m_start();
+	virtual V m_stop();
 
 	virtual V m_units(xs_unit mode = xsu__);
 
@@ -148,6 +148,7 @@ xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
 	// in max loadbang does the init again
+	m_reset();
 }
 
 xgroove_obj::~xgroove_obj()
@@ -194,6 +195,17 @@ I xgroove_obj::m_set(I argc,t_atom *argv)
 	if(r < 0) m_reset(); // resets pos/min/max
 	if(r != 0) m_units(); 
 	return r;
+}
+
+V xgroove_obj::m_start() 
+{ 
+	m_refresh(); 
+	doplay = true; 
+}
+
+V xgroove_obj::m_stop() 
+{ 
+	doplay = false; 
 }
 
 V xgroove_obj::m_reset()
@@ -455,6 +467,7 @@ V xgroove_obj::m_help()
 	post("\tfloat {unit}: set playing position");
 	post("\tbang/start: start playing");
 	post("\tstop: stop playing");
+	post("\trefresh: checks buffer and refreshes outlets");
 	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
 	post("\tsclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
 	post("");

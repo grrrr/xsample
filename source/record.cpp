@@ -27,7 +27,7 @@ public:
 	~xrec_obj();
 	
 #ifdef MAXMSP
-	virtual V m_loadbang() { buf->Set();	}
+	virtual V m_loadbang() { m_refresh();	}
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 	
@@ -37,8 +37,8 @@ public:
 	virtual I m_set(I argc,t_atom *argv);
 
 	virtual V m_pos(F pos);
-	virtual V m_start() { dorec = true; }
-	virtual V m_stop() { dorec = false; if(!sigmode && !appmode) m_pos(0); }
+	virtual V m_start();
+	virtual V m_stop();
 
 	virtual V m_reset();
 
@@ -50,11 +50,13 @@ public:
 	virtual V m_sigmode(BL mode) { dorec = sigmode = mode; }
 	virtual V m_loop(BL lp) { doloop = lp; }
 	virtual V m_append(BL app) { if(!(appmode = app)) m_pos(0); }
-	
+
+	virtual V m_draw(I argc,t_atom *argv);	
 protected:
 	I inchns;
 	BL sigmode,appmode;
 	const F **invecs; // pointers to input signal chunks
+	F drintv;
 
 	BL dorec,doloop,mixmode;
 	L curpos;  // in samples
@@ -89,6 +91,8 @@ private:
 	static V cb_mixmode(V *c,FI md) { thisClass(c)->m_mixmode(md != 0); }
 	static V cb_sigmode(V *c,FI md) { thisClass(c)->m_sigmode(md != 0); }
 	static V cb_append(V *c,FI md) { thisClass(c)->m_append(md != 0); }
+
+	static V cb_draw(V *c,t_symbol *,I argc,t_atom *argv) { thisClass(c)->m_draw(argc,argv); }	
 };
 
 
@@ -111,13 +115,16 @@ V xrec_obj::cb_setup(t_class *c)
 	add_method0(c,cb_stop, "stop");	
 	add_float(c,cb_pos);	
 	add_method1(c,cb_pos, "pos", A_FLOAT);	
+
+	add_methodG(c,cb_draw,"draw");
 }
 
 xrec_obj::xrec_obj(I argc,t_atom *argv):
 	dorec(false),
 	sigmode(false),mixmode(false),
 	appmode(true),doloop(false),
-	invecs(NULL)
+	invecs(NULL),
+	drintv(0)
 {
 #ifdef DEBUG
 	if(argc < 1) {
@@ -154,6 +161,7 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 #endif
 
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
+	m_reset();
 }
 
 xrec_obj::~xrec_obj()
@@ -203,12 +211,37 @@ I xrec_obj::m_set(I argc,t_atom *argv)
 	return r;
 }
 
+V xrec_obj::m_start() 
+{ 
+	m_refresh(); 
+	dorec = true; 
+	buf->SetRefrIntv(drintv);
+}
+
+V xrec_obj::m_stop() 
+{ 
+	dorec = false; 
+	if(!sigmode && !appmode) m_pos(0); 
+	buf->Dirty(true);
+	buf->SetRefrIntv(0);
+}
+
 V xrec_obj::m_reset()
 {
 	curpos = 0;
 	xs_obj::m_reset();
 }
 
+V xrec_obj::m_draw(I argc,t_atom *argv)
+{
+	if(argc >= 1) {
+		drintv = atom_getflintarg(0,argc,argv);
+		if(dorec) buf->SetRefrIntv(drintv);
+	}
+	else
+		buf->Dirty(true);
+}
+	
 	
 #ifdef TMPLOPT  
 template<int _BCHNS_,int _ICHNS_>  
@@ -256,7 +289,8 @@ V xrec_obj::signal(I n,const F *on,F *pos)
 					if(doloop) 
 						ncur = curlen;
 					else 
-						dorec = false;
+						m_stop(); // loop expired;
+			
 				}
 
 				if(!dorec) break;
@@ -382,32 +416,32 @@ V xrec_obj::m_dsp(t_signal **sp)
 #ifdef TMPLOPT
 	switch(buf->Channels()*100+inchns) {
 		case 101:
-			dsp_add(dspmeth<1,1>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<1,1>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		case 102:
-			dsp_add(dspmeth<1,2>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<1,2>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		case 201:
-			dsp_add(dspmeth<2,1>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<2,1>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		case 202:
-			dsp_add(dspmeth<2,2>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<2,2>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		case 204:
-			dsp_add(dspmeth<2,4>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<2,4>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		case 402:
-			dsp_add(dspmeth<4,2>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<4,2>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		case 404:
-			dsp_add(dspmeth<4,4>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<4,4>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		default:
-			dsp_add(dspmeth<0,0>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<0,0>, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 	}
 #else
-	dsp_add(dspmeth, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+	dsp_add(dspmeth, 4,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 #endif
 }
 
@@ -441,8 +475,10 @@ V xrec_obj::m_help()
 	post("\tfloat {unit}: set recording position");
 	post("\tbang/start: start recording");
 	post("\tstop: stop recording");
+	post("\trefresh: checks buffer and refreshes outlets");
 	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
 	post("\tsclmode 0/1/2/3: set range of position to units/units in loop/buffer/loop");
+	post("\tdraw [{float}]: draw buffer immediately/set refresh time during recording (0 turns off)");
 	post("");
 }
 
@@ -469,7 +505,7 @@ V xrec_obj::m_assist(L msg,L arg,C *s)
 			strcpy(s,"Messages and Audio signal to record");
 			break;
 		case 1:
-			strcpy(s,"On/Off/Fade signal (0..1)");
+			strcpy(s,"On/Off/Fade/Mix signal (0..1)");
 			break;
 		case 2:
 			strcpy(s,"Starting point of recording");

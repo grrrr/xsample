@@ -29,7 +29,7 @@ public:
 	~xplay_obj();
 	
 #ifdef MAXMSP
-	virtual V m_loadbang() { buf->Set(); }
+	virtual V m_loadbang() { m_refresh(); }
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 
@@ -38,8 +38,8 @@ public:
 	
 	virtual I m_set(I argc,t_atom *argv);
 
-	virtual V m_start() { m_refresh(); doplay = true; }
-	virtual V m_stop() { doplay = false; }
+	virtual V m_start();
+	virtual V m_stop();
 
 protected:
 	BL doplay;
@@ -96,6 +96,7 @@ xplay_obj::xplay_obj(I argc, t_atom *argv):
 		newout_signal(x_obj); // output
 
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);	
+	m_reset();
 }
 
 xplay_obj::~xplay_obj()
@@ -109,6 +110,17 @@ I xplay_obj::m_set(I argc,t_atom *argv)
 	I r = xs_obj::m_set(argc,argv);
 	if(r != 0) m_units();
 	return r;
+}
+
+V xplay_obj::m_start() 
+{ 
+	m_refresh(); 
+	doplay = true; 
+}
+
+V xplay_obj::m_stop() 
+{ 
+	doplay = false; 
 }
 
 
@@ -281,7 +293,8 @@ V xplay_obj::m_help()
 	post("\tprint: print current settings");
 	post("\tbang/start: begin playing");
 	post("\tstop: stop playing");
-	post("\treset: recognizes new buffer");
+	post("\treset: checks buffer");
+	post("\trefresh: checks buffer and refreshes outlets");
 	post("\tunits 0/1/2/3: set units to samples/buffer size/ms/s");
 	post("\tinterp 0/1: turn interpolation off/on");
 	post("");
