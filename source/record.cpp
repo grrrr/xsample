@@ -52,7 +52,7 @@ protected:
 	I inchns;
 	BL sigmode,appmode;
 	BL dirty;
-	F **invecs; // pointers to input signal chunks
+	const F **invecs; // pointers to input signal chunks
 
 	BL dorec,doloop,mixmode;
 	L curpos;  // in samples
@@ -63,7 +63,7 @@ protected:
 	V outputmax() const { outlet_float(outmax,curmax*s2u); }
 	
 	template<int _CHNS_>
-	V signal(I n,const F **in,const F *on,F *pos);  // this is the dsp method
+	V signal(I n,const F *on,F *pos);  // this is the dsp method
 
 	virtual V setbuf(t_symbol *s = NULL);
 
@@ -71,7 +71,11 @@ private:
 	virtual V m_dsp(t_signal **sp);
 
 	template<int CHNS>
-	static t_int *dspmeth(t_int *w);
+	static t_int *dspmeth(t_int *w)
+	{ 
+		((xrec_obj *)w[1])->signal<CHNS>((I)w[2],(const F *)w[3],(F *)w[4]); 
+		return w+5;
+	}
 	
 	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
@@ -115,7 +119,8 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 	dorec(false),
 	sigmode(false),mixmode(false),
 	appmode(true),doloop(false),
-	dirty(false)
+	dirty(false),
+	invecs(NULL)
 {
 #ifdef DEBUG
 	if(argc < 1) {
@@ -231,20 +236,13 @@ V xrec_obj::m_tick()
 #endif
 
 
-template<int CHNS>
-t_int *xrec_obj::dspmeth(t_int *w)
-{ 
-	((xrec_obj *)w[1])->signal<CHNS>((I)w[2],(const F **)w[3],(const F *)w[4],(F *)w[5]); 
-	return w+6;
-}
-
-
 template<int _CHNS_> // trust in loop unrolling!
-V xrec_obj::signal(I n,const F **sig,const F *on,F *pos)
+V xrec_obj::signal(I n,const F *on,F *pos)
 {
 	if(enable) {	
 		// optimizer should recognize whether constant or not
 		const I CHNS = _CHNS_ == 0?bufchns:_CHNS_;  
+		const F **sig = invecs;
 
 		register const F pf = sclmul;
 		register L o = curpos;
@@ -380,23 +378,25 @@ V xrec_obj::m_dsp(t_signal **sp)
 {
 	m_units();  // m_dsp hopefully called at change of sample rate ?!
 
+	// TODO: check whether buffer has changed
+
 	if(invecs) delete[] invecs;
-	invecs = new F *[bufchns];
+	invecs = new const F *[bufchns];
 	for(I ci = 0; ci < bufchns; ++ci)
 		invecs[ci] = sp[0+ci%inchns]->s_vec;
 		
 	switch(bufchns) {
 		case 1:
-			dsp_add(dspmeth<1>, 6,this,sp[0]->s_n,invecs,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<1>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		case 2:
-			dsp_add(dspmeth<2>, 6,this,sp[0]->s_n,invecs,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<2>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		case 4:
-			dsp_add(dspmeth<4>, 6,this,sp[0]->s_n,invecs,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<4>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 		default:
-			dsp_add(dspmeth<0>, 6,this,sp[0]->s_n,invecs,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
+			dsp_add(dspmeth<0>, 5,this,sp[0]->s_n,sp[0+inchns]->s_vec,sp[1+inchns]->s_vec);
 			break;
 	}
 }
@@ -409,7 +409,7 @@ V xrec_obj::m_help()
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
 #ifdef MAX
-	post("Arguments: " OBJNAME " [buffer] [channels]");
+	post("Arguments: " OBJNAME " [buffer] [channels=1]");
 #else
 	post("Arguments: " OBJNAME " [buffer]");
 #endif

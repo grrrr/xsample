@@ -26,6 +26,7 @@ class xplay_obj:
 
 public:
 	xplay_obj(I argc, t_atom *argv);
+	~xplay_obj();
 	
 #ifdef MAX
 	virtual V m_loadbang() { setbuf(); }
@@ -48,8 +49,10 @@ public:
 protected:
 	BL doplay;
 	I outchns;
+	F **outvecs;
 
-	V signal(I n,const F *pos,F *sig);  // this is the dsp method
+	template <int _BCHNS_,int _OCHNS_>
+	V signal(I n,const F *pos);  // this is the dsp method
 
 private:
 	virtual V m_dsp(t_signal **sp);
@@ -58,10 +61,11 @@ private:
 	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
 	static V cb_reset(t_class *c) { thisClass(c)->m_reset(); }
 
+	template <int _BCHNS_,int _OCHNS_>
 	static t_int *dspmeth(t_int *w) 
 	{ 
-		((xplay_obj *)w[1])->signal((I)w[2],(const F *)w[3],(F *)w[4]); 
-		return w+5;
+		((xplay_obj *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3]); 
+		return w+4;
 	}
 };
 
@@ -77,7 +81,7 @@ V xplay_obj::cb_setup(t_class *c)
 
 
 xplay_obj::xplay_obj(I argc, t_atom *argv): 
-	doplay(false),outchns(0)
+	doplay(false),outvecs(NULL)
 {
 #ifdef DEBUG
 	if(argc < 1) {
@@ -102,71 +106,97 @@ xplay_obj::xplay_obj(I argc, t_atom *argv):
 #endif
 }
 
+xplay_obj::~xplay_obj()
+{
+	if(outvecs) delete[] outvecs;
+}
 
-V xplay_obj::signal(I n,const F *pos,F *sig)
+#ifndef MIN
+#define MIN(x,y) ((x) < (y)?(x):(y))
+#endif
+
+template <int _BCHNS_,int _OCHNS_>
+V xplay_obj::signal(I n,const F *pos)
 {
 	if(enable) {
+		const I BCHNS = _BCHNS_ == 0?bufchns:_BCHNS_;
+		const I OCHNS = _OCHNS_ == 0?MIN(outchns,BCHNS):MIN(_OCHNS_,BCHNS);
+		F **sig = outvecs;
+		register I si = 0;
+	
 		if(doplay && buflen > 0) {
-			if(interp && buflen > 4) {
+			if(interp == xsi_4p && buflen > 4) {
 				I maxo = buflen-3;
 
-				for(I i = 0; i < n; ++i) {	
+				for(I i = 0; i < n; ++i,++si) {	
 					F o = *(pos++)/s2u;
 					I oint = o;
-					F a,b,c,d;
+					register F a,b,c,d;
 
-					const F *fp = buf+oint;
-					F frac = o-oint;
+					for(I ci = 0; ci < OCHNS; ++ci) {
+						register const F *fp = buf+oint*BCHNS+ci;
+						F frac = o-oint;
 
-					if (oint < 1) {
-						if(oint < 0) {
-							frac = 0;
-							a = b = c = d = buf[0];
+						if (oint < 1) {
+							if(oint < 0) {
+								frac = 0;
+								a = b = c = d = buf[0*BCHNS+ci];
+							}
+							else {
+								a = b = fp[0*BCHNS];
+								c = fp[1*BCHNS];
+								d = fp[2*BCHNS];
+							}
+						}
+						else if(oint > maxo) {
+							if(oint == maxo+1) {
+								a = fp[-1*BCHNS];	
+								b = fp[0*BCHNS];	
+								c = d = fp[1*BCHNS];	
+							}
+							else {
+								frac = 0; 
+								a = b = c = d = buf[(buflen-1)*BCHNS+ci]; 
+							}
 						}
 						else {
-							a = b = fp[0];
-							c = fp[1];
-							d = fp[2];
+							a = fp[-1*BCHNS];
+							b = fp[0*BCHNS];
+							c = fp[1*BCHNS];
+							d = fp[2*BCHNS];
 						}
-					}
-					else if(oint > maxo) {
-						if(oint == maxo+1) {
-							a = fp[-1];	
-							b = fp[0];	
-							c = d = fp[1];	
-						}
-						else {
-							frac = 0; 
-							a = b = c = d = buf[buflen-1]; 
-						}
-					}
-					else {
-						a = fp[-1];
-						b = fp[0];
-						c = fp[1];
-						d = fp[2];
-					}
 
-					F cmb = c-b;
-					*(sig++) = b + frac*( 
-						cmb - 0.5f*(frac-1.) * ((a-d+3.0f*cmb)*frac + (b-a-cmb))
-					);
+						F cmb = c-b;
+						sig[ci][si] = b + frac*( 
+							cmb - 0.5f*(frac-1.) * ((a-d+3.0f*cmb)*frac + (b-a-cmb))
+						);
+					}
 				}
 			}
 			else {
 				// keine Interpolation
-				for(I i = 0; i < n; ++i) {	
+				for(I i = 0; i < n; ++i,++si) {	
 					I o = *(pos++)/s2u;
-					if(o < 0) *(sig++) = buf[0];
-					if(o > buflen) 
-						*(sig++) = buf[buflen-1];
-					else 
-						*(sig++) = buf[o];
+					if(o < 0) {
+						for(I ci = 0; ci < OCHNS; ++ci)
+							sig[ci][si] = buf[0*BCHNS+ci];
+					}
+					if(o > buflen) {
+						for(I ci = 0; ci < OCHNS; ++ci)
+							sig[ci][si] = buf[(buflen-1)*BCHNS+ci];
+					}
+					else {
+						for(I ci = 0; ci < OCHNS; ++ci)
+							sig[ci][si] = buf[o*BCHNS+ci];
+					}
 				}
 			}	
 		}
 		else {
-			while(n--) *(sig++) = 0;
+			while(n--) { 
+				for(I ci = 0; ci < OCHNS; ++ci)	sig[ci][si] = 0;
+				++si;
+			}
 		}
 	}
 }
@@ -174,7 +204,39 @@ V xplay_obj::signal(I n,const F *pos,F *sig)
 V xplay_obj::m_dsp(t_signal **sp)
 {
 	m_units();  // method_dsp hopefully called at change of sample rate ?!
-	dsp_add(dspmeth, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1]->s_vec);
+
+	// TODO: check whether buffer has changed
+
+	if(outvecs) delete[] outvecs;
+	outvecs = new F *[bufchns];
+	for(I ci = 0; ci < bufchns; ++ci)
+		outvecs[ci] = sp[1+ci%outchns]->s_vec;
+		
+	switch(bufchns*100+outchns) {
+		case 101:
+			dsp_add(dspmeth<1,1>, 3,this,sp[0]->s_n,sp[0]->s_vec);
+			break;
+		case 102:
+			dsp_add(dspmeth<1,2>, 3,this,sp[0]->s_n,sp[0]->s_vec);
+			break;
+		case 201:
+			dsp_add(dspmeth<2,1>, 3,this,sp[0]->s_n,sp[0]->s_vec);
+			break;
+		case 202:
+			dsp_add(dspmeth<2,2>, 3,this,sp[0]->s_n,sp[0]->s_vec);
+			break;
+		case 204:
+			dsp_add(dspmeth<2,4>, 3,this,sp[0]->s_n,sp[0]->s_vec);
+			break;
+		case 402:
+			dsp_add(dspmeth<4,2>, 3,this,sp[0]->s_n,sp[0]->s_vec);
+			break;
+		case 404:
+			dsp_add(dspmeth<4,4>, 3,this,sp[0]->s_n,sp[0]->s_vec);
+			break;
+		default:
+			dsp_add(dspmeth<0,0>, 3,this,sp[0]->s_n,sp[0]->s_vec);
+	}
 }
 
 
@@ -184,7 +246,7 @@ V xplay_obj::m_help()
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
 #ifdef MAX
-	post("Arguments: " OBJNAME " [buffer] [channels]");
+	post("Arguments: " OBJNAME " [buffer] [channels=1]");
 #else
 	post("Arguments: " OBJNAME " [buffer]");
 #endif

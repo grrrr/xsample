@@ -52,6 +52,7 @@ public:
 protected:
 
 	I outchns;
+	F **outvecs;
 	BL doplay,doloop;
 	D curpos;  // in samples
 
@@ -60,8 +61,10 @@ protected:
 	V outputmin() { outlet_float(outmin,curmin*s2u); }
 	V outputmax() { outlet_float(outmax,curmax*s2u); }
 	
-	V signal(I n,const F *speed,F *sig,F *pos);  // this is the dsp method
-	V setbuf(t_symbol *s = NULL);
+	template <int _BCHNS_,int _OCHNS_>
+	V signal(I n,const F *speed,F *pos);  // this is the dsp method
+	
+	virtual V setbuf(t_symbol *s = NULL);
 
 private:
 	virtual V m_dsp(t_signal **sp);
@@ -69,10 +72,11 @@ private:
 	static V cb_start(t_class *c) { thisClass(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisClass(c)->m_stop(); }
 
+	template <int _BCHNS_,int _OCHNS_>
 	static t_int *dspmeth(t_int *w) 
 	{ 
-		((xgroove_obj *)w[1])->signal((I)w[2],(const F *)w[3],(F *)w[4],(F *)w[5]); 
-		return w+6;
+		((xgroove_obj *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3],(F *)w[4]); 
+		return w+5;
 	}
 
 	static V cb_pos(V *c,F pos) { thisClass(c)->m_pos(pos); }
@@ -104,7 +108,8 @@ V xgroove_obj::cb_setup(t_class *c)
 
 xgroove_obj::xgroove_obj(I argc,t_atom *argv):
 	doplay(false),doloop(true),
-	curpos(0)
+	curpos(0),
+	outvecs(NULL)
 {
 #ifdef DEBUG
 	if(argc < 1) {
@@ -192,11 +197,20 @@ V xgroove_obj::setbuf(t_symbol *s)
     m_units();
 }
 
+#ifndef MIN
+#define MIN(x,y) ((x) < (y)?(x):(y))
+#endif
 
 
-V xgroove_obj::signal(I n,const F *speed,F *sig,F *pos)
+template <int _BCHNS_,int _OCHNS_>
+V xgroove_obj::signal(I n,const F *speed,F *pos)
 {
 	if(enable) {    
+		const I BCHNS = _BCHNS_ == 0?bufchns:_BCHNS_;
+		const I OCHNS = _OCHNS_ == 0?MIN(outchns,BCHNS):MIN(_OCHNS_,BCHNS);
+		F **sig = outvecs;
+		register I si = 0;
+	
 		const I smin = curmin,smax = curmax;
 		const I plen = curlen;
 		D o = curpos;
@@ -205,7 +219,7 @@ V xgroove_obj::signal(I n,const F *speed,F *sig,F *pos)
 			const I maxo = smax-3;
 
 			if(interp && plen >= 4) {
-				for(I i = 0; i < n; ++i) {	
+				for(I i = 0; i < n; ++i,++si) {	
 					const F spd = *(speed++);
 
 					// Offset normalisieren
@@ -217,108 +231,117 @@ V xgroove_obj::signal(I n,const F *speed,F *sig,F *pos)
 					*(pos++) = scale(o);
 
 					const I oint = o;
-					F a,b,c,d;
+					register F a,b,c,d;
 
-					const F *fp = buf+oint;
-					F frac = o-oint;
+					const F frac = o-oint;
 
-					if (oint <= smin) {
-						if(doloop) {
-							// oint ist immer == smin
-							a = buf[smax-1];
-							b = fp[0];
-							c = fp[1];
-							d = fp[2];
-						}
-						else {
-							// Offset ist nicht normalisiert
-							if(oint == smin) {
-								a = b = fp[0];
-								c = fp[1];
-								d = fp[2];
+					for(I ci = 0; ci < OCHNS; ++ci) {
+						register const F *fp = buf+oint*BCHNS+ci;
+						if (oint <= smin) {
+							if(doloop) {
+								// oint is always == smin
+								a = buf[(smax-1)*BCHNS+ci];
+								b = fp[0*BCHNS];
+								c = fp[1*BCHNS];
+								d = fp[2*BCHNS];
 							}
 							else {
-								a = b = c = d = buf[smin];
+								// offset is not normalized
+								if(oint == smin) {
+									a = b = fp[0*BCHNS];
+									c = fp[1*BCHNS];
+									d = fp[2*BCHNS];
+								}
+								else {
+									a = b = c = d = buf[smin*BCHNS+ci];
+								}
 							}
 						}
-					}
-					else if(oint > maxo) {
-						if(doloop) {
-							a = fp[-1];
-							b = fp[0];
-							if(oint == maxo+1) {
-								c = fp[1];
-								d = buf[smin];
+						else if(oint > maxo) {
+							if(doloop) {
+								a = fp[-1*BCHNS];
+								b = fp[0*BCHNS];
+								if(oint == maxo+1) {
+									c = fp[1*BCHNS];
+									d = buf[smin*BCHNS+ci];
+								}
+								else {
+									c = buf[smin*BCHNS+ci];
+									d = buf[(smin+1)*BCHNS+ci];
+								}
 							}
 							else {
-								c = buf[smin];
-								d = buf[smin+1];
+								// offset is not normalized
+								if(oint == maxo+1) {
+									a = fp[-1*BCHNS];
+									b = fp[0*BCHNS];
+									c = d = fp[1*BCHNS];	
+								}
+								else 
+								if(oint == maxo+2) {
+									a = fp[-1*BCHNS];
+									b = c = d = fp[0*BCHNS];
+								}
+								else { 
+									// >= (maxo+3 = smax-1)
+									a = b = c = d = buf[(smax-1)*BCHNS+ci];
+								}
+
 							}
 						}
 						else {
-							// Offset ist nicht normalisiert
-							if(oint == maxo+1) {
-								a = fp[-1];
-								b = fp[0];
-								c = d = fp[1];	
-							}
-							else 
-							if(oint == maxo+2) {
-								a = fp[-1];
-								b = c = d = fp[0];
-							}
-							else { 
-								// >= (maxo+3 = smax-1)
-								a = b = c = d = buf[smax-1];
-							}
-
+							a = fp[-1*BCHNS];
+							b = fp[0*BCHNS];
+							c = fp[1*BCHNS];
+							d = fp[2*BCHNS];
 						}
-					}
-					else {
-						a = fp[-1];
-						b = fp[0];
-						c = fp[1];
-						d = fp[2];
-					}
 
-					const F cmb = c-b;
-					*(sig++) = b + frac*( 
-						cmb - 0.5f*(frac-1.) * ((a-d+3.0f*cmb)*frac + (b-a-cmb))
-					);
+						const F cmb = c-b;
+						sig[ci][si] = b + frac*( 
+							cmb - 0.5f*(frac-1.) * ((a-d+3.0f*cmb)*frac + (b-a-cmb))
+						);
+					}
 
 					o += spd;
 				}
 			}
 			else {
 				if(doloop) {
-					for(I i = 0; i < n; ++i) {	
+					for(I i = 0; i < n; ++i,++si) {	
 						F spd = *(speed++);
 
-						// Offset normalisieren
+						// normalize offset
 						if(o >= smax) 
 							o = fmod(o,plen)+smin;
 						else if(o < smin) 
 							o = fmod(o+smax,plen)+smin;
 
 						*(pos++) = scale(o);
-						*(sig++) = buf[(I)o];
+						for(I ci = 0; ci < OCHNS; ++ci)
+							sig[ci][si] = buf[(I)o*BCHNS+ci];
 
 						o += spd;
 					}
 				}
 				else {
-					for(I i = 0; i < n; ++i) {	
+					for(I i = 0; i < n; ++i,++si) {	
 						const F spd = *(speed++);
 
 						*(pos++) = scale(o);
 
 						const I oint = o;
-						if(oint < smin) 
-							*(sig++) = buf[smin];
-						else if(oint >= smax) 
-							*(sig++) = buf[smax];
-						else
-							*(sig++) = buf[oint];
+						if(oint < smin) {
+							for(I ci = 0; ci < OCHNS; ++ci)
+								sig[ci][si] = buf[smin*BCHNS+ci];
+						}
+						else if(oint >= smax) {
+							for(I ci = 0; ci < OCHNS; ++ci)
+								sig[ci][si] = buf[smax*BCHNS+ci];
+						}
+						else {
+							for(I ci = 0; ci < OCHNS; ++ci)
+								sig[ci][si] = buf[oint*BCHNS+ci];
+						}
 
 						o += spd;
 					}
@@ -326,11 +349,11 @@ V xgroove_obj::signal(I n,const F *speed,F *sig,F *pos)
 			}
 		} 
 		else {
-			// interne Funktionen benutzen!
 			const F oscl = scale(o);
 			while(n--) {	
 				*(pos++) = oscl;
-				*(sig++) = 0;
+				for(I ci = 0; ci < OCHNS; ++ci)	sig[ci][si] = 0;
+				++si;
 			}
 		}
 		
@@ -341,7 +364,39 @@ V xgroove_obj::signal(I n,const F *speed,F *sig,F *pos)
 V xgroove_obj::m_dsp(t_signal **sp)
 {
 	setbuf();  // method_dsp hopefully called at change of sample rate ?!
-	dsp_add(dspmeth, 5,this,sp[0]->s_n,sp[0]->s_vec,sp[1]->s_vec,sp[2]->s_vec);
+
+	// TODO: check whether buffer has changed
+
+	if(outvecs) delete[] outvecs;
+	outvecs = new F *[bufchns];
+	for(I ci = 0; ci < bufchns; ++ci)
+		outvecs[ci] = sp[1+ci%outchns]->s_vec;
+		
+	switch(bufchns*100+outchns) {
+		case 101:
+			dsp_add(dspmeth<1,1>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+			break;
+		case 102:
+			dsp_add(dspmeth<1,2>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+			break;
+		case 201:
+			dsp_add(dspmeth<2,1>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+			break;
+		case 202:
+			dsp_add(dspmeth<2,2>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+			break;
+		case 204:
+			dsp_add(dspmeth<2,4>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+			break;
+		case 402:
+			dsp_add(dspmeth<4,2>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+			break;
+		case 404:
+			dsp_add(dspmeth<4,4>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+			break;
+		default:
+			dsp_add(dspmeth<0,0>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+	}
 }
 
 
@@ -350,7 +405,7 @@ V xgroove_obj::m_help()
 	post(OBJNAME " - part of xsample objects");
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
 #ifdef MAX
-	post("Arguments: " OBJNAME " [buffer] [channels]");
+	post("Arguments: " OBJNAME " [buffer] [channels=1]");
 #else
 	post("Arguments: " OBJNAME " [buffer]");
 #endif
