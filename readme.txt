@@ -52,6 +52,9 @@ Goals/features of the package:
 
 Version history:
 
+0.2.3:
+- cleaner gcc makefile
+
 0.2.2:
 - using flext 0.2.0
 - xrecord~ for PD: new flext brings better graphics update behavior
@@ -91,6 +94,7 @@ features:
 - vasp handling
 - performance comparison to respective PD/Max objects
 - anti-alias filter? (possible?)
+- linear interpolation!
 
 tests:
 - reconsider startup sequence of set buffer,set units,set sclmode,set pos/min/max
