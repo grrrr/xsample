@@ -9,6 +9,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 */
 
 #include "main.h"
+#include <stdio.h>
 
 #ifdef _MSC_VER
 #pragma warning (disable:4244)
@@ -25,10 +26,6 @@ public:
 	
 	virtual BL Init();
 		
-#if FLEXT_SYS == FLEXT_SYS_MAX
-	virtual V m_assist(L msg,L arg,C *s);
-#endif
-
 	virtual V m_help();
 	virtual V m_print();
 	
@@ -69,8 +66,12 @@ xplay::xplay(I argc,const t_atom *argv)
 	else
 		buf = new buffer(NULL,true);
 
-	AddInSignal();  // pos signal
-	AddOutSignal(outchns);
+	AddInSignal("Messages and Signal of playing position");  // pos signal
+	for(I ci = 0; ci < outchns; ++ci) {
+		C tmp[30];
+		sprintf(tmp,"Audio signal channel %i",ci+1); 
+		AddOutSignal(tmp);
+	}
 	
 	m_reset();
 }
@@ -124,26 +125,5 @@ V xplay::m_print()
 	post("out channels = %i, samples/unit = %.3f, interpolation = %s",outchns,(F)(1./s2u),interp_txt[interp >= xsi_none && interp <= xsi_lin?interp:xsi_none]); 
 	post("");
 }
-
-
-#if FLEXT_SYS == FLEXT_SYS_MAX
-V xplay::m_assist(L msg,L arg,C *s)
-{
-	switch(msg) {
-	case 1: //ASSIST_INLET:
-		switch(arg) {
-		case 0:
-			sprintf(s,"Messages and Signal of playing position"); break;
-		}
-		break;
-	case 2: //ASSIST_OUTLET:
-		if(arg < outchns) 
-			sprintf(s,"Audio signal channel %li",arg+1); 
-		break;
-	}
-}
-#endif
-
-
 
 

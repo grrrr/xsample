@@ -10,6 +10,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 
 #include "main.h"
 #include <math.h>
+#include <stdio.h>
 
 #ifdef _MSC_VER
 #pragma warning (disable:4244)
@@ -30,10 +31,6 @@ public:
 
 	virtual BL Init();
 		
-#if FLEXT_SYS == FLEXT_SYS_MAX
-	virtual V m_assist(L msg,L arg,C *s);
-#endif
-
 	virtual V m_help();
 	virtual V m_print();
 
@@ -177,12 +174,18 @@ xgroove::xgroove(I argc,const t_atom *argv):
 	else
 		buf = new buffer(NULL,true);		
 
-	AddInSignal(); // speed signal
-	AddInFloat(2); // min & max play pos
-	AddOutSignal(outchns); // output
-	AddOutSignal(); // position
-	AddOutFloat(2); // play min & max	
-	AddOutBang();  // loop bang
+	AddInSignal("Signal of playing speed"); // speed signal
+	AddInFloat("Starting point"); // min play pos
+	AddInFloat("Ending point"); // max play pos
+	for(I ci = 0; ci < outchns; ++ci) {
+		C tmp[30];
+		sprintf(tmp,"Audio signal channel %i",ci+1); 
+		AddOutSignal(tmp); // output
+	}
+	AddOutSignal("Position currently played"); // position
+	AddOutFloat("Starting point (rounded to frame)"); // play min 
+	AddOutFloat("Ending point (rounded to frame)"); // play max
+	AddOutBang("Bang on loop end/rollover");  // loop bang
 	
 
 	znbuf = new S *[outchns];
@@ -673,41 +676,4 @@ V xgroove::m_print()
 	post("loop crossfade zone = %.3f",(F)(xzone*s2u)); 
 	post("");
 }
-
-#if FLEXT_SYS == FLEXT_SYS_MAX
-V xgroove::m_assist(long msg, long arg, char *s)
-{
-	switch(msg) {
-	case 1: //ASSIST_INLET:
-		switch(arg) {
-		case 0:
-			sprintf(s,"Signal of playing speed"); break;
-		case 1:
-			sprintf(s,"Starting point"); break;
-		case 2:
-			sprintf(s,"Ending point"); break;
-		}
-		break;
-	case 2: //ASSIST_OUTLET:
-		if(arg < outchns)
-			sprintf(s,"Audio signal channel %li",arg+1); 
-		else
-			switch(arg-outchns) {
-			case 0:
-				sprintf(s,"Position currently played"); break;
-			case 1:
-				sprintf(s,"Starting point (rounded to frame)"); break;
-			case 2:
-				sprintf(s,"Ending point (rounded to frame)"); break;
-			case 3:
-				sprintf(s,"Bang on loop end/rollover"); break;
-			}
-		break;
-	}
-}
-#endif
-
-
-
-
 

@@ -9,6 +9,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 */
 
 #include "main.h"
+#include <stdio.h>
 
 #ifdef _MSC_VER
 #pragma warning (disable:4244)
@@ -25,10 +26,6 @@ public:
 	
 	virtual BL Init();
 		
-#if FLEXT_SYS == FLEXT_SYS_MAX
-	virtual V m_assist(L msg,L arg,C *s);
-#endif
-	
 	virtual V m_help();
 	virtual V m_print();
 	
@@ -143,12 +140,18 @@ xrecord::xrecord(I argc,const t_atom *argv):
 	else
 		buf = new buffer(NULL,true);
 
-	AddInSignal(inchns);  // audio signals
-	AddInSignal(); // on/off signal
-	AddInFloat(2);  // min & max
-	AddOutSignal();  // pos signal
-	AddOutFloat(2); // min & max
-	AddOutBang();  // loop bang
+	for(I ci = 0; ci < inchns; ++ci) {
+		C tmp[30];
+		sprintf(tmp,"Audio channel %i",ci+1);
+		AddInSignal(tmp);  // audio signals
+	}
+	AddInSignal("On/Off/Fade/Mix signal (0..1)"); // on/off signal
+	AddInFloat("Starting point of recording");  // min 
+	AddInFloat("Ending point of recording");  // max
+	AddOutSignal("Current position of recording");  // pos signal
+	AddOutFloat("Starting point (rounded to frame)"); // min 
+	AddOutFloat("Ending point (rounded to frame)"); // max
+	AddOutBang("Bang on loop end/rollover");  // loop bang
 
 	FLEXT_ADDMETHOD(inchns+1,m_min);
 	FLEXT_ADDMETHOD(inchns+2,m_max);
@@ -459,44 +462,4 @@ V xrecord::m_print()
 	post("sigmode = %s, append = %s, loop = %s, mixmode = %s",sigmode?"yes":"no",appmode?"yes":"no",doloop?"yes":"no",mixmode?"yes":"no"); 
 	post("");
 }
-
-
-#if FLEXT_SYS == FLEXT_SYS_MAX
-V xrecord::m_assist(L msg,L arg,C *s)
-{
-	switch(msg) {
-	case 1: //ASSIST_INLET:
-		if(arg < inchns) {
-			if(arg) 
-				sprintf(s,"Messages and Audio channel 1"); 
-			else
-				sprintf(s,"Audio channel %li",arg+1); 
-		}
-		else
-			switch(arg-inchns) {
-			case 0:
-				sprintf(s,"On/Off/Fade/Mix signal (0..1)"); break;
-			case 1:
-				sprintf(s,"Starting point of recording"); break;
-			case 2:
-				sprintf(s,"Ending point of recording"); break;
-			}
-		break;
-	case 2: //ASSIST_OUTLET:
-		switch(arg) {
-		case 0:
-			sprintf(s,"Current position of recording"); break;
-		case 1:
-			sprintf(s,"Starting point (rounded to frame)"); break;
-		case 2:
-			sprintf(s,"Ending point (rounded to frame)"); break;
-		case 3:
-			sprintf(s,"Bang on loop end/rollover"); break;
-		}
-		break;
-	}
-}
-#endif
-
-
 
