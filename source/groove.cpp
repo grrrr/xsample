@@ -128,7 +128,7 @@ FLEXT_LIB_DSP_V("xgroove~",xgroove)
 
 V xgroove::setup(t_classid c)
 {
-	DefineHelp(c,"xgroove~");
+//	DefineHelp(c,"xgroove~");
 
 	FLEXT_CADDMETHOD_(c,0,"all",m_all);
 	FLEXT_CADDMETHOD(c,1,m_min);
