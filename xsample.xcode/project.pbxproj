@@ -56,6 +56,7 @@
 		};
 		0867D69AFE84028FC02AAC07 = {
 			children = (
+				E98C3076078D948800EC0264,
 				E94AC9630789EEA300AE1770,
 				E94AC9610789EE8700AE1770,
 				E9974DFA0770750400206F68,
@@ -105,7 +106,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = source/prefix.h;
-				GCC_PREPROCESSOR_DEFINITIONS = "$(GCC_PREPROCESSOR_DEFINITIONS) _DEBUG";
+				GCC_PREPROCESSOR_DEFINITIONS = "$(GCC_PREPROCESSOR_DEFINITIONS) _DEBUG FLEXT_USESIMD";
 				OPTIMIZATION_CFLAGS = "-O0";
 				ZERO_LINK = YES;
 			};
@@ -119,7 +120,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = source/prefix.h;
-				GCC_PREPROCESSOR_DEFINITIONS = "$(GCC_PREPROCESSOR_DEFINITIONS) NDEBUG";
+				GCC_PREPROCESSOR_DEFINITIONS = "$(GCC_PREPROCESSOR_DEFINITIONS) NDEBUG  FLEXT_USESIMD";
 				ZERO_LINK = NO;
 			};
 			isa = PBXBuildStyle;
@@ -161,6 +162,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E94AC9640789EEA300AE1770,
+				E98C3077078D948800EC0264,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -236,6 +238,26 @@
 		};
 		E94AC9640789EEA300AE1770 = {
 			fileRef = E94AC9630789EEA300AE1770;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E98C3076078D948800EC0264 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = vecLib.framework;
+			path = /System/Library/Frameworks/vecLib.framework;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		E98C3077078D948800EC0264 = {
+			fileRef = E98C3076078D948800EC0264;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E98C3078078D948800EC0264 = {
+			fileRef = E98C3076078D948800EC0264;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -406,6 +428,7 @@
 				E9974E5C0770851700206F68,
 				E9974E5B0770851500206F68,
 				E94AC9620789EE8700AE1770,
+				E98C3078078D948800EC0264,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;

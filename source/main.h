@@ -80,13 +80,13 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	}
 #endif
 
-#if defined(__GNUC__)
+#if FLEXT_CPU != FLEXT_CPU_PPC && defined(__GNUC__) 
 template<typename I,typename F> inline I CASTINT(F o) { return lrintf(o); }
 #elif FLEXT_CPU == FLEXT_CPU_INTEL && defined(_MSC_VER)
 template<typename I,typename F>
 inline I CASTINT(F x) {
 //  by Laurent de Soras (http://ldesoras.free.fr)
-//    assert (x > static_cast <double> (INT_MIN / 2) – 1.0);
+//    assert (x > static_cast <double> (INT_MIN / 2) + 1.0);
 //    assert (x < static_cast <double> (INT_MAX / 2) + 1.0);
     const float round_towards_m_i = -0.5f;
     I i;

@@ -417,7 +417,7 @@ void xrecord::DoUpdate(unsigned int flags)
 	    ToOutFloat(2,curmax*s2u);
     }
 
-    if(flags&xsc_transport) {
+    if(flags&xsc_transport && buf.Ok()) {
         if(dorec)
         	buf.SetRefrIntv(drintv);
         else {
