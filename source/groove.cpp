@@ -597,7 +597,9 @@ V xgroove::s_dsp()
 		switch(loopmode) {
 		case xsl_once: SETSIGFUN(posfun,SIGFUN(s_pos_once)); break;
 		case xsl_loop: 
-			if(xzone > 0) {
+			if(_xzone > 0) {
+                // xzone might not be set yet
+
 				const I blksz = Blocksize();
 
 				if(pblksz != blksz) {
