@@ -3,31 +3,40 @@
 #
 # Makefile for gcc @ linux
 #
-# usage: make -f makefile.pd-linux
+# usage:
+# to build run "make -f makefile.pd-linux"
+# to install (as root), do "make -f makefile.pd-linux install"
 #
-# ---------------------------------------------
 
-NAME=xsample
+## EDIT ZONE ##################################
 
-# where to build
-TARGDIR=../pd-linux
+# flext path 
+FLEXTPATH=/usr/lib/pd/flext
 
-# where to install  ### EDIT! ###
+# pd path 
+PDPATH=/usr/lib/pd/include
+
+# where to install  
 INSTDIR=/usr/lib/pd/extra
 
-# flext stuff  ### EDIT! ###
-FLEXTPATH=/usr/lib/pd/flext
+###############################################
+
 FLEXTLIB=$(FLEXTPATH)/flext.a
 
-# compiler+linker stuff  ### EDIT! ###
-INCLUDES=/usr/lib/pd/include
+# where to build (temporary)
+TARGDIR=../pd-linux
+
+# compiler stuff
+INCLUDES=$(PDPATH)
 FLAGS=-DPD
 CFLAGS=-O6 -mpentium -funroll-loops
 LIBS=m
 
-
+# ----------------------------------------------
 # the rest can stay untouched
 # ----------------------------------------------
+
+NAME=xsample
 
 # all the source files from the package
 SRCS=main.cpp play.cpp record.cpp groove.cpp 
