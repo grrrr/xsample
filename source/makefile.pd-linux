@@ -13,13 +13,13 @@ TARGDIR=../pd-linux
 TARGET=$(TARGDIR)/xsample.pd_linux
 SRCS=main.cpp play.cpp record.cpp groove.cpp 
 
+all: $(TARGDIR) $(TARGET)
+
+$(TARGDIR):
+	mkdir $(TARGDIR)
+
 $(TARGDIR)/%.o : %.cpp
 	$(CXX) -c $(CFLAGS) $(FLAGS) $(patsubst %,-I%,$(INCLUDES)) $< -o $@
-
-$(MAXPDPATH)/$(TARGDIR)/%.o : %.cpp
-	$(CXX) -c $(CFLAGS) $(FLAGS) $(patsubst %,-I%,$(INCLUDES)) $< -o $@
-
-all: $(TARGET)
 
 $(TARGET) : $(patsubst %.cpp,$(TARGDIR)/%.o,$(SRCS)) $(FLEXTLIB) 
 	$(CXX) $(LDFLAGS) -shared $^ $(patsubst %,-l%,$(LIBS)) -o $@ 
@@ -33,18 +33,6 @@ install: $(TARGET)
 clean:
 	rm -f $(TARGDIR)/*.o $(TARGET)
 	
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

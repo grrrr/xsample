@@ -16,6 +16,7 @@ OUTPATH=..\bcc
 DEFS=-DPD -DNT 
 CFLAGS=-6 -O2 -OS -ff -tWD 
 
+all: $(NAME).dll
 
 
 main.cpp: main.h $(FLEXTPATH)\flext.h
@@ -43,4 +44,4 @@ $(NAME).dll:: $(OBJ)
 	@echo EXPORTS xsample_setup = _xsample_setup > xsample.def
 	ilink32 -Tpd $(LIBPATH) $** ,$.,,$(LIBS) $(OUTPATH)\pd.lib $(FLEXTPATH)\bcc\flext-$(TARGET).lib,xsample.def
 
-all: $(NAME).dll
+
