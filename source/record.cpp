@@ -25,8 +25,8 @@ public:
 	xrecord(I argc,t_atom *argv);
 	~xrecord();
 	
+	virtual V m_loadbang() { m_reset();	}
 #ifdef MAXMSP
-	virtual V m_loadbang() { m_refresh();	}
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 	
@@ -61,8 +61,8 @@ protected:
 
 	t_outlet *outmin,*outmax; // float outlets	
 	
-	V outputmin() const { outlet_float(outmin,curmin*s2u); }
-	V outputmax() const { outlet_float(outmax,curmax*s2u); }
+	V outputmin() { to_out_float(outmin,curmin*s2u); }
+	V outputmax() { to_out_float(outmax,curmax*s2u); }
 	
 private:
 	virtual V m_dsp(I n,F *const *in,F *const *out);
@@ -137,8 +137,10 @@ xrecord::xrecord(I argc,t_atom *argv):
 	outmin = get_out(1);
 	outmax = get_out(2);
 	
-	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
-	m_reset();
+	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL,true);
+#ifdef PD
+	m_loadbang();
+#endif
 }
 
 xrecord::~xrecord()

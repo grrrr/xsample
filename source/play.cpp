@@ -27,8 +27,8 @@ public:
 	xplay(I argc, t_atom *argv);
 	~xplay();
 	
-#ifdef MAXMSP
 	virtual V m_loadbang() { m_refresh(); }
+#ifdef MAXMSP
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 
@@ -85,8 +85,10 @@ xplay::xplay(I argc, t_atom *argv):
 	add_out_signal(outchns);
 	setup_inout();
 
-	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);	
-	m_reset();
+	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL,true);	
+#ifdef PD
+	m_loadbang();
+#endif
 }
 
 xplay::~xplay()
@@ -230,7 +232,7 @@ V xplay::m_help()
 	post("%s - part of xsample objects",thisName());
 	post("(C) Thomas Grill, 2001-2002 - version " VERSION " compiled on " __DATE__ " " __TIME__);
 #ifdef MAXMSP
-	post("Arguments: %s [buffer] [channels=1]",thisName());
+	post("Arguments: %s [out channels=1] [buffer] [channel(s)] ...",thisName());
 #else
 	post("Arguments: %s [buffer]",thisName());
 #endif

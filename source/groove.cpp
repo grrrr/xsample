@@ -27,8 +27,8 @@ public:
 	xgroove(I argc,t_atom *argv);
 	~xgroove();
 
+	virtual V m_loadbang() { m_reset(); }
 #ifdef MAXMSP
-	virtual V m_loadbang() { m_refresh(); }
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 
@@ -58,8 +58,11 @@ protected:
 
 	t_outlet *outmin,*outmax; // float outlets	
 	
-	V outputmin() { outlet_float(outmin,curmin*s2u); }
-	V outputmax() { outlet_float(outmax,curmax*s2u); }
+	V outputmin() { to_out_float(outmin,curmin*s2u); }
+	V outputmax() { to_out_float(outmax,curmax*s2u); }
+	
+	I bcnt,bframes;
+	F **bvecs;
 
 private:
 	virtual V m_dsp(I n,F *const *in,F *const *out);
@@ -121,9 +124,10 @@ xgroove::xgroove(I argc,t_atom *argv):
 	outmin = get_out(outchns+1);
 	outmax = get_out(outchns+2);
 	
-	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
-	// in max loadbang does the init again
-	m_reset();
+	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL,true);	
+#ifdef PD
+	m_loadbang();
+#endif
 }
 
 xgroove::~xgroove()

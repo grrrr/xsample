@@ -1,11 +1,11 @@
 #include "main.h"
 
-#ifdef __cplusplus
-extern "C" { 
-#endif
+#define BIGFLOAT 1.e10
+#define BIGLONG 0x7fffffffL
+
 
 #ifdef PD
-FLEXT_EXT void xsample_setup()
+extern "C" FLEXT_EXT void xsample_setup()
 {
 	post("xsample objects, (C)2001,2002 Thomas Grill");
 	post("xsample: xrecord~, xplay~, xgroove~");
@@ -15,10 +15,6 @@ FLEXT_EXT void xsample_setup()
 	xrecord_tilde_setup();
 	xplay_tilde_setup();
 	xgroove_tilde_setup();
-}
-#endif
-
-#ifdef __cplusplus
 }
 #endif
 
