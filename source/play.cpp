@@ -36,11 +36,10 @@ public:
 	virtual V m_help();
 	virtual V m_print();
 	
-	virtual BL m_set(I argc,t_atom *argv);
+	virtual I m_set(I argc,t_atom *argv);
 
-	virtual V m_start() { doplay = true; }
+	virtual V m_start() { m_refresh(); doplay = true; }
 	virtual V m_stop() { doplay = false; }
-	virtual V m_reset() { buf->Set(); }
 
 protected:
 	BL doplay;
@@ -105,10 +104,10 @@ xplay_obj::~xplay_obj()
 	if(outvecs) delete[] outvecs;
 }
 
-BL xplay_obj::m_set(I argc,t_atom *argv) 
+I xplay_obj::m_set(I argc,t_atom *argv) 
 {
-	BL r = xs_obj::m_set(argc,argv);
-	m_units();
+	I r = xs_obj::m_set(argc,argv);
+	if(r != 0) m_units();
 	return r;
 }
 
@@ -224,9 +223,7 @@ V xplay_obj::signal(I n,const F *pos)
 
 V xplay_obj::m_dsp(t_signal **sp)
 {
-	m_units();  // method_dsp hopefully called at change of sample rate ?!
-
-	// TODO: check whether buffer has changed
+	m_refresh();  // m_dsp hopefully called at change of sample rate ?!
 
 	if(outvecs) delete[] outvecs;
 	outvecs = new F *[buf->Frames()];

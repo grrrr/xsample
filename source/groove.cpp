@@ -37,7 +37,7 @@ public:
 	virtual V m_help();
 	virtual V m_print();
 
-	virtual BL m_set(I argc,t_atom *argv);
+	virtual I m_set(I argc,t_atom *argv);
 
 	virtual V m_start() { doplay = true; }
 	virtual V m_stop() { doplay = false; }
@@ -84,7 +84,6 @@ private:
 	static V cb_min(V *c,F mn) { thisClass(c)->m_min(mn); }
 	static V cb_max(V *c,F mx) { thisClass(c)->m_max(mx); }
 
-	static V cb_reset(V *c) { thisClass(c)->m_reset(); }
 	static V cb_loop(V *c,FI lp) { thisClass(c)->m_loop(lp != 0); }
 };
 
@@ -97,7 +96,6 @@ V xgroove_obj::cb_setup(t_class *c)
 	add_float1(c,cb_min);
 	add_float2(c,cb_max);
 
-	add_method0(c,cb_reset, "reset");	
 	add_method1(c,cb_loop, "loop", A_FLINT);	
 	add_method1(c,cb_min, "min", A_FLOAT);	
 	add_method1(c,cb_max, "max", A_FLOAT);	
@@ -171,12 +169,14 @@ V xgroove_obj::m_units(xs_unit mode)
 V xgroove_obj::m_min(F mn)
 {
 	xs_obj::m_min(mn);
+	m_pos(curpos);
 	outputmin();
 }
 
 V xgroove_obj::m_max(F mx)
 {
 	xs_obj::m_max(mx);
+	m_pos(curpos);
 	outputmax();
 }
 
@@ -188,22 +188,20 @@ V xgroove_obj::m_pos(F pos)
 	else if(curpos > curmax) curpos = curmax;
 }
 
-V xgroove_obj::m_reset() 
+I xgroove_obj::m_set(I argc,t_atom *argv)
 {
-	buf->Set();
-	curpos = 0;
-	m_min(0);
-    m_max(buf->Frames()*s2u);
-}
-
-
-BL xgroove_obj::m_set(I argc,t_atom *argv)
-{
-	BL r = xs_obj::m_set(argc,argv);
-	if(r) m_reset(); // calls recmin,recmax,rescale
-    m_units();
+	I r = xs_obj::m_set(argc,argv);
+	if(r < 0) m_reset(); // resets pos/min/max
+	if(r != 0) m_units(); 
 	return r;
 }
+
+V xgroove_obj::m_reset()
+{
+	curpos = 0;
+	xs_obj::m_reset();
+}
+
 
 
 #ifdef TMPLOPT
@@ -393,9 +391,7 @@ V xgroove_obj::signal(I n,const F *speed,F *pos)
 
 V xgroove_obj::m_dsp(t_signal **sp)
 {
-	m_set(0,NULL);  // method_dsp hopefully called at change of sample rate ?!
-
-	// TODO: check whether buffer has changed
+	m_refresh();  // m_dsp hopefully called at change of sample rate ?!
 
 	if(outvecs) delete[] outvecs;
 	outvecs = new F *[buf->Channels()];

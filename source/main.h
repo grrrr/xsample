@@ -55,8 +55,11 @@ public:
 protected:
 	buffer *buf;
 
-  	virtual BL m_set(I argc,t_atom *argv);
+  	virtual I m_set(I argc,t_atom *argv);
 	virtual V m_print() = 0;
+	virtual V m_refresh();
+	virtual V m_reset();
+
 	virtual V m_units(xs_unit u = xsu__);
 	virtual V m_interp(xs_intp u = xsi__);
 	virtual V m_sclmode(xs_sclmd u = xss__);
@@ -78,6 +81,9 @@ protected:
 private:
 	static V cb_set(V *c,t_symbol *s,I argc,t_atom *argv);
 	static V cb_print(V *c);
+	static V cb_refresh(V *c);
+	static V cb_reset(V *c);
+
 	static V cb_units(V *c,FI md);
 	static V cb_interp(V *c,FI md);
 	static V cb_sclmode(V *c,FI md);

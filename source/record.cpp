@@ -34,11 +34,12 @@ public:
 	virtual V m_help();
 	virtual V m_print();
 	
-	virtual BL m_set(I argc,t_atom *argv);
+	virtual I m_set(I argc,t_atom *argv);
 
 	virtual V m_pos(F pos);
 	virtual V m_start() { dorec = true; }
 	virtual V m_stop() { dorec = false; if(!sigmode && !appmode) m_pos(0); }
+
 	virtual V m_reset();
 
 	virtual V m_units(xs_unit md = xsu__);
@@ -53,7 +54,6 @@ public:
 protected:
 	I inchns;
 	BL sigmode,appmode;
-	BL dirty;
 	const F **invecs; // pointers to input signal chunks
 
 	BL dorec,doloop,mixmode;
@@ -68,8 +68,6 @@ protected:
 	template<I _BCHNS_,I _ICHNS_>
 #endif
 	V signal(I n,const F *on,F *pos);  // this is the dsp method
-
-//	virtual V setbuf(t_symbol *s = NULL);
 
 private:
 	virtual V m_dsp(t_signal **sp);
@@ -86,7 +84,6 @@ private:
 	static V cb_min(V *c,F mn) { thisClass(c)->m_min(mn); }
 	static V cb_max(V *c,F mx) { thisClass(c)->m_max(mx); }
 
-	static V cb_reset(V *c) { thisClass(c)->m_reset(); }
 	static V cb_loop(V *c,FI lp) { thisClass(c)->m_loop(lp != 0); }
 
 	static V cb_mixmode(V *c,FI md) { thisClass(c)->m_mixmode(md != 0); }
@@ -102,7 +99,6 @@ V xrec_obj::cb_setup(t_class *c)
 	add_float2(c,cb_min);
 	add_float3(c,cb_max);
 
-	add_method0(c,cb_reset, "reset");	
 	add_method1(c,cb_mixmode, "mixmode", A_FLINT);	
 	add_method1(c,cb_sigmode, "sigmode", A_FLINT);	
 	add_method1(c,cb_loop, "loop", A_FLINT);	
@@ -121,7 +117,6 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 	dorec(false),
 	sigmode(false),mixmode(false),
 	appmode(true),doloop(false),
-	dirty(false),
 	invecs(NULL)
 {
 #ifdef DEBUG
@@ -147,8 +142,6 @@ xrec_obj::xrec_obj(I argc,t_atom *argv):
 	newout_signal(x_obj);
 	outmin = newout_float(x_obj);
 	outmax = newout_float(x_obj);
-
-//    clock = clock_new(x,(t_method)method_tick);
 #elif defined(MAXMSP)
 	// inlets and outlets set up in reverse
 	floatin(x_obj,3);  // max record pos
@@ -182,12 +175,14 @@ V xrec_obj::m_units(xs_unit mode)
 V xrec_obj::m_min(F mn)
 {
 	xs_obj::m_min(mn);
+	m_pos(curpos);
 	outputmin();
 }
 
 V xrec_obj::m_max(F mx)
 {
 	xs_obj::m_max(mx);
+	m_pos(curpos);
 	outputmax();
 }
 
@@ -199,21 +194,19 @@ V xrec_obj::m_pos(F pos)
 	else if(curpos > curmax) curpos = curmax;
 }
 
-V xrec_obj::m_reset()
+
+I xrec_obj::m_set(I argc,t_atom *argv)
 {
-	buf->Set();
-	curpos = 0;
-	m_min(0);
-    m_max(buf->Frames()*s2u);
+	I r = xs_obj::m_set(argc,argv);
+	if(r < 0) m_reset(); // resets pos/min/max
+	if(r != 0) m_units();
+	return r;
 }
 
-
-BL xrec_obj::m_set(I argc,t_atom *argv)
+V xrec_obj::m_reset()
 {
-	BL r = xs_obj::m_set(argc,argv);
-	if(r) m_reset(); // calls recmin,recmax,rescale
-    m_units();
-	return r;
+	curpos = 0;
+	xs_obj::m_reset();
 }
 
 	
@@ -379,9 +372,7 @@ V xrec_obj::signal(I n,const F *on,F *pos)
 
 V xrec_obj::m_dsp(t_signal **sp)
 {
-	m_units();  // m_dsp hopefully called at change of sample rate ?!
-
-	// TODO: check whether buffer has changed
+	m_refresh();  // m_dsp hopefully called at change of sample rate ?!
 
 	if(invecs) delete[] invecs;
 	invecs = new const F *[buf->Channels()];

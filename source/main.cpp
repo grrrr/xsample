@@ -28,6 +28,8 @@ V xs_obj::cb_setup(t_class *c)
 {
 	add_methodG(c,cb_set,"set");
 	add_method0(c,cb_print,"print");
+	add_method0(c,cb_refresh,"refresh");
+	add_method0(c,cb_reset,"reset");
 	
 	add_method1(c,cb_units,"units",A_FLINT);
 	add_method1(c,cb_interp,"interp",A_FLINT);
@@ -48,14 +50,31 @@ xs_obj::xs_obj():
 
 V xs_obj::cb_set(V *c,t_symbol *s,I argc,t_atom *argv) { thisClass(c)->m_set(argc,argv); }
 V xs_obj::cb_print(V *c) { thisClass(c)->m_print(); }	
+V xs_obj::cb_refresh(V *c) { thisClass(c)->m_refresh(); }	
+V xs_obj::cb_reset(V *c) { thisClass(c)->m_reset(); }	
+
 V xs_obj::cb_units(V *c,FI md) { thisClass(c)->m_units((xs_unit)(I)md); }
 V xs_obj::cb_interp(V *c,FI md) { thisClass(c)->m_interp((xs_intp)(I)md); }
 V xs_obj::cb_sclmode(V *c,FI md) { thisClass(c)->m_sclmode((xs_sclmd)(I)md); }
 
 
-BL xs_obj::m_set(I argc, t_atom *argv)
+I xs_obj::m_set(I argc, t_atom *argv)
 {
 	return buf->Set(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
+}
+
+V xs_obj::m_refresh()
+{
+	buf->Set();	
+	m_min(curmin); // also checks pos
+	m_max(curmax); // also checks pos
+}
+
+V xs_obj::m_reset()
+{
+	buf->Set();
+	m_min(0);
+    m_max(buf->Frames()*s2u);
 }
 
 V xs_obj::m_units(xs_unit mode)
@@ -109,6 +128,7 @@ V xs_obj::m_min(F mn)
 	else if(mn > curmax) mn = (F)curmax;
 	curmin = (I)(mn+.5);
 	curlen = curmax-curmin;
+
 	m_sclmode();
 }
 
@@ -119,8 +139,7 @@ V xs_obj::m_max(F mx)
 	else if(mx < curmin) mx = (F)curmin;
 	curmax = (I)(mx+.5);
 	curlen = curmax-curmin;
+
 	m_sclmode();
 }
-
-
 
