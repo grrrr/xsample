@@ -138,11 +138,14 @@ TMPLDEF V xinter::st_play4(const S *bdt,const I smin,const I smax,const I n,cons
 		register const S *fa,*fb,*fc,*fd;
 
 		if(oint <= smin) { 
+			// if oint < first sample set it to first sample
+			// \TODO what about wraparound (in loop/palindrome mode) ?
 			if(oint < smin) oint = smin,o = (float)smin;
 			
-			fa = bdt+smin*BCHNS;  // position is first sample
+			// position is first sample
+			fa = bdt+smin*BCHNS;  
+
 			fb = bdt+oint*BCHNS;
-						
 			frac = o-oint;
 			fc = fb+BCHNS;
 			fd = fc+BCHNS;
@@ -152,11 +155,11 @@ TMPLDEF V xinter::st_play4(const S *bdt,const I smin,const I smax,const I n,cons
 			frac = o-oint;
 
 			fb = bdt+oint*BCHNS;
-			fa = fb-BCHNS;   // CACHE!
+			fa = fb-BCHNS;   
 			
-			// \TODO what about wrap-around???
-			fc = fb >= maxp?maxp:fb+BCHNS;	// ev. CACHE!		
-			fd = fc >= maxp?maxp:fc+BCHNS;	// ev. CACHE!
+			// \TODO what about wraparound (in loop/palindrome mode) ?
+			fc = fb >= maxp?maxp:fb+BCHNS;
+			fd = fc >= maxp?maxp:fc+BCHNS;
 		}
 		else {
 			fa = bdt+oint*BCHNS-BCHNS;

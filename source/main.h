@@ -12,7 +12,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #define __XSAMPLE_H
 
 
-#define XSAMPLE_VERSION "0.3.0pre13"
+#define XSAMPLE_VERSION "0.3.0pre14"
 
 
 #define FLEXT_ATTRIBUTES 1 
@@ -41,7 +41,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 #elif defined(__MWERKS__)
 // CodeWarrior <= 8 can't take address of a template member function 
-	#ifndef FEXLT_DEBUG
+	#ifndef FLEXT_DEBUG
 	#define TMPLOPT
 	#endif
 //	#define SIGSTATIC  // define that for CW6
@@ -72,6 +72,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	#define STD
 #endif
 
+
 #ifdef __ALTIVEC__
 #if FLEXT_CPU == FLEXT_CPU_PPC && defined(__MWERKS__)
 	#pragma altivec_model on
@@ -94,6 +95,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 			(blockStride & 0xFFFF);
 	}
 #endif
+
 
 class xsample:
 	public flext_dsp
