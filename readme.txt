@@ -113,6 +113,8 @@ TODO list:
 general:
 - Documentation and better example patches
 
+- do a smooth (line~) mixin in xrecord~ help patch
+
 features:
 - crossfading loop zone for xgroove~
 - multi-buffer handling (aka multi-channel for pd)

@@ -53,7 +53,7 @@ xsample::xsample():
 	
 xsample::~xsample()
 {
-	m_enable(false); // switch off DSP
+//	m_enable(false); // switch off DSP
 
 	if(buf) delete buf; 
 }
