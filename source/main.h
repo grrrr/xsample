@@ -95,7 +95,6 @@ protected:
 
 	virtual V m_units(xs_unit u = xsu__);
 	virtual V m_sclmode(xs_sclmd u = xss__);
-//	virtual V m_interp(xs_intp u = xsi__);
 
 	virtual V m_all();
 	virtual V m_min(F mn);
@@ -106,7 +105,6 @@ protected:
 
 	xs_unit unitmode; //iunitmode,ounitmode;
 	xs_sclmd sclmode; //isclmode,osclmode;
-//	xs_intp interp;
 
 	I curmin,curmax,curlen;  // in samples
 	I sclmin; // in samples
@@ -127,46 +125,49 @@ private:
 
 	FLEXT_CALLBACK_1(m_units,xs_unit)
 	FLEXT_CALLBACK_1(m_sclmode,xs_sclmd)
-//	FLEXT_CALLBACK_1(m_interp,xs_intp)
 };
 
 
 // defines which are used in the derived classes
 #ifdef SIGSTATIC
 	#ifdef TMPLOPT
-		#define SIGFUN(CL,FUN,BCHNS,IOCHNS) &CL::st_##FUN<BCHNS,IOCHNS>
+		#define SIGFUN(FUN,BCHNS,IOCHNS) &thisType::st_##FUN<BCHNS,IOCHNS>
 		#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
 		#define TMPLCALL <_BCHNS_,_IOCHNS_>
 	#else
-		#define SIGFUN(CL,FUN,BCHNS,IOCHNS) &CL::st_##FUN
+		#define SIGFUN(FUN,BCHNS,IOCHNS) &thisType::st_##FUN
 		#define TMPLDEF 
 		#define TMPLCALL
 	#endif
+
+	#define DEFSIGFUN(NAME) \
+	static V st_##NAME(thisType *obj,I n,F *const *in,F *const *out)  { obj->NAME TMPLCALL (n,in,out); } \
+	V NAME(I n,F *const *in,F *const *out)
+
+	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
+
+	#define DEFSIGCALL(NAME) \
+	inline V NAME(I n,F *const *in,F *const *out) { (*v_##NAME)(this,n,in,out); } \
+	V (*v_##NAME)(thisType *obj,I n,F *const *in,F *const *out) 
+
 #else
 	#ifdef TMPLOPT
-		#define SIGFUN(CL,FUN,BCHNS,IOCHNS) &CL::FUN<BCHNS,IOCHNS>
+		#define SIGFUN(FUN,BCHNS,IOCHNS) &thisType::FUN<BCHNS,IOCHNS>
 		#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
 		#define TMPLCALL <_BCHNS_,_IOCHNS_>
 	#else
-		#define SIGFUN(CL,FUN,BCHNS,IOCHNS) &CL::FUN
+		#define SIGFUN(FUN,BCHNS,IOCHNS) &thisType::FUN
 		#define TMPLDEF 
 		#define TMPLCALL
 	#endif
-#endif
 
-#ifndef SIGSTATIC
-	// member function
-	#define DEFSIGFUN(CL) \
-	V (CL::*sigfun)(I n,F *const *in,F *const *out);  \
-	virtual V m_signal(I n,F *const *in,F *const *out) { (this->*sigfun)(n,in,out); }
-#else
-	// static function -> another redirection...
-	#define DEFSIGFUN(CL) \
-	V (*sigfun)(CL *obj,I n,F *const *in,F *const *out);  \
-	virtual V m_signal(I n,F *const *in,F *const *out)   \
-		{ (*sigfun)(this,n,in,out); }  \
-	TMPLDEF static V st_signal(CL *obj,I n,F *const *in,F *const *out)  \
-		{ obj->signal TMPLCALL (n,in,out); }
+	#define DEFSIGFUN(NAME)	V NAME(I n,F *const *in,F *const *out)
+
+	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
+
+	#define DEFSIGCALL(NAME) \
+	V (thisType::*v_##NAME)(I n,F *const *in,F *const *out);  \
+	inline V NAME(I n,F *const *in,F *const *out) { (this->*v_##NAME)(n,in,out); } 
 #endif
 
 
@@ -204,18 +205,26 @@ public:
 	xinter();
 	
 protected:
+	virtual I m_set(I argc,t_atom *argv);
+
+	virtual V m_start();
+	virtual V m_stop();
+
 	virtual V m_interp(xs_intp u = xsi__);
 
 	I outchns;
 	BL doplay;	
 	xs_intp interp;
 
-	TMPLDEF V s_speed(I n,F *const *in,F *const *out);  // this is the dsp method
 
-	TMPLDEF V s_play0(I n,F *const *in,F *const *out);  // this is the dsp method
-	TMPLDEF V s_play1(I n,F *const *in,F *const *out);  // this is the dsp method
-	TMPLDEF V s_play2(I n,F *const *in,F *const *out);  // this is the dsp method
-	TMPLDEF V s_play4(I n,F *const *in,F *const *out);  // this is the dsp method
+	TMPLDEF DEFSIGFUN(s_play0);
+	TMPLDEF DEFSIGFUN(s_play1);
+	TMPLDEF DEFSIGFUN(s_play2);
+	TMPLDEF DEFSIGFUN(s_play4);
+
+	DEFSIGCALL(playfun);
+
+	virtual V s_dsp();
 
 private:
 

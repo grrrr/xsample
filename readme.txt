@@ -15,7 +15,7 @@ You will need the flext C++ layer for PD and Max/MSP externals to compile this.
 Package files:
 - readme.txt: this one
 - gpl.txt,license.txt: GPL license stuff
-- main.h,main.cpp: base class definition for all the other objects
+- main.h,main.cpp,inter.cpp: base class definition for all the other objects
 - record.cpp: xrecord~
 - play.cpp: xplay~
 - groove.cpp: xgroove~
@@ -48,7 +48,7 @@ Goals/features of the package:
 - avoid the various bugs of the original MSP2 objects
 - multi-channel capability 
 - live update of respective buffer/array object
-- switchable 4-point-interpolation for xplay~/xgroove~ object
+- switchable 4-point or linear interpolation for xplay~/xgroove~ object
 
 ----------------------------------------------------------------------------
 
@@ -58,8 +58,10 @@ Version history:
 - using flext 0.2.2 - xsample is now a library under MaxMSP
 - cleaner gcc makefile
 - xgroove~, xrecord~: added "all" message to select entire buffer length
-- xgroove~, xplay~: revisited dsp methods, restructured the code, added linear interpolation (message to send: "interp 2") 
+- xgroove~, xplay~: revisited dsp methods, restructured the code
+- xgroove~, xplay~: added linear interpolation (message "interp 2") 
 - enabled 0 output channels -> xgroove~: position output only
+- xgroove~: added bidirectional looping (message "loop 2")
 
 0.2.2:
 - using flext 0.2.0

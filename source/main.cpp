@@ -20,7 +20,6 @@ V lib_setup()
 	// call the objects' setup routines
 	FLEXT_TILDE_SETUP(xrecord);
 	FLEXT_TILDE_SETUP(xplay);
-	FLEXT_TILDE_SETUP(xspeed);
 	FLEXT_TILDE_SETUP(xgroove);
 }
 
@@ -164,22 +163,6 @@ V xsample::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 	m_refresh();  
 	s_dsp();
 }
-
-
-
-xinter::xinter():
-	doplay(false),outchns(1),
-	interp(xsi_4p)
-{
-	FLEXT_ADDMETHOD_E(0,"interp",m_interp);
-}
-
-V xinter::m_interp(xs_intp mode) 
-{ 
-	interp = mode; 
-	s_dsp(); 
-}
-
 
 
 

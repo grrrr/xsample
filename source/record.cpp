@@ -65,12 +65,14 @@ protected:
 	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
 	
 private:
-	static V setup(t_class *c);
+//	static V setup(t_class *c);
 
 	virtual V s_dsp();
 
-	DEFSIGFUN(xrecord)
-	TMPLDEF V signal(I n,F *const *in,F *const *out);  // this is the dsp method
+	TMPLDEF DEFSIGFUN(s_rec);
+
+	DEFSIGCALL(recfun);
+	virtual V m_signal(I n,F *const *in,F *const *out) { recfun(n,in,out); }
 
 	FLEXT_CALLBACK_F(m_pos)
 	FLEXT_CALLBACK(m_all)
@@ -235,7 +237,7 @@ V xrecord::m_draw(I argc,t_atom *argv)
 }
 	
 	
-TMPLDEF V xrecord::signal(I n,F *const *invecs,F *const *outvecs)
+TMPLDEF V xrecord::s_rec(I n,F *const *invecs,F *const *outvecs)
 {
 	SIGCHNS(BCHNS,buf->Channels(),ICHNS,inchns);
 
@@ -249,7 +251,7 @@ TMPLDEF V xrecord::signal(I n,F *const *invecs,F *const *outvecs)
 	
 	if(o < curmin) o = curmin;
 
-	if(buf && curlen > 0) {
+	if(buf && dorec && curlen > 0) {
 		while(n) {
 			L ncur = curmax-o; // at max to buffer or recording end
 
@@ -375,22 +377,15 @@ TMPLDEF V xrecord::signal(I n,F *const *invecs,F *const *outvecs)
 V xrecord::s_dsp()
 {
 	switch(buf->Channels()*1000+inchns) {
-		case 1001:
-			sigfun = SIGFUN(xrecord,signal,1,1);	break;
-		case 1002:
-			sigfun = SIGFUN(xrecord,signal,1,2);	break;
-		case 2001:
-			sigfun = SIGFUN(xrecord,signal,2,1);	break;
-		case 2002:
-			sigfun = SIGFUN(xrecord,signal,2,2);	break;
-		case 4001:
-		case 4002:
-		case 4003:
-			sigfun = SIGFUN(xrecord,signal,4,-1);	break;
-		case 4004:
-			sigfun = SIGFUN(xrecord,signal,4,4);	break;
-		default:
-			sigfun = SIGFUN(xrecord,signal,-1,-1);	break;
+	case 1001:	SETSIGFUN(recfun,SIGFUN(s_rec,1,1));	break;
+	case 1002:	SETSIGFUN(recfun,SIGFUN(s_rec,1,2));	break;
+	case 2001:	SETSIGFUN(recfun,SIGFUN(s_rec,2,1));	break;
+	case 2002:	SETSIGFUN(recfun,SIGFUN(s_rec,2,2));	break;
+	case 4001:
+	case 4002:
+	case 4003:	SETSIGFUN(recfun,SIGFUN(s_rec,4,-1));	break;
+	case 4004:	SETSIGFUN(recfun,SIGFUN(s_rec,4,4));	break;
+	default:	SETSIGFUN(recfun,SIGFUN(s_rec,-1,-1));	break;
 	}
 }
 
