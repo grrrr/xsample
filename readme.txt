@@ -78,7 +78,7 @@ bash ../flext/build.sh
 
 Max - OS9 - Metrowerks CodeWarrior:
 -----------------------------------
-use the "xsample.cw" project file
+use the "xsample.mcp" project file
 
 ----------------------------------------------------------------------------
 
