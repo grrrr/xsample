@@ -1,22 +1,21 @@
 # xsample - extended sample objects for Max/MSP and pd (pure data)
 # Copyright (c) 2001-2004 Thomas Grill (xovo@gmx.net)
 #
-# Makefile for gcc @ cygwin
+# Makefile for gcc @ minGW
 #
 # usage:
-# to build run "make -f makefile.pd-cygwin"
-# to install (as root), do "make -f makefile.pd-cygwin install"
+# to build run "make -f makefile.pd-mingw"
+# to install (as root), do "make -f makefile.pd-mingw install"
 #
 
-CONFIG=config-pd-cygwin.txt
-MAKEFILE=makefile.pd-cygwin
+CONFIG=config-pd-mingw.txt
+MAKEFILE=makefile.pd-mingw
 
 include ${CONFIG}
 
 
 # compiler stuff
-# /usr/include holds the cygwin pthread headers and must be first!
-INCLUDES=/usr/include $(PDINC) 
+INCLUDES=$(PDINC) 
 
 FLAGS=-DFLEXT_SYS=2
 CFLAGS=-O2 -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions -fno-rtti -fno-exceptions ${UFLAGS} 
@@ -50,7 +49,7 @@ TARGET=$(TARGDIR)/$(NAME).dll
 all: $(TARGDIR) $(TARGET) 
 
 $(patsubst %,$(SRCDIR)/%,$(SRCS)): $(patsubst %,$(SRCDIR)/%,$(HDRS)) $(MAKEFILE) $(CONFIG)
-	touch $(patsubst %,$(SRCDIR)/%,$(SRCS))
+#	echo touch $(patsubst %,$(SRCDIR)/%,$(SRCS)) # minGW has no touch
 
 $(TARGDIR):
 	-mkdir $(TARGDIR)

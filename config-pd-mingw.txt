@@ -6,7 +6,7 @@
 # CXX=g++
 
 # where does the PD installation reside?
-PD=/cygdrive/c/programme/audio/pd
+PD=c:/programme/audio/pd
 
 # where are the PD header files?
 # leave it blank if it is a system directory (like /usr/local/include), 
@@ -17,7 +17,7 @@ PDINC=${PD}/src
 FLEXTPATH=${PD}/flext
 
 # where should xsample objects be built?
-TARGDIR=./pd-cygwin
+TARGDIR=./pd-mingw
 
 # where should xsample be installed?
 # (leave blank to omit installation)
@@ -33,4 +33,4 @@ UFLAGS=-mcpu=pentium4 -msse -mfpmath=sse # gcc 3.2
 # UFLAGS=-mcpu=pentiumpro  # gcc 2.95
 
 # define to build with shared flext library
-#FLEXT_SHARED=1
+# FLEXT_SHARED=1
