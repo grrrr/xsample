@@ -55,10 +55,11 @@ protected:
     virtual void DoReset();
     virtual void DoUpdate(unsigned int flags);
 	
+	virtual void CbSignal();
+	
 	virtual void m_help();
 	virtual void m_print();
-	virtual void m_signal(int n,t_sample *const *in,t_sample *const *out);
-	
+
 private:
 	static void setup(t_classid c);
 
@@ -385,7 +386,7 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
 	if(lpbang) ToOutBang(3);
 }
 
-void xrecord::m_signal(int n,t_sample *const *in,t_sample *const *out) 
+void xrecord::CbSignal() 
 { 
     int ret = ChkBuffer(true);
 
@@ -393,14 +394,14 @@ void xrecord::m_signal(int n,t_sample *const *in,t_sample *const *out)
 		// call the appropriate dsp function
         
         const lock_t l = Lock();
-		recfun(n,in,out);
+		recfun(Blocksize(),InSig(),OutSig());
         Unlock(l);
          
         Refresh();
     }
 	else
 		// set position signal to zero
-		ZeroSamples(out[0],n);
+		ZeroSamples(OutSig()[0],Blocksize());
 }
 
 void xrecord::DoUpdate(unsigned int flags)

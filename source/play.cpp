@@ -29,9 +29,11 @@ public:
     }
 	
 protected:
-	virtual void m_help();
+
+    virtual void CbSignal();
+
+    virtual void m_help();
 	virtual void m_print();
-	virtual void m_signal(int n,t_sample *const *in,t_sample *const *out);
 	
 private:
 	static void setup(t_classid c);
@@ -83,9 +85,12 @@ xplay::xplay(int argc,const t_atom *argv)
 	}
 }
 
-void xplay::m_signal(int n,t_sample *const *in,t_sample *const *out) 
+void xplay::CbSignal() 
 { 
 	int ret = ChkBuffer(true);
+    int n = Blocksize();
+    const t_sample *const *in = InSig();
+    t_sample *const *out = OutSig();
 
 	// check whether buffer is invalid or changed
 	if(ret) {

@@ -15,7 +15,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #error You need at least flext version 0.5.0
 #endif
 
-#define XSAMPLE_VERSION "0.3.1pre5"
+#define XSAMPLE_VERSION "0.3.1pre6"
 
 
 // most compilers are somehow broken - in other words - can't handle all C++ features
@@ -233,9 +233,11 @@ protected:
     virtual void DoReset();
     virtual void DoUpdate(unsigned int flags);
 
-	virtual void m_loadbang();
+	virtual void CbLoadbang();
+	virtual bool CbDsp();
+
+	virtual void m_help() = 0;
 	virtual void m_print() = 0;
-	virtual void m_dsp(int n,t_sample *const *insigs,t_sample *const *outsigs);
 
 private:
 
@@ -243,6 +245,7 @@ private:
 
 	static void setup(t_classid c);
 
+	FLEXT_CALLBACK(m_help)
 	FLEXT_CALLBACK_V(m_set)
 	FLEXT_CALLBACK(m_print)
 	FLEXT_CALLBACK(m_refresh)

@@ -36,6 +36,7 @@ FLEXT_LIB_SETUP(xsample,xsample_main)
 
 void xsample::setup(t_classid c)
 {
+	FLEXT_CADDMETHOD_(c,0,"help",m_help);
 	FLEXT_CADDMETHOD_(c,0,"set",m_set);
 	FLEXT_CADDMETHOD_(c,0,"print",m_print);
 	FLEXT_CADDMETHOD_(c,0,"refresh",m_refresh);
@@ -90,7 +91,7 @@ int xsample::ChkBuffer(bool refresh)
 }
 
 /* called after all buffer objects have been created in the patch */
-void xsample::m_loadbang() 
+void xsample::CbLoadbang() 
 {
     ChkBuffer(true);
 }
@@ -140,7 +141,7 @@ void xsample::m_max(float mx)
 	}
 }
 
-void xsample::m_dsp(int /*n*/,t_sample *const * /*insigs*/,t_sample *const * /*outsigs*/)
+bool xsample::CbDsp()
 {
 	// this is hopefully called at change of sample rate ?!
 
@@ -152,6 +153,7 @@ void xsample::m_dsp(int /*n*/,t_sample *const * /*insigs*/,t_sample *const * /*o
     // then we must reset the buffer
 
     Update(xsc_srate|xsc_buffer,true);
+    return true;
 }
 
 void xsample::DoReset() 

@@ -101,9 +101,10 @@ protected:
     virtual void DoReset();
     virtual void DoUpdate(unsigned int flags);
 
+	virtual void CbSignal();
+
 	virtual void m_help();
 	virtual void m_print();
-	virtual void m_signal(int n,t_sample *const *in,t_sample *const *out);
 
 private:
 	static void setup(t_classid c);
@@ -541,7 +542,7 @@ void xgroove::s_pos_bidir(int n,t_sample *const *invecs,t_sample *const *outvecs
 	if(lpbang) ToOutBang(outchns+3);
 }
 
-void xgroove::m_signal(int n,t_sample *const *in,t_sample *const *out) 
+void xgroove::CbSignal() 
 { 
     int ret = ChkBuffer(true);
 
@@ -549,13 +550,13 @@ void xgroove::m_signal(int n,t_sample *const *in,t_sample *const *out)
         FLEXT_ASSERT(buf.Valid());
         
         const lock_t l = Lock();
-		posfun(n,in,out); 
+		posfun(Blocksize(),InSig(),OutSig()); 
         Unlock(l);
 
         Refresh();
     }
 	else
-		zerofun(n,in,out);
+		zerofun(Blocksize(),InSig(),OutSig());
 }
 
 
