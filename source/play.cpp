@@ -43,24 +43,21 @@ public:
 protected:
 	BL doplay;
 	I outchns;
-	F **outvecs;
 
 #ifdef TMPLOPT
 	template <int _BCHNS_,int _OCHNS_>
 #endif
-	V signal(I n,const F *pos);  // this is the dsp method
+	V signal(I n,F *const *in,F *const *out);  // this is the dsp method
 
 private:
-	virtual V m_dsp(t_signal **sp);
+	virtual V m_dsp(I n,F *const *in,F *const *out);
+	virtual V m_signal(I n,F *const *in,F *const *out) { (this->*sigfun)(n,in,out); }
+
+	V (xplay::*sigfun)(I n,F *const *in,F *const *out);  // this is my dsp method
 
 	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
 	static V cb_reset(t_class *c) { thisObject(c)->m_reset(); }
-
-#ifdef TMPLOPT
-	template <int _BCHNS_,int _OCHNS_>
-#endif
-	static t_int *dspmeth(t_int *w); 
 };
 
 FLEXT_NEW_WITH_GIMME("xplay~",xplay)
@@ -75,7 +72,7 @@ V xplay::cb_setup(t_class *c)
 
 
 xplay::xplay(I argc, t_atom *argv): 
-	doplay(false),outvecs(NULL)
+	doplay(false)
 {
 #ifdef DEBUG
 	if(argc < 1) {
@@ -100,7 +97,6 @@ xplay::xplay(I argc, t_atom *argv):
 xplay::~xplay()
 {
 	if(buf) delete buf;
-	if(outvecs) delete[] outvecs;
 }
 
 I xplay::m_set(I argc,t_atom *argv) 
@@ -124,149 +120,124 @@ V xplay::m_stop()
 
 #ifdef TMPLOPT
 template <int _BCHNS_,int _OCHNS_>
-t_int *xplay::dspmeth(t_int *w) 
-{ 
-	((xplay *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3]); 
-	return w+4;
-}
-#else
-t_int *xplay::dspmeth(t_int *w) 
-{ 
-	((xplay *)w[1])->signal((I)w[2],(const F *)w[3]); 
-	return w+4;
-}
 #endif
-
-
-#ifdef TMPLOPT
-template <int _BCHNS_,int _OCHNS_>
-#endif
-V xplay::signal(I n,const F *pos)
+V xplay::signal(I n,F *const *invecs,F *const *outvecs)
 {
-	if(enable) {
 #ifdef TMPLOPT
-		const I BCHNS = _BCHNS_ == 0?buf->Channels():_BCHNS_;
-		const I OCHNS = _OCHNS_ == 0?MIN(outchns,BCHNS):MIN(_OCHNS_,BCHNS);
+	const I BCHNS = _BCHNS_ == 0?buf->Channels():_BCHNS_;
+	const I OCHNS = _OCHNS_ == 0?MIN(outchns,BCHNS):MIN(_OCHNS_,BCHNS);
 #else
-		const I BCHNS = buf->Channels();
-		const I OCHNS = MIN(outchns,BCHNS);
+	const I BCHNS = buf->Channels();
+	const I OCHNS = MIN(outchns,BCHNS);
 #endif
-		F **sig = outvecs;
-		register I si = 0;
-	
-		if(doplay && buf->Frames() > 0) {
-			if(interp == xsi_4p && buf->Frames() > 4) {
-				I maxo = buf->Frames()-3;
 
-				for(I i = 0; i < n; ++i,++si) {	
-					F o = *(pos++)/s2u;
-					I oint = (I)o;
-					register F a,b,c,d;
+	const F *pos = invecs[0];
+	F *const *sig = outvecs;
+	register I si = 0;
 
-					for(I ci = 0; ci < OCHNS; ++ci) {
-						register const F *fp = buf->Data()+oint*BCHNS+ci;
-						F frac = o-oint;
+	if(doplay && buf->Frames() > 0) {
+		if(interp == xsi_4p && buf->Frames() > 4) {
+			I maxo = buf->Frames()-3;
 
-						if (oint < 1) {
-							if(oint < 0) {
-								frac = 0;
-								a = b = c = d = buf->Data()[0*BCHNS+ci];
-							}
-							else {
-								a = b = fp[0*BCHNS];
-								c = fp[1*BCHNS];
-								d = fp[2*BCHNS];
-							}
-						}
-						else if(oint > maxo) {
-							if(oint == maxo+1) {
-								a = fp[-1*BCHNS];	
-								b = fp[0*BCHNS];	
-								c = d = fp[1*BCHNS];	
-							}
-							else {
-								frac = 0; 
-								a = b = c = d = buf->Data()[(buf->Frames()-1)*BCHNS+ci]; 
-							}
+			for(I i = 0; i < n; ++i,++si) {	
+				F o = *(pos++)/s2u;
+				I oint = (I)o;
+				register F a,b,c,d;
+
+				for(I ci = 0; ci < OCHNS; ++ci) {
+					register const F *fp = buf->Data()+oint*BCHNS+ci;
+					F frac = o-oint;
+
+					if (oint < 1) {
+						if(oint < 0) {
+							frac = 0;
+							a = b = c = d = buf->Data()[0*BCHNS+ci];
 						}
 						else {
-							a = fp[-1*BCHNS];
-							b = fp[0*BCHNS];
+							a = b = fp[0*BCHNS];
 							c = fp[1*BCHNS];
 							d = fp[2*BCHNS];
 						}
-
-						F cmb = c-b;
-						sig[ci][si] = b + frac*( 
-							cmb - 0.5f*(frac-1.) * ((a-d+3.0f*cmb)*frac + (b-a-cmb))
-						);
 					}
-				}
-			}
-			else {
-				// keine Interpolation
-				for(I i = 0; i < n; ++i,++si) {	
-					I o = (I)(*(pos++)/s2u);
-					if(o < 0) {
-						for(I ci = 0; ci < OCHNS; ++ci)
-							sig[ci][si] = buf->Data()[0*BCHNS+ci];
-					}
-					if(o > buf->Frames()) {
-						for(I ci = 0; ci < OCHNS; ++ci)
-							sig[ci][si] = buf->Data()[(buf->Frames()-1)*BCHNS+ci];
+					else if(oint > maxo) {
+						if(oint == maxo+1) {
+							a = fp[-1*BCHNS];	
+							b = fp[0*BCHNS];	
+							c = d = fp[1*BCHNS];	
+						}
+						else {
+							frac = 0; 
+							a = b = c = d = buf->Data()[(buf->Frames()-1)*BCHNS+ci]; 
+						}
 					}
 					else {
-						for(I ci = 0; ci < OCHNS; ++ci)
-							sig[ci][si] = buf->Data()[o*BCHNS+ci];
+						a = fp[-1*BCHNS];
+						b = fp[0*BCHNS];
+						c = fp[1*BCHNS];
+						d = fp[2*BCHNS];
 					}
+
+					F cmb = c-b;
+					sig[ci][si] = b + frac*( 
+						cmb - 0.5f*(frac-1.) * ((a-d+3.0f*cmb)*frac + (b-a-cmb))
+					);
 				}
-			}	
+			}
 		}
 		else {
-			while(n--) { 
-				for(I ci = 0; ci < OCHNS; ++ci)	sig[ci][si] = 0;
-				++si;
+			// keine Interpolation
+			for(I i = 0; i < n; ++i,++si) {	
+				I o = (I)(*(pos++)/s2u);
+				if(o < 0) {
+					for(I ci = 0; ci < OCHNS; ++ci)
+						sig[ci][si] = buf->Data()[0*BCHNS+ci];
+				}
+				if(o > buf->Frames()) {
+					for(I ci = 0; ci < OCHNS; ++ci)
+						sig[ci][si] = buf->Data()[(buf->Frames()-1)*BCHNS+ci];
+				}
+				else {
+					for(I ci = 0; ci < OCHNS; ++ci)
+						sig[ci][si] = buf->Data()[o*BCHNS+ci];
+				}
 			}
+		}	
+	}
+	else {
+		while(n--) { 
+			for(I ci = 0; ci < OCHNS; ++ci)	sig[ci][si] = 0;
+			++si;
 		}
 	}
 }
 
-V xplay::m_dsp(t_signal **sp)
+V xplay::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 {
-	m_refresh();  // m_dsp hopefully called at change of sample rate ?!
+	// this is hopefully called at change of sample rate ?!
 
-	if(outvecs) delete[] outvecs;
-	outvecs = new F *[buf->Frames()];
-	for(I ci = 0; ci < buf->Frames(); ++ci)
-		outvecs[ci] = sp[1+ci%outchns]->s_vec;
+	m_refresh();  
 
 #ifdef TMPLOPT
 	switch(buf->Frames()*100+outchns) {
 		case 101:
-			dsp_add(dspmeth<1,1>, 3,this,sp[0]->s_n,sp[0]->s_vec);
-			break;
+			sigfun = &xplay::signal<1,1>; break;
 		case 102:
-			dsp_add(dspmeth<1,2>, 3,this,sp[0]->s_n,sp[0]->s_vec);
-			break;
+			sigfun = &xplay::signal<1,2>; break;
 		case 201:
-			dsp_add(dspmeth<2,1>, 3,this,sp[0]->s_n,sp[0]->s_vec);
-			break;
+			sigfun = &xplay::signal<2,1>; break;
 		case 202:
-			dsp_add(dspmeth<2,2>, 3,this,sp[0]->s_n,sp[0]->s_vec);
-			break;
+			sigfun = &xplay::signal<2,2>; break;
 		case 401:
 		case 402:
 		case 403:
-			dsp_add(dspmeth<4,0>, 3,this,sp[0]->s_n,sp[0]->s_vec);
-			break;
+			sigfun = &xplay::signal<4,0>; break;
 		case 404:
-			dsp_add(dspmeth<4,4>, 3,this,sp[0]->s_n,sp[0]->s_vec);
-			break;
+			sigfun = &xplay::signal<4,4>; break;
 		default:
-			dsp_add(dspmeth<0,0>, 3,this,sp[0]->s_n,sp[0]->s_vec);
+			sigfun = &xplay::signal<0,0>;
 	}
 #else
-	dsp_add(dspmeth, 3,this,sp[0]->s_n,sp[0]->s_vec);
+	sigfun = &xplay::signal;
 #endif
 }
 
@@ -314,15 +285,13 @@ V xplay::m_assist(L msg,L arg,C *s)
 	case 1: //ASSIST_INLET:
 		switch(arg) {
 		case 0:
-			strcpy(s,"Messages and Signal of playing position");
-			break;
+			strcpy(s,"Messages and Signal of playing position"); break;
 		}
 		break;
 	case 2: //ASSIST_OUTLET:
 		switch(arg) {
 		case 0:
-			strcpy(s,"Audio signal played");
-			break;
+			strcpy(s,"Audio signal played"); break;
 		}
 		break;
 	}
@@ -330,19 +299,12 @@ V xplay::m_assist(L msg,L arg,C *s)
 #endif
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifdef PD
-FLEXT_EXT V xplay_tilde_setup()
+extern "C" FLEXT_EXT V xplay_tilde_setup()
 #elif defined(MAXMSP)
-V main()
+extern "C" V main()
 #endif
 {
 	xplay_setup();
 }
-#ifdef __cplusplus
-}
-#endif
 

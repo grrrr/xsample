@@ -53,11 +53,10 @@ public:
 protected:
 
 	I outchns;
-	F **outvecs;
 	BL doplay,doloop;
 	D curpos;  // in samples
 
-	_outlet *outmin,*outmax; // float outlets	
+	t_outlet *outmin,*outmax; // float outlets	
 	
 	V outputmin() { outlet_float(outmin,curmin*s2u); }
 	V outputmax() { outlet_float(outmax,curmax*s2u); }
@@ -65,18 +64,16 @@ protected:
 #ifdef TMPLOPT
 	template <I _BCHNS_,I _OCHNS_>
 #endif
-	V signal(I n,const F *speed,F *pos);  // this is the dsp method
+	V signal(I n,F *const *in,F *const *out);  // this is my dsp method
 	
 private:
-	virtual V m_dsp(t_signal **sp);
+	virtual V m_dsp(I n,F *const *in,F *const *out);
+	virtual V m_signal(I n,F *const *in,F *const *out) { (this->*sigfun)(n,in,out); }
+
+	V (xgroove::*sigfun)(I n,F *const *in,F *const *out);  // this is my dsp method
 
 	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }
-
-#ifdef TMPLOPT
-	template <I _BCHNS_,I _OCHNS_>
-#endif
-	static t_int *dspmeth(t_int *w);
 
 	static V cb_pos(V *c,F pos) { thisObject(c)->m_pos(pos); }
 	static V cb_min(V *c,F mn) { thisObject(c)->m_min(mn); }
@@ -107,8 +104,7 @@ V xgroove::cb_setup(t_class *c)
 
 xgroove::xgroove(I argc,t_atom *argv):
 	doplay(false),doloop(true),
-	curpos(0),
-	outvecs(NULL)
+	curpos(0)
 {
 #ifdef DEBUG
 	if(argc < 1) {
@@ -140,7 +136,6 @@ xgroove::xgroove(I argc,t_atom *argv):
 xgroove::~xgroove()
 {
 	if(buf) delete buf;
-	if(outvecs) delete[] outvecs;
 }
 
 
@@ -201,22 +196,6 @@ V xgroove::m_reset()
 }
 
 
-
-#ifdef TMPLOPT
-template <int _BCHNS_,int _OCHNS_>
-t_int *xgroove::dspmeth(t_int *w) 
-{ 
-	((xgroove *)w[1])->signal<_BCHNS_,_OCHNS_>((I)w[2],(const F *)w[3],(F *)w[4]); 
-	return w+5;
-}
-#else
-t_int *xgroove::dspmeth(t_int *w) 
-{ 
-	((xgroove *)w[1])->signal((I)w[2],(const F *)w[3],(F *)w[4]); 
-	return w+5;
-}
-#endif
-
 #ifndef MIN
 #define MIN(x,y) ((x) < (y)?(x):(y))
 #endif
@@ -224,205 +203,197 @@ t_int *xgroove::dspmeth(t_int *w)
 #ifdef TMPLOPT
 template <int _BCHNS_,int _OCHNS_>
 #endif
-V xgroove::signal(I n,const F *speed,F *pos)
+V xgroove::signal(I n,F *const *invecs,F *const *outvecs)
 {
-	if(enable) {    
 #ifdef TMPLOPT
-		const I BCHNS = _BCHNS_ == 0?buf->Channels():_BCHNS_;
-		const I OCHNS = _OCHNS_ == 0?MIN(outchns,BCHNS):MIN(_OCHNS_,BCHNS);
+	const I BCHNS = _BCHNS_ == 0?buf->Channels():_BCHNS_;
+	const I OCHNS = _OCHNS_ == 0?MIN(outchns,BCHNS):MIN(_OCHNS_,BCHNS);
 #else
-		const I BCHNS = buf->Channels();
-		const I OCHNS = MIN(outchns,BCHNS);
+	const I BCHNS = buf->Channels();
+	const I OCHNS = MIN(outchns,BCHNS);
 #endif
-		F **sig = outvecs;
-		register I si = 0;
-	
-		const I smin = curmin,smax = curmax;
-		const I plen = curlen;
-		D o = curpos;
 
-		if(buf && doplay && plen > 0) {
-			const I maxo = smax-3;
+	const F *speed = invecs[0];
+	F *const *sig = outvecs;
+	F *pos = outvecs[outchns];
+	register I si = 0;
 
-			if(interp && plen >= 4) {
-				for(I i = 0; i < n; ++i,++si) {	
-					const F spd = *(speed++);
+	const I smin = curmin,smax = curmax;
+	const I plen = curlen;
+	D o = curpos;
 
-					// normalize offset
-					if(o >= smax) 
-						o = doloop?fmod(o-smin,plen)+smin:(D)smax-0.001;
-					else if(o < smin) 
-						o = doloop?fmod(o+(plen-smin),plen)+smin:smin;
+	if(buf && doplay && plen > 0) {
+		const I maxo = smax-3;
 
-					*(pos++) = scale(o);
+		if(interp && plen >= 4) {
+			for(I i = 0; i < n; ++i,++si) {	
+				const F spd = *(speed++);
 
-					const I oint = (I)o;
-					register F a,b,c,d;
+				// normalize offset
+				if(o >= smax) 
+					o = doloop?fmod(o-smin,plen)+smin:(D)smax-0.001;
+				else if(o < smin) 
+					o = doloop?fmod(o+(plen-smin),plen)+smin:smin;
 
-					const F frac = o-oint;
+				*(pos++) = scale(o);
 
-					for(I ci = 0; ci < OCHNS; ++ci) {
-						register const F *fp = buf->Data()+oint*BCHNS+ci;
-						if (oint <= smin) {
-							if(doloop) {
-								// oint is always == smin
-								a = buf->Data()[(smax-1)*BCHNS+ci];
-								b = fp[0*BCHNS];
-								c = fp[1*BCHNS];
-								d = fp[2*BCHNS];
-							}
-							else {
-								// offset is not normalized
-								if(oint == smin) {
-									a = b = fp[0*BCHNS];
-									c = fp[1*BCHNS];
-									d = fp[2*BCHNS];
-								}
-								else {
-									a = b = c = d = buf->Data()[smin*BCHNS+ci];
-								}
-							}
-						}
-						else if(oint > maxo) {
-							if(doloop) {
-								a = fp[-1*BCHNS];
-								b = fp[0*BCHNS];
-								if(oint == maxo+1) {
-									c = fp[1*BCHNS];
-									d = buf->Data()[smin*BCHNS+ci];
-								}
-								else {
-									c = buf->Data()[smin*BCHNS+ci];
-									d = buf->Data()[(smin+1)*BCHNS+ci];
-								}
-							}
-							else {
-								// offset is not normalized
-								if(oint == maxo+1) {
-									a = fp[-1*BCHNS];
-									b = fp[0*BCHNS];
-									c = d = fp[1*BCHNS];	
-								}
-								else 
-								if(oint == maxo+2) {
-									a = fp[-1*BCHNS];
-									b = c = d = fp[0*BCHNS];
-								}
-								else { 
-									// >= (maxo+3 = smax-1)
-									a = b = c = d = buf->Data()[(smax-1)*BCHNS+ci];
-								}
+				const I oint = (I)o;
+				register F a,b,c,d;
 
-							}
-						}
-						else {
-							a = fp[-1*BCHNS];
+				const F frac = o-oint;
+
+				for(I ci = 0; ci < OCHNS; ++ci) {
+					register const F *fp = buf->Data()+oint*BCHNS+ci;
+					if (oint <= smin) {
+						if(doloop) {
+							// oint is always == smin
+							a = buf->Data()[(smax-1)*BCHNS+ci];
 							b = fp[0*BCHNS];
 							c = fp[1*BCHNS];
 							d = fp[2*BCHNS];
 						}
-
-						const F cmb = c-b;
-						sig[ci][si] = b + frac*( 
-							cmb - 0.5f*(frac-1.) * ((a-d+3.0f*cmb)*frac + (b-a-cmb))
-						);
+						else {
+							// offset is not normalized
+							if(oint == smin) {
+								a = b = fp[0*BCHNS];
+								c = fp[1*BCHNS];
+								d = fp[2*BCHNS];
+							}
+							else {
+								a = b = c = d = buf->Data()[smin*BCHNS+ci];
+							}
+						}
 					}
+					else if(oint > maxo) {
+						if(doloop) {
+							a = fp[-1*BCHNS];
+							b = fp[0*BCHNS];
+							if(oint == maxo+1) {
+								c = fp[1*BCHNS];
+								d = buf->Data()[smin*BCHNS+ci];
+							}
+							else {
+								c = buf->Data()[smin*BCHNS+ci];
+								d = buf->Data()[(smin+1)*BCHNS+ci];
+							}
+						}
+						else {
+							// offset is not normalized
+							if(oint == maxo+1) {
+								a = fp[-1*BCHNS];
+								b = fp[0*BCHNS];
+								c = d = fp[1*BCHNS];	
+							}
+							else 
+							if(oint == maxo+2) {
+								a = fp[-1*BCHNS];
+								b = c = d = fp[0*BCHNS];
+							}
+							else { 
+								// >= (maxo+3 = smax-1)
+								a = b = c = d = buf->Data()[(smax-1)*BCHNS+ci];
+							}
+
+						}
+					}
+					else {
+						a = fp[-1*BCHNS];
+						b = fp[0*BCHNS];
+						c = fp[1*BCHNS];
+						d = fp[2*BCHNS];
+					}
+
+					const F cmb = c-b;
+					sig[ci][si] = b + frac*( 
+						cmb - 0.5f*(frac-1.) * ((a-d+3.0f*cmb)*frac + (b-a-cmb))
+					);
+				}
+
+				o += spd;
+			}
+		}
+		else {
+			if(doloop) {
+				for(I i = 0; i < n; ++i,++si) {	
+					F spd = *(speed++);
+
+					// normalize offset
+					if(o >= smax) 
+						o = fmod(o,plen)+smin;
+					else if(o < smin) 
+						o = fmod(o+smax,plen)+smin;
+
+					*(pos++) = scale(o);
+					for(I ci = 0; ci < OCHNS; ++ci)
+						sig[ci][si] = buf->Data()[(I)o*BCHNS+ci];
 
 					o += spd;
 				}
 			}
 			else {
-				if(doloop) {
-					for(I i = 0; i < n; ++i,++si) {	
-						F spd = *(speed++);
+				for(I i = 0; i < n; ++i,++si) {	
+					const F spd = *(speed++);
 
-						// normalize offset
-						if(o >= smax) 
-							o = fmod(o,plen)+smin;
-						else if(o < smin) 
-							o = fmod(o+smax,plen)+smin;
+					*(pos++) = scale(o);
 
-						*(pos++) = scale(o);
+					const I oint = (I)o;
+					if(oint < smin) {
 						for(I ci = 0; ci < OCHNS; ++ci)
-							sig[ci][si] = buf->Data()[(I)o*BCHNS+ci];
-
-						o += spd;
+							sig[ci][si] = buf->Data()[smin*BCHNS+ci];
 					}
-				}
-				else {
-					for(I i = 0; i < n; ++i,++si) {	
-						const F spd = *(speed++);
-
-						*(pos++) = scale(o);
-
-						const I oint = (I)o;
-						if(oint < smin) {
-							for(I ci = 0; ci < OCHNS; ++ci)
-								sig[ci][si] = buf->Data()[smin*BCHNS+ci];
-						}
-						else if(oint >= smax) {
-							for(I ci = 0; ci < OCHNS; ++ci)
-								sig[ci][si] = buf->Data()[smax*BCHNS+ci];
-						}
-						else {
-							for(I ci = 0; ci < OCHNS; ++ci)
-								sig[ci][si] = buf->Data()[oint*BCHNS+ci];
-						}
-
-						o += spd;
+					else if(oint >= smax) {
+						for(I ci = 0; ci < OCHNS; ++ci)
+							sig[ci][si] = buf->Data()[smax*BCHNS+ci];
 					}
+					else {
+						for(I ci = 0; ci < OCHNS; ++ci)
+							sig[ci][si] = buf->Data()[oint*BCHNS+ci];
+					}
+
+					o += spd;
 				}
-			}
-		} 
-		else {
-			const F oscl = scale(o);
-			while(n--) {	
-				*(pos++) = oscl;
-				for(I ci = 0; ci < OCHNS; ++ci)	sig[ci][si] = 0;
-				++si;
 			}
 		}
-		
-		curpos = o;
-	}   
+	} 
+	else {
+		const F oscl = scale(o);
+		while(n--) {	
+			*(pos++) = oscl;
+			for(I ci = 0; ci < OCHNS; ++ci)	sig[ci][si] = 0;
+			++si;
+		}
+	}
+	
+	curpos = o;
 }
 
-V xgroove::m_dsp(t_signal **sp)
+V xgroove::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 {
-	m_refresh();  // m_dsp hopefully called at change of sample rate ?!
+	// this is hopefully called at change of sample rate ?!
 
-	if(outvecs) delete[] outvecs;
-	outvecs = new F *[buf->Channels()];
-	for(I ci = 0; ci < buf->Channels(); ++ci)
-		outvecs[ci] = sp[1+ci%outchns]->s_vec;
+	m_refresh();  
 
 #ifdef TMPLOPT
 	switch(buf->Channels()*100+outchns) {
 		case 101:
-			dsp_add(dspmeth<1,1>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
-			break;
+			sigfun = &xgroove::signal<1,1>;	break;
 		case 102:
-			dsp_add(dspmeth<1,2>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
-			break;
+			sigfun = &xgroove::signal<1,2>;	break;
 		case 201:
-			dsp_add(dspmeth<2,1>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
-			break;
+			sigfun = &xgroove::signal<2,1>;	break;
 		case 202:
-			dsp_add(dspmeth<2,2>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
-			break;
+			sigfun = &xgroove::signal<2,2>;	break;
 		case 401:
 		case 402:
 		case 403:
-			dsp_add(dspmeth<4,0>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
-			break;
+			sigfun = &xgroove::signal<4,0>;	break;
 		case 404:
-			dsp_add(dspmeth<4,4>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
-			break;
+			sigfun = &xgroove::signal<4,4>;	break;
 		default:
-			dsp_add(dspmeth<0,0>, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+			sigfun = &xgroove::signal<0,0>;
 	}
 #else
-	dsp_add(dspmeth, 4,this,sp[0]->s_n,sp[0]->s_vec,sp[1+outchns]->s_vec);
+	sigfun = &xgroove::signal;
 #endif
 }
 
@@ -477,50 +448,37 @@ V xgroove::m_assist(long msg, long arg, char *s)
 	case 1: //ASSIST_INLET:
 		switch(arg) {
 		case 0:
-			strcpy(s,"Signal of playing speed");
-			break;
+			strcpy(s,"Signal of playing speed"); break;
 		case 1:
-			strcpy(s,"Starting point");
-			break;
+			strcpy(s,"Starting point"); break;
 		case 2:
-			strcpy(s,"Ending point");
-			break;
+			strcpy(s,"Ending point"); break;
 		}
 		break;
 	case 2: //ASSIST_OUTLET:
 		switch(arg) {
 		case 0:
-			strcpy(s,"Audio signal played");
-			break;
+			strcpy(s,"Audio signal played"); break;
 		case 1:
-			strcpy(s,"Position currently played");
-			break;
+			strcpy(s,"Position currently played"); break;
 		case 2:
-			strcpy(s,"Starting point (rounded to sample)");
-			break;
+			strcpy(s,"Starting point (rounded to sample)"); break;
 		case 3:
-			strcpy(s,"Ending point (rounded to sample)");
-			break;
+			strcpy(s,"Ending point (rounded to sample)"); break;
 		}
 		break;
 	}
 }
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #ifdef PD
-FLEXT_EXT V xgroove_tilde_setup()
+extern "C" FLEXT_EXT V xgroove_tilde_setup()
 #elif defined(MAXMSP)
-V main()
+extern "C" V main()
 #endif
 {
 	xgroove_setup();
 }
-#ifdef __cplusplus
-}
-#endif
 
 
