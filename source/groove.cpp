@@ -358,20 +358,20 @@ V xgroove::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 	m_refresh();  
 
-	switch(buf->Channels()*100+outchns) {
-		case 101:
+	switch(buf->Channels()*1000+outchns) {
+		case 1001:
 			sigfun = SIGFUN(xgroove,1,1);	break;
-		case 102:
+		case 1002:
 			sigfun = SIGFUN(xgroove,1,2);	break;
-		case 201: 
+		case 2001: 
 			sigfun = SIGFUN(xgroove,2,1);	break;
-		case 202:
+		case 2002:
 			sigfun = SIGFUN(xgroove,2,2);	break;
-		case 401:
-		case 402:
-		case 403:
+		case 4001:
+		case 4002:
+		case 4003:
 			sigfun = SIGFUN(xgroove,4,0);	break;
-		case 404:
+		case 4004:
 			sigfun = SIGFUN(xgroove,4,4);	break;
 		default:
 			sigfun = SIGFUN(xgroove,0,0);
@@ -396,7 +396,7 @@ V xgroove::m_help()
 	post("Methods:");
 	post("\thelp: shows this help");
 	post("\tset [name]: set buffer or reinit");
-	post("\tdspon 0/1: turn dsp calculation off/on");	
+	post("\tenable 0/1: turn dsp calculation off/on");	
 	post("\treset: reset min/max playing points and playing offset");
 	post("\tprint: print current settings");
 	post("\tloop 0/1: switches looping off/on");

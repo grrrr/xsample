@@ -362,20 +362,20 @@ V xrecord::m_dsp(I /*n*/,F *const * /*insigs*/,F *const * /*outsigs*/)
 
 	m_refresh();  
 
-	switch(buf->Channels()*100+inchns) {
-		case 101:
+	switch(buf->Channels()*1000+inchns) {
+		case 1001:
 			sigfun = SIGFUN(xrecord,1,1);	break;
-		case 102:
+		case 1002:
 			sigfun = SIGFUN(xrecord,1,2);	break;
-		case 201:
+		case 2001:
 			sigfun = SIGFUN(xrecord,2,1);	break;
-		case 202:
+		case 2002:
 			sigfun = SIGFUN(xrecord,2,2);	break;
-		case 401:
-		case 402:
-		case 403:
+		case 4001:
+		case 4002:
+		case 4003:
 			sigfun = SIGFUN(xrecord,4,0);	break;
-		case 404:
+		case 4004:
 			sigfun = SIGFUN(xrecord,4,4);	break;
 		default:
 			sigfun = SIGFUN(xrecord,0,0);	break;
@@ -402,7 +402,7 @@ V xrecord::m_help()
 	post("Methods:");
 	post("\thelp: shows this help");
 	post("\tset [name]: set buffer or reinit");
-	post("\tdspon 0/1: turn dsp calculation off/on");	
+	post("\tenable 0/1: turn dsp calculation off/on");	
 	post("\treset: reset min/max recording points and recording offset");
 	post("\tprint: print current settings");
 	post("\tsigmode 0/1: specify message or signal triggered recording");
