@@ -91,8 +91,8 @@ FLEXT_TILDE_GIMME("xrecord~",xrecord)
 
 V xrecord::cb_setup(t_class *c)
 {
-	add_floatn(c,cb_min,2);
-	add_floatn(c,cb_max,3);
+	add_floatn(c,cb_min,1);
+	add_floatn(c,cb_max,2);
 
 	add_method1(c,cb_mixmode, "mixmode", A_FLINT);	
 	add_method1(c,cb_sigmode, "sigmode", A_FLINT);	
