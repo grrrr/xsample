@@ -640,7 +640,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 
     // adapt the playing bounds to the current cross-fade zone
     const L smin = znsmin,smax = znsmax,plen = smax-smin;
-
+	// calculate inner cross-fade boundaries
 	const D lmin = smin+xz,lmax = smax-xz,lsh = lmax-lmin+xz;
 
 	if(buf && plen > 0) {
@@ -711,7 +711,8 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 		}
 	
 		// rescale position vector
-		arrscale(n,pos,pos,(xz*0.5-sclmin)*sclmul,sclmul);
+		// \note half of early fade zone is left of min bound which gives a bad impression of the playing position
+		arrscale(n,pos,pos);
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);
