@@ -87,7 +87,7 @@ private:
 };
 
 
-FLEXT_NEW_WITH_GIMME("xrecord~",xrecord)
+FLEXT_TILDE_NEW_GIMME("xrecord~",xrecord)
 
 V xrecord::cb_setup(t_class *c)
 {
@@ -102,9 +102,8 @@ V xrecord::cb_setup(t_class *c)
 	add_method1(c,cb_max, "max", A_FLOAT);	
 
 	add_bang(c,cb_start);	
-	add_method0(c,cb_start, "start");	
-	add_method0(c,cb_stop, "stop");	
-//	add_float(c,cb_pos);	
+	add_method(c,cb_start, "start");	
+	add_method(c,cb_stop, "stop");	
 	add_method1(c,cb_pos, "pos", A_FLOAT);	
 
 	add_methodG(c,cb_draw,"draw");
@@ -128,15 +127,15 @@ xrecord::xrecord(I argc,t_atom *argv):
 	inchns = 1;
 #endif
 
-	Inlet_signal(inchns);  // audio signals
-	Inlet_signal(); // on/off signal
-	Inlet_float(2);  // min & max
-	Outlet_signal();  // pos signal
-	Outlet_float(2); // min & max
-	SetupInOut();
+	add_in_signal(inchns);  // audio signals
+	add_in_signal(); // on/off signal
+	add_in_float(2);  // min & max
+	add_out_signal();  // pos signal
+	add_out_float(2); // min & max
+	setup_inout();
 
-	outmin = Outlet(1);
-	outmax = Outlet(2);
+	outmin = get_out(1);
+	outmax = get_out(2);
 	
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
 	m_reset();
@@ -464,12 +463,3 @@ V xrecord::m_assist(L msg,L arg,C *s)
 #endif
 
 
-
-#ifdef PD
-extern "C" FLEXT_EXT V xrecord_tilde_setup()
-#elif defined(MAXMSP)
-extern "C" V main()
-#endif
-{
-	xrecord_setup();
-}

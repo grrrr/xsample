@@ -27,9 +27,9 @@ FLEXT_EXT void xsample_setup()
 V xsample::cb_setup(t_class *c)
 {
 	add_methodG(c,cb_set,"set");
-	add_method0(c,cb_print,"print");
-	add_method0(c,cb_refresh,"refresh");
-	add_method0(c,cb_reset,"reset");
+	add_method(c,cb_print,"print");
+	add_method(c,cb_refresh,"refresh");
+	add_method(c,cb_reset,"reset");
 	
 	add_method1(c,cb_units,"units",A_FLINT);
 	add_method1(c,cb_interp,"interp",A_FLINT);

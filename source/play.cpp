@@ -55,14 +55,14 @@ private:
 	static V cb_reset(t_class *c) { thisObject(c)->m_reset(); }
 };
 
-FLEXT_NEW_WITH_GIMME("xplay~",xplay)
+FLEXT_TILDE_NEW_GIMME("xplay~",xplay)
 
 
 V xplay::cb_setup(t_class *c)
 {
 	add_bang(c,cb_start);
-	add_method0(c,cb_start,"start");
-	add_method0(c,cb_stop,"stop");
+	add_method(c,cb_start,"start");
+	add_method(c,cb_stop,"stop");
 }
 
 
@@ -81,9 +81,9 @@ xplay::xplay(I argc, t_atom *argv):
 	outchns = 1;
 #endif
 
-	Inlet_signal();  // pos signal
-	Outlet_signal(outchns);
-	SetupInOut();
+	add_in_signal();  // pos signal
+	add_out_signal(outchns);
+	setup_inout();
 
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);	
 	m_reset();
@@ -281,12 +281,4 @@ V xplay::m_assist(L msg,L arg,C *s)
 #endif
 
 
-#ifdef PD
-extern "C" FLEXT_EXT V xplay_tilde_setup()
-#elif defined(MAXMSP)
-extern "C" V main()
-#endif
-{
-	xplay_setup();
-}
 

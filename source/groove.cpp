@@ -78,7 +78,7 @@ private:
 };
 
 
-FLEXT_NEW_WITH_GIMME("xgroove~",xgroove)
+FLEXT_TILDE_NEW_GIMME("xgroove~",xgroove)
 
 V xgroove::cb_setup(t_class *c)
 {
@@ -90,9 +90,8 @@ V xgroove::cb_setup(t_class *c)
 	add_method1(c,cb_max, "max", A_FLOAT);	
 
 	add_bang(c,cb_start);	
-	add_method0(c,cb_start, "start");	
-	add_method0(c,cb_stop, "stop");	
-//	add_float(c,cb_pos);	
+	add_method(c,cb_start, "start");	
+	add_method(c,cb_stop, "stop");	
 	add_method1(c,cb_pos, "pos", A_FLOAT);	
 }
 
@@ -112,15 +111,15 @@ xgroove::xgroove(I argc,t_atom *argv):
 	outchns = 1;
 #endif
 
-	Inlet_signal(); // speed signal
-	Inlet_float(2); // min & max play pos
-	Outlet_signal(outchns); // output
-	Outlet_signal(); // position
-	Outlet_float(2); // play min & max	
-	SetupInOut();
+	add_in_signal(); // speed signal
+	add_in_float(2); // min & max play pos
+	add_out_signal(outchns); // output
+	add_out_signal(); // position
+	add_out_float(2); // play min & max	
+	setup_inout();
 
-	outmin = Outlet(outchns+1);
-	outmax = Outlet(outchns+2);
+	outmin = get_out(outchns+1);
+	outmax = get_out(outchns+2);
 	
 	buf = new buffer(argc >= 1?atom_getsymbolarg(0,argc,argv):NULL);
 	// in max loadbang does the init again
@@ -449,13 +448,5 @@ V xgroove::m_assist(long msg, long arg, char *s)
 #endif
 
 
-#ifdef PD
-extern "C" FLEXT_EXT V xgroove_tilde_setup()
-#elif defined(MAXMSP)
-extern "C" V main()
-#endif
-{
-	xgroove_setup();
-}
 
 
