@@ -24,7 +24,7 @@ class xrecord:
 public:
 	xrecord(I argc,t_atom *argv);
 	
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 	
@@ -59,10 +59,8 @@ protected:
 	BL dorec,doloop,mixmode;
 	L curpos;  // in samples
 
-	outlet *outmin,*outmax; // float outlets	
-	
-	V outputmin() { ToOutFloat(outmin,curmin*s2u); }
-	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
+	V outputmin() { ToOutFloat(1,curmin*s2u); }
+	V outputmax() { ToOutFloat(2,curmax*s2u); }
 	
 private:
 //	static V setup(t_class *c);
@@ -107,9 +105,9 @@ xrecord::xrecord(I argc,t_atom *argv):
 	inchns(1)
 {
 	I argi = 0;
-#ifdef MAXMSP
-	if(argc > argi && IsFlint(argv[argi])) {
-		inchns = GetAFlint(argv[argi]);
+#if FLEXT_SYS == FLEXT_SYS_MAX
+	if(argc > argi && CanbeFloat(argv[argi])) {
+		inchns = GetAFloat(argv[argi]);
 		argi++;
 	}
 #endif
@@ -118,10 +116,10 @@ xrecord::xrecord(I argc,t_atom *argv):
 		buf = new buffer(GetSymbol(argv[argi]),true);
 		argi++;
 
-#ifdef MAXMSP		
+#if FLEXT_SYS == FLEXT_SYS_MAX
 		// oldstyle command line?
-		if(argi == 1 && argc == 2 && IsFlint(argv[argi])) {
-			inchns = GetAFlint(argv[argi]);
+		if(argi == 1 && argc == 2 && CanbeFloat(argv[argi])) {
+			inchns = GetAFloat(argv[argi]);
 			argi++;
 			post("%s: old style command line detected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
 		}
@@ -151,9 +149,6 @@ xrecord::xrecord(I argc,t_atom *argv):
 	
 	FLEXT_ADDMETHOD_(0,"draw",m_draw);
 
-	outmin = GetOut(1);
-	outmax = GetOut(2);
-	
 	m_reset();
 }
 
@@ -231,7 +226,7 @@ V xrecord::m_reset()
 V xrecord::m_draw(I argc,t_atom *argv)
 {
 	if(argc >= 1) {
-		drintv = GetAFlint(argv[0]);
+		drintv = GetAFloat(argv[0]);
 		if(dorec) buf->SetRefrIntv(drintv);
 	}
 	else
@@ -397,11 +392,11 @@ V xrecord::s_dsp()
 V xrecord::m_help()
 {
 	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
-#ifdef _DEBUG
+#ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
 	post("(C) Thomas Grill, 2001-2002");
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
 	post("Arguments: %s [buffer]",thisName());
@@ -444,7 +439,7 @@ V xrecord::m_print()
 }
 
 
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 V xrecord::m_assist(L msg,L arg,C *s)
 {
 	switch(msg) {

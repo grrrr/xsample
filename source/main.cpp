@@ -13,7 +13,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 // Initialization function for xsample library
 V lib_setup()
 {
-	post("xsample objects, version " XSAMPLE_VERSION ", (C)2001,2002 Thomas Grill");
+	post("\"pure\" xsample objects, version " XSAMPLE_VERSION ", (C)2001,2002 Thomas Grill");
 	post("xsample: xrecord~, xplay~, xgroove~ - send objects a 'help' message to get assistance");
 	post("");
 
@@ -30,7 +30,7 @@ FLEXT_LIB_SETUP(xsample,lib_setup)
 
 xsample::xsample():
 	buf(NULL),
-#ifdef PD
+#if FLEXT_SYS == FLEXT_SYS_PD
 	unitmode(xsu_sample),  // PD defaults to samples
 #else
 	unitmode(xsu_ms),	   // Max/MSP defaults to milliseconds
@@ -94,7 +94,7 @@ V xsample::m_units(xs_unit mode)
 			s2u = 1;
 			break;
 		case xsu_buffer: // buffer size
-			s2u = 1.f/buf->Frames();
+			s2u = buf?1.f/buf->Frames():1;
 			break;
 		case xsu_ms: // ms
 			s2u = 1000.f/Samplerate();

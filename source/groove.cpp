@@ -25,7 +25,7 @@ class xgroove:
 public:
 	xgroove(I argc,t_atom *argv);
 
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 	virtual V m_assist(L msg,L arg,C *s);
 #endif
 
@@ -54,10 +54,8 @@ protected:
 	D curpos;  // in samples
 	I bidir;
 
-	outlet *outmin,*outmax; // float outlets	
-	
-	V outputmin() { ToOutFloat(outmin,curmin*s2u); }
-	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
+	V outputmin() { ToOutFloat(outchns+1,curmin*s2u); }
+	V outputmax() { ToOutFloat(outchns+2,curmax*s2u); }
 	
 	inline V setpos(F pos)
 	{
@@ -103,9 +101,9 @@ xgroove::xgroove(I argc,t_atom *argv):
 	loopmode(xsl_loop),curpos(0),bidir(1)
 {
 	I argi = 0;
-#ifdef MAXMSP
-	if(argc > argi && IsFlint(argv[argi])) {
-		outchns = GetAFlint(argv[argi]);
+#if FLEXT_SYS == FLEXT_SYS_MAX
+	if(argc > argi && IsFloat(argv[argi])) {
+		outchns = CanbeFloat(argv[argi]);
 		argi++;
 	}
 #endif
@@ -114,10 +112,10 @@ xgroove::xgroove(I argc,t_atom *argv):
 		buf = new buffer(GetSymbol(argv[argi]),true);
 		argi++;
 		
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 		// oldstyle command line?
-		if(argi == 1 && argc == 2 && IsFlint(argv[argi])) {
-			outchns = GetAFlint(argv[argi]);
+		if(argi == 1 && argc == 2 && IsFloat(argv[argi])) {
+			outchns = CanbeFloat(argv[argi]);
 			argi++;
 			post("%s: old style command line detected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
 		}
@@ -141,9 +139,6 @@ xgroove::xgroove(I argc,t_atom *argv):
 	FLEXT_ADDMETHOD_(0,"all",m_all);
 	FLEXT_ADDMETHOD_B(0,"loop",m_loop);
 
-	outmin = GetOut(outchns+1);
-	outmax = GetOut(outchns+2);
-	
 	m_reset();
 }
 
@@ -325,11 +320,11 @@ V xgroove::s_dsp()
 V xgroove::m_help()
 {
 	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
-#ifdef _DEBUG
+#ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
 	post("(C) Thomas Grill, 2001-2002");
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
 	post("Arguments: %s [buffer]",thisName());
@@ -370,7 +365,7 @@ V xgroove::m_print()
 	post("");
 }
 
-#ifdef MAXMSP
+#if FLEXT_SYS == FLEXT_SYS_MAX
 V xgroove::m_assist(long msg, long arg, char *s)
 {
 	switch(msg) {
