@@ -253,12 +253,12 @@ xgroove::xgroove(I argc,const t_atom *argv):
 xgroove::~xgroove()
 {
 	if(znbuf) {
-		for(I i = 0; i < outchns; ++i) if(znbuf[i]) delete[] znbuf[i]; 
+		for(I i = 0; i < outchns; ++i) if(znbuf[i]) FreeAligned(znbuf[i]); 
 		delete[] znbuf;
 	}
 
-	if(znpos) delete[] znpos;
-	if(znidx) delete[] znidx;
+	if(znpos) FreeAligned(znpos);
+	if(znidx) FreeAligned(znidx);
 }
 
 BL xgroove::Init()
@@ -704,9 +704,9 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 
 			// mix voices for all channels
 			for(I o = 0; o < outchns; ++o) {
-				F *ov = outvecs[o],*ob = znbuf[o];
-				for(I i = 0; i < n; ++i,ov++,ob++)
-					*ov = (*ov)*znidx[i]+(*ob)*znpos[i];
+				MulSamples(outvecs[o],outvecs[o],znidx,n);
+				MulSamples(znbuf[o],znbuf[o],znpos,n);
+				AddSamples(outvecs[o],outvecs[o],znbuf[o],n);
 			}
 		}
 	
@@ -778,14 +778,14 @@ V xgroove::s_dsp()
 
 				if(pblksz != blksz) {
 					for(I o = 0; o < outchns; ++o) {
-						if(znbuf[o]) delete[] znbuf[o]; 
-						znbuf[o] = new S[blksz]; 
+						if(znbuf[o]) FreeAligned(znbuf[o]); 
+						znbuf[o] = (S *)NewAligned(blksz*sizeof(S)); 
 					}
 				
-					if(znpos) delete[] znpos; 
-					znpos = new S[blksz];
-					if(znidx) delete[] znidx;
-					znidx = new S[blksz];
+					if(znpos) FreeAligned(znpos); 
+					znpos = (S *)NewAligned(blksz*sizeof(S));
+					if(znidx) FreeAligned(znidx);
+					znidx = (S *)NewAligned(blksz*sizeof(S));
 
 					pblksz = blksz;
 				}
