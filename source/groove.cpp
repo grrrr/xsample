@@ -61,16 +61,17 @@ protected:
 	V outputmin() { outlet_float(outmin,curmin*s2u); }
 	V outputmax() { outlet_float(outmax,curmax*s2u); }
 
-#ifdef TMPLOPT
-	template <I _BCHNS_,I _OCHNS_>
-#endif
-	V signal(I n,F *const *in,F *const *out);  // this is my dsp method
-	
 private:
 	virtual V m_dsp(I n,F *const *in,F *const *out);
 	virtual V m_signal(I n,F *const *in,F *const *out) { (this->*sigfun)(n,in,out); }
 
 	V (xgroove::*sigfun)(I n,F *const *in,F *const *out);  // this is my dsp method
+
+#ifdef TMPLOPT
+	template <I _BCHNS_,I _OCHNS_>
+#endif
+	V signal(I n,F *const *in,F *const *out);  // this is my dsp method
+	
 
 	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
 	static V cb_stop(t_class *c) { thisObject(c)->m_stop(); }

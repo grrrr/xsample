@@ -64,16 +64,16 @@ protected:
 	V outputmin() const { outlet_float(outmin,curmin*s2u); }
 	V outputmax() const { outlet_float(outmax,curmax*s2u); }
 	
-#ifdef TMPLOPT
-	template<I _BCHNS_,I _ICHNS_>
-#endif
-	V signal(I n,F *const *in,F *const *out);  // this is the dsp method
-
 private:
 	virtual V m_dsp(I n,F *const *in,F *const *out);
 	virtual V m_signal(I n,F *const *in,F *const *out) { (this->*sigfun)(n,in,out); }
 
 	V (xrecord::*sigfun)(I n,F *const *in,F *const *out);  // this is my dsp method
+
+#ifdef TMPLOPT
+	template<I _BCHNS_,I _ICHNS_>
+#endif
+	V signal(I n,F *const *in,F *const *out);  // this is the dsp method
 
   
 	static V cb_start(t_class *c) { thisObject(c)->m_start(); }
