@@ -29,3 +29,8 @@ INSTDIR=${PD}/extra
 # where should the xsample help be installed?
 # (leave blank to omit installation)
 HELPDIR=${PD}/doc/5.reference
+
+# additional compiler flags
+# (check whether they fit your system!)
+UFLAGS=-malign-power -maltivec
+

@@ -17,8 +17,7 @@ FLEXTLIB=$(FLEXTPATH)/flext.a
 # compiler stuff
 INCLUDES=$(PDINC) 
 FLAGS=-DFLEXT_SYS=2
-CFLAGS=-O6 -mcpu=pentiumpro -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions
-#CFLAGS=-O6 -mcpu=pentium3 -msse -mfpmath=sse -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions
+CFLAGS=${UFLAGS} -O6 -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions -fno-rtti -fno-exceptions
 LIBS=m
 
 # ----------------------------------------------
