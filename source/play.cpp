@@ -66,16 +66,16 @@ xplay::xplay(I argc, t_atom *argv):
 {
 	I argi = 0;
 #ifdef MAXMSP
-	if(argc > argi && ISFLINT(argv[argi])) {
-		outchns = atom_getflintarg(argi,argc,argv);
+	if(argc > argi && is_flint(argv[argi])) {
+		outchns = geta_flint(argv[argi]);
 		argi++;
 	}
 	else
 #endif
 	outchns = 1;
 
-	if(argc > argi && ISSYMBOL(argv[argi])) {
-		buf = new buffer(atom_getsymbolarg(argi,argc,argv),true);
+	if(argc > argi && is_symbol(argv[argi])) {
+		buf = new buffer(get_symbol(argv[argi]),true);
 		argi++;
 	}
 	else
@@ -89,9 +89,11 @@ xplay::xplay(I argc, t_atom *argv):
 	FLEXT_ADDMETHOD_(0,"start",m_start);
 	FLEXT_ADDMETHOD_(0,"stop",m_stop);
 
+/*
 #ifdef PD
 	m_loadbang();  // in PD loadbang is not called upon object creation
 #endif
+*/
 }
 
 

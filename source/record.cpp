@@ -101,16 +101,16 @@ xrecord::xrecord(I argc,t_atom *argv):
 {
 	I argi = 0;
 #ifdef MAXMSP
-	if(argc > argi && ISFLINT(argv[argi])) {
-		inchns = atom_getflintarg(argi,argc,argv);
+	if(argc > argi && is_flint(argv[argi])) {
+		inchns = geta_flint(argv[argi]);
 		argi++;
 	}
 	else
 #endif
 	inchns = 1;
 
-	if(argc > argi && ISSYMBOL(argv[argi])) {
-		buf = new buffer(atom_getsymbolarg(argi,argc,argv),true);
+	if(argc > argi && is_symbol(argv[argi])) {
+		buf = new buffer(get_symbol(argv[argi]),true);
 		argi++;
 	}
 	else
@@ -143,9 +143,11 @@ xrecord::xrecord(I argc,t_atom *argv):
 	outmin = get_out(1);
 	outmax = get_out(2);
 	
+/*
 #ifdef PD
 	m_loadbang();  // in PD loadbang is not called upon object creation
 #endif
+*/
 }
 
 
@@ -213,7 +215,7 @@ V xrecord::m_reset()
 V xrecord::m_draw(I argc,t_atom *argv)
 {
 	if(argc >= 1) {
-		drintv = atom_getflintarg(0,argc,argv);
+		drintv = geta_flint(argv[0]);
 		if(dorec) buf->SetRefrIntv(drintv);
 	}
 	else
