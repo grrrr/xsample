@@ -97,3 +97,5 @@ tests:
 
 bugs:
 - PD: problems with timed buffer redrawing (takes a lot of cpu time) - flext bug?
+- Apple MPW doesn't correctly compile template optimization 
+- there seem to be problems with template-optimized DSP code (sample 0) - better turn off optimization

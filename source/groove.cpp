@@ -19,7 +19,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xgroove:
 	public xsample
 {
-	FLEXT_HEADER_S(xgroove,xsample)
+	FLEXT_HEADER_S(xgroove,xsample,setup)
 
 public:
 	xgroove(I argc,t_atom *argv);
@@ -61,6 +61,8 @@ protected:
 	F **bvecs;
 
 private:
+	static V setup(t_class *c);
+
 	virtual V m_dsp(I n,F *const *in,F *const *out);
 
 	DEFSIGFUN(xgroove)	
@@ -74,9 +76,9 @@ private:
 };
 
 
-FLEXT_TILDE_GIMME("xgroove~",xgroove)
+FLEXT_NEW_TILDE_G("xgroove~",xgroove)
 
-V xgroove::cb_setup(t_class *c)
+V xgroove::setup(t_class *)
 {
 #ifndef PD
 	post("loaded xgroove~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");

@@ -18,7 +18,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 class xrecord:
 	public xsample
 {
-	FLEXT_HEADER_S(xrecord,xsample)
+	FLEXT_HEADER_S(xrecord,xsample,setup)
 
 public:
 	xrecord(I argc,t_atom *argv);
@@ -62,6 +62,8 @@ protected:
 	V outputmax() { ToOutFloat(outmax,curmax*s2u); }
 	
 private:
+	static V setup(t_class *c);
+
 	virtual V m_dsp(I n,F *const *in,F *const *out);
 	
 	DEFSIGFUN(xrecord)
@@ -80,9 +82,9 @@ private:
 };
 
 
-FLEXT_TILDE_GIMME("xrecord~",xrecord)
+FLEXT_NEW_TILDE_G("xrecord~",xrecord)
 
-V xrecord::cb_setup(t_class *c)
+V xrecord::setup(t_class *)
 {
 #ifndef PD
 	post("loaded xrecord~ - part of xsample objects, version " XSAMPLE_VERSION " - (C) Thomas Grill, 2001-2002");

@@ -108,10 +108,10 @@ V xsample::m_units(xs_unit mode)
 			s2u = 1.f/buf->Frames();
 			break;
 		case xsu_ms: // ms
-			s2u = 1000.f/sys_getsr();
+			s2u = 1000.f/Samplerate();
 			break;
 		case xsu_s: // s
-			s2u = 1.f/sys_getsr();
+			s2u = 1.f/Samplerate();
 			break;
 		default:
 			post("%s: Unknown unit mode",thisName());

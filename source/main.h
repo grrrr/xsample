@@ -41,8 +41,8 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 	#define SIGSTATIC
 #elif defined(__MRC__)
 // Apple MPW - MrCpp
-	#define TMPLOPT  // template optimation for more speed
-	#define TMPLINT	 // if <int,int> templates are correctly handled 
+//	#define TMPLOPT  // template optimation for more speed
+//	#define TMPLINT	 // if <int,int> templates are correctly handled 
 #else
 // another compiler
 //	#define TMPLOPT  // template optimation for more speed
@@ -174,11 +174,11 @@ private:
 #else
 	// static function -> another redirection...
 	#define DEFSIGFUN(CL) \
-	V (*sigfun)(CL &obj,I n,F *const *in,F *const *out);  \
+	V (*sigfun)(CL *obj,I n,F *const *in,F *const *out);  \
 	virtual V m_signal(I n,F *const *in,F *const *out)   \
-		{ (*sigfun)(*this,n,in,out); }  \
-	TMPLDEF static V st_signal(CL &obj,I n,F *const *in,F *const *out)  \
-		{ obj.signal TMPLCALL (n,in,out); }
+		{ (*sigfun)(this,n,in,out); }  \
+	TMPLDEF static V st_signal(CL *obj,I n,F *const *in,F *const *out)  \
+		{ obj->signal TMPLCALL (n,in,out); }
 #endif
 
 
