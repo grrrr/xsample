@@ -652,6 +652,7 @@ V xgroove::m_help()
 	post("\txzone {unit}: length of loop crossfade zone");
 	post("\txsymm -1,0...1: symmetry of crossfade zone inside/outside point");
 	post("\txshape 0/1 [param 0...1]: shape of crossfading (linear/trig)");
+	post("\txkeep 0/1: try to preserve xzone/loop length");
 	post("");
 } 
 
