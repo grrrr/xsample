@@ -1,4 +1,4 @@
-#N canvas 90 37 915 634 12;
+#N canvas 90 37 919 638 12;
 #X obj 225 248 hsl 128 15 0.001 3 1 1 empty empty empty 20 8 0 8 -225271
 -1 -1 9300 1;
 #X floatatom 222 269 8 0 0 0 - - -;
@@ -112,9 +112,9 @@
 #X obj 271 576 tabwrite~ buf2;
 #X obj 23 535 *~;
 #X obj 79 540 hsl 128 15 0.0001 1 1 0 empty empty empty -2 -6 0 8 -261689
--1 -1 7800 1;
+-1 -1 6200 1;
 #X obj 77 560 nbx 5 14 -1e+037 1e+037 0 0 empty empty empty 0 -6 0
-10 -261689 -1 -1 0.0286215 256;
+10 -261689 -1 -1 0.00896925 256;
 #X msg 25 249 pos \$1;
 #X msg 63 220 200;
 #X msg 25 221 100;
@@ -124,11 +124,11 @@
 -1 -1 1000 256;
 #X text 718 47 generate oscillation;
 #X text 140 558 volume;
-#N canvas 485 144 454 332 loopzone 0;
+#N canvas 83 212 383 289 loopzone 0;
 #X obj 29 235 outlet;
 #X msg 30 64 xzone \$1;
 #X obj 33 23 hsl 128 15 0 300 0 0 empty empty empty -2 -6 0 8 -262131
--1 -1 0 1;
+-1 -1 4400 1;
 #X floatatom 30 44 5 0 0 0 - - -;
 #X msg 205 187 xfade \$1;
 #X obj 205 122 vdl 15 0 0 4 empty empty empty 0 -6 0 8 -262144 -1 -1
@@ -168,9 +168,9 @@
 #X text 242 53 bidirectional;
 #X text 242 151 buffer size;
 #X obj 574 402 hsl 300 15 0 300 0 0 empty bufpos empty -2 -6 0 8 -262144
--1 -1 8254 1;
+-1 -1 23344 1;
 #X obj 354 519 nbx 5 14 -1e+037 1e+037 0 0 empty empty empty 0 -6 0
-10 -262144 -1 -1 82.8194 256;
+10 -262144 -1 -1 234.221 256;
 #X obj 279 538 s bufpos;
 #X connect 0 0 1 0;
 #X connect 1 0 25 0;

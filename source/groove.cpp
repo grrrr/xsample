@@ -351,7 +351,8 @@ V xgroove::ms_xshape(I sh)
 
 V xgroove::do_xzone()
 {
-	if(!s2u) return; // this can happen if DSP is off
+	// \todo do we really need this?
+	if(!s2u) return; // this can happen if DSP is off 
 
 	xzone = _xzone; // make a copy for changing it
 
@@ -640,38 +641,58 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 
     // adapt the playing bounds to the current cross-fade zone
     const L smin = znsmin,smax = znsmax,plen = smax-smin;
-	// calculate inner cross-fade boundaries
-	const D lmin = smin+xz,lmax = smax-xz,lsh = lmax-lmin+xz;
 
 	if(buf && plen > 0) {
 		BL inzn = false;
 		register D o = curpos;
 
+		// calculate inner cross-fade boundaries
+		const D lmin = smin+xz,lmax = smax-xz,lsh = lmax-lmin+xz;
+		const D lmin2 = lmin-xz/2,lmax2 = lmax+xz/2;
+
  		for(I i = 0; i < n; ++i) {	
- 			// \TODO: exploit relationships: smin <= lmin, smax >= lmax
- 		
 			// normalize offset
-			if(!(o < smax)) {
-				o = fmod(o-smin,plen)+smin;
-				lpbang = true;
-			}
-            else if(o < smin) {
+            if(o < smin) {
 				o = fmod(o-smin,plen)+smax; 
 				lpbang = true;
 			}
-
-            if(o >= lmax) {
-                // in late cross-fade zone
-				o -= lsh;
+			else if(!(o < smax)) {
+				o = fmod(o-smin,plen)+smin;
 				lpbang = true;
 			}
 
-            // now: smin <= o < smax
 			if(o < lmin) {
-				// in early cross-fade zone
-				register F inp = xz+(F)(o-lmin);  // 0 <= inp < xz
+				register F inp;
+				if(o < lmin2) {
+					o += lsh;
+					lpbang = true;
+					// now lmax <= o <= lmax2
+
+					inp = xz-(F)(o-lmax);  // 0 <= inp < xz
+					znpos[i] = lmin-inp;
+				}
+				else { // in early cross-fade zone
+					inp = xz+(F)(o-lmin);  // 0 <= inp < xz
+					znpos[i] = lmax+inp;
+				}
 				znidx[i] = inp*xf;
-				znpos[i] = lmax+inp;
+				inzn = true;
+			}
+			else if(!(o < lmax)) {
+				register F inp;
+				if(!(o < lmax2)) {
+					o -= lsh;
+					lpbang = true;
+					// now lmin2 <= o <= lmin
+
+					inp = xz+(F)(o-lmin);  // 0 <= inp < xz
+					znpos[i] = lmax+inp;
+				}
+				else { // in late cross-fade zone
+					inp = xz-(F)(o-lmax);  // 0 <= inp < xz
+					znpos[i] = lmin-inp;
+				}
+				znidx[i] = inp*xf;
 				inzn = true;
 			}
 			else
@@ -683,14 +704,16 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 		}
 
 		// normalize and store current playing position
-		if(o < znsmin) o += plen;
 		setpos(o);
 
 		// calculate samples (1st voice)
 		playfun(n,&pos,outvecs); 
 
+		// rescale position vector
+		arrscale(n,pos,pos);
+
 		if(inzn) {
-			// only if we are in cross-fade zone
+			// only if we have touched the cross-fade zone
 			
 			// calculate samples in loop zone (2nd voice)
 			playfun(n,&znpos,znbuf); 
@@ -698,7 +721,7 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 			// calculate counterpart in loop fade
 			arrscale(n,znidx,znpos,XZONE_TABLE,-1);
 			
-			// calculate fade coefficients
+			// calculate fade coefficients by sampling from the fade curve
 			zonefun(znmul,0,XZONE_TABLE+1,n,1,1,&znidx,&znidx);
 			zonefun(znmul,0,XZONE_TABLE+1,n,1,1,&znpos,&znpos);
 
@@ -709,10 +732,6 @@ V xgroove::s_pos_loopzn(I n,S *const *invecs,S *const *outvecs)
 				AddSamples(outvecs[o],outvecs[o],znbuf[o],n);
 			}
 		}
-	
-		// rescale position vector
-		// \note half of early fade zone is left of min bound which gives a bad impression of the playing position
-		arrscale(n,pos,pos);
 	} 
 	else 
 		s_pos_off(n,invecs,outvecs);
