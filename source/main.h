@@ -118,7 +118,7 @@ private:
 			#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
 			#define TMPLCALL <_BCHNS_,_IOCHNS_>
 		#else 
-			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::st_signal<B[BCHNS],B[IOCHNS]>
+			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::st_signal<C[BCHNS+1],C[IOCHNS+1]>
 			#define TMPLDEF template <class BCL,class IOCL>
 			#define TMPLCALL <BCL,IOCL>
 		#endif
@@ -134,7 +134,7 @@ private:
 			#define TMPLDEF template <int _BCHNS_,int _IOCHNS_>
 			#define TMPLCALL <_BCHNS_,_IOCHNS_>
 		#else
-			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::signal<B[BCHNS],B[IOCHNS]>
+			#define SIGFUN(CL,BCHNS,IOCHNS) &CL::signal<C[BCHNS+1],C[IOCHNS+1]>
 			#define TMPLDEF template <class BCL,class IOCL>
 			#define TMPLCALL <BCL,IOCL>
 		#endif
@@ -175,9 +175,10 @@ private:
 	const I IOCHNS = _IOCHNS_ == 0?MIN(iochns,BCHNS):MIN(_IOCHNS_,BCHNS)
 #else
 	// the same but using classes to calculate channel numbers
+	// bad trick...
 #define SIGCHNS(BCHNS,bchns,IOCHNS,iochns)   \
-	const I BCHNS = sizeof(BCL) == 0?(bchns):sizeof(BCL);  \
-	const I IOCHNS = sizeof(IOCL) == 0?MIN(iochns,BCHNS):MIN(sizeof(IOCL),BCHNS)
+	const I BCHNS = sizeof(BCL) == 1?(bchns):sizeof(BCL)-1;  \
+	const I IOCHNS = sizeof(IOCL) == 1?MIN(iochns,BCHNS):MIN(sizeof(IOCL)-1,BCHNS)
 #endif
 #else 
 	// no template optimization
