@@ -39,7 +39,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pd.lib flext-pdwin.lib"
+				AdditionalDependencies="pd.lib "
 				OutputFile="pd-msvc\xsample.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
