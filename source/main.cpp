@@ -14,23 +14,18 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #ifdef PD
 // Initialization for pd xsample library
 
-extern "C" {
-FLEXT_EXT V xrecord_tilde_setup();
-FLEXT_EXT V xplay_tilde_setup();
-FLEXT_EXT V xgroove_tilde_setup();
-
-FLEXT_EXT V xsample_setup()
+extern "C" FLEXT_EXT V xsample_setup()
 {
 	post("xsample objects, version " XSAMPLE_VERSION ", (C)2001,2002 Thomas Grill");
 	post("xsample: xrecord~, xplay~, xgroove~ - send objects a 'help' message to get assistance");
 	post("");
 
 	// call the objects' setup routines
-	xrecord_tilde_setup();
-	xplay_tilde_setup();
-	xgroove_tilde_setup();
+	FLEXT_TILDE_SETUP(xrecord);
+	FLEXT_TILDE_SETUP(xplay);
+	FLEXT_TILDE_SETUP(xgroove);
 }
-}
+
 #endif
 
 // ------------------------------
