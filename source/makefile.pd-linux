@@ -27,10 +27,11 @@ FLEXTLIB=$(FLEXTPATH)/flext.a
 TARGDIR=../pd-linux
 
 # compiler stuff
-CXX=g++
+CXX=g++-3.2
 INCLUDES=$(PDPATH)
 FLAGS=-DPD
-CFLAGS=-O6 -mcpu=pentiumpro -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions
+#CFLAGS=-O6 -mcpu=pentiumpro -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions
+CFLAGS=-O6 -mcpu=pentium3 -msse -mfpmath=sse -funroll-loops -fmove-all-movables -frerun-loop-opt -finline-functions
 LIBS=m
 
 # ----------------------------------------------
