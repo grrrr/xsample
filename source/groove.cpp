@@ -169,8 +169,11 @@ xgroove::xgroove(I argc,const t_atom *argv):
 	}
 #endif
 
+
 	if(argc > argi && IsSymbol(argv[argi])) {
-		buf = new buffer(GetSymbol(argv[argi]),true);
+
+        buf = new buffer(GetSymbol(argv[argi]),true);
+
 		argi++;
 		
 #if FLEXT_SYS == FLEXT_SYS_MAX
@@ -182,8 +185,8 @@ xgroove::xgroove(I argc,const t_atom *argv):
 		}
 #endif
 	}
-	else
-		buf = new buffer(NULL,true);		
+    else
+        buf = new buffer(NULL,true);
 
 	AddInSignal("Signal of playing speed"); // speed signal
 	AddInFloat("Starting point"); // min play pos
