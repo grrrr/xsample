@@ -156,7 +156,7 @@ TMPLDEF V xinter::st_play4(const S *bdt,const I smin,const I smax,const I n,cons
 		for(I ci = 0; ci < OCHNS; ++ci) {
 			const F cmb = fc[ci]-fb[ci];
 			sig[ci][si] = fb[ci] + frac*( 
-				cmb - 0.5f*(frac-1.) * ((fa[ci]-fd[ci]+3.0f*cmb)*frac + (fb[ci]-fa[ci]-cmb))
+				cmb - 0.5f*(frac-1.0f) * ((fa[ci]-fd[ci]+3.0f*cmb)*frac + (fb[ci]-fa[ci]-cmb))
 			);
 		}
 	}

@@ -452,7 +452,7 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 	S *pos = outvecs[outchns];
 	BL lpbang = false;
 
-	const I smin = curmin,smax = curmax,plen = smax-smin; //curlen;
+	const D smin = curmin,smax = curmax,plen = smax-smin; //curlen;
 
 	if(buf && plen > 0) {
 		register D o = curpos;
@@ -461,7 +461,7 @@ V xgroove::s_pos_loop(I n,S *const *invecs,S *const *outvecs)
 			const S spd = speed[i];  // must be first because the vector is reused for output!
 
 			// normalize offset
-			if(o >= smax) {
+			if(!(o < smax)) {  // faster than o >= smax
 				o = fmod(o-smin,plen)+smin;
 				lpbang = true;
 			}
