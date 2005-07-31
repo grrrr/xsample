@@ -56,6 +56,7 @@ public:
 
 	void ms_xfade(int xf)
     { 
+        if(xf < 0 || xf > xsf_inside) xf = xsf_keeplooppos;
 	    xfade = (xs_fade)xf;
         Update(xsc_fade,true);
     }
@@ -263,6 +264,8 @@ void xgroove::ms_xzone(float xz)
 
 void xgroove::ms_xshape(int sh) 
 { 
+    if(sh < 0 || sh > xss_hsine) sh = xss_lin;
+
 	xshape = (xs_shape)sh;
 	switch(xshape) {
 		case xss_qsine: znmul = fade_qsine; break;
