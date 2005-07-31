@@ -56,7 +56,7 @@ xsample::xsample():
 	unitmode(xsu_sample),  // PD defaults to samples
 #endif
 	sclmode(xss_unitsinbuf),
-	curmin(0),curmax(1<<(sizeof(curmax)*8-2))
+	curmin(0),curmax(1L<<(sizeof(curmax)*8-2))
 {}
 	
 xsample::~xsample() {}
