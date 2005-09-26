@@ -167,8 +167,13 @@ void xsample::DoUpdate(unsigned int flags)
         buf.Set();
 
     if(flags&xsc_range && buf.Ok()) {
+		const int f = buf.Frames();
+		
         if(curmin < 0) curmin = 0;
-        if(curmax > buf.Frames()) curmax = buf.Frames();
+		else if(curmin > f) curmin = f;
+		
+        if(curmax > f) curmax = f;
+		else if(curmax < curmin) curmax = curmin;		
     }
 
     if(flags&xsc_units) {
