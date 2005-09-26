@@ -15,8 +15,9 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #error You need at least flext version 0.5.0
 #endif
 
-#define XSAMPLE_VERSION "0.3.1pre7"
+#define XSAMPLE_VERSION "0.3.1pre8"
 
+extern "C++" {
 
 // most compilers are somehow broken - in other words - can't handle all C++ features
 
@@ -438,5 +439,7 @@ private:
 #ifdef TMPLOPT
 #include "inter.h"
 #endif
+
+}
 
 #endif

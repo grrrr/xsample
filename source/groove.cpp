@@ -657,7 +657,7 @@ bool xgroove::do_xzone()
 		if(xzone > maxfd) xzone = maxfd;
 
 		// \todo what about round-off?
-        const long hzone = CASTINT<long>(xzone/2.f);
+        const long hzone = CASTINT<long>(xzone/2.f+0.5f);
 		znsmin = curmin-hzone;
 		znsmax = curmax+hzone;
 
@@ -684,7 +684,7 @@ bool xgroove::do_xzone()
 		if(xzone > maxfd) xzone = maxfd;
 
 		// \todo what about round-off?
-        const long hzone = CASTINT<long>(xzone/2.f);
+        const long hzone = CASTINT<long>(xzone/2.f+0.5f);
 		znsmin = curmin-hzone;
 		znsmax = curmax+hzone;
 
@@ -707,7 +707,7 @@ bool xgroove::do_xzone()
 		if(xzone > plen) xzone = plen;
 
 		// \todo what about round-off?
-        const long hzone = CASTINT<long>(xzone/2.f);
+        const long hzone = CASTINT<long>(xzone/2.f+0.5f);
 		znsmin = curmin-hzone;
 		znsmax = curmax+hzone;
 

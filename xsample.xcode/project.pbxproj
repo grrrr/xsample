@@ -180,12 +180,13 @@
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_EXTENSION = pd_darwin;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INPUT_FILETYPE = sourcecode.cpp.cpp;
 				GCC_PREPROCESSOR_DEFINITIONS = "FLEXT_SYS=2";
-				HEADER_SEARCH_PATHS = "$(PD)/src $(Flext)/source";
+				HEADER_SEARCH_PATHS = "$(PDApp)/src $(flext)/source";
 				INSTALL_PATH = "$(PD)/extra";
-				LIBRARY_SEARCH_PATHS = "$(Flext)/build";
+				LIBRARY_SEARCH_PATHS = "$(flext)/build";
 				LIBRARY_STYLE = BUNDLE;
-				OTHER_LDFLAGS = "-bundle_loader $(PD)/bin/pd";
+				OTHER_LDFLAGS = "-bundle_loader $(PDApp)/bin/pd";
 				PRODUCT_NAME = xsample;
 			};
 			dependencies = (
@@ -221,12 +222,6 @@
 			path = "/usr/local/lib/libflext-max_sd.a";
 			refType = 0;
 			sourceTree = "<absolute>";
-		};
-		E94AC9620789EE8700AE1770 = {
-			fileRef = E94AC9610789EE8700AE1770;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		E94AC9630789EEA300AE1770 = {
 			isa = PBXFileReference;
@@ -425,9 +420,9 @@
 		E9974E51077083C700206F68 = {
 			buildActionMask = 2147483647;
 			files = (
+				E9B5873A08E6F228002DA49F,
 				E9974E5C0770851700206F68,
 				E9974E5B0770851500206F68,
-				E94AC9620789EE8700AE1770,
 				E98C3078078D948800EC0264,
 			);
 			isa = PBXFrameworksBuildPhase;
@@ -444,10 +439,11 @@
 			);
 			buildSettings = {
 				GCC_PREPROCESSOR_DEFINITIONS = "FLEXT_SYS=1";
-				HEADER_SEARCH_PATHS = "$(Max SDK)/max-includes $(Max SDK)/msp-includes $(Flext)/source";
+				GENERATE_PKGINFO_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(MaxSDK)/max-includes $(MaxSDK)/msp-includes $(flext)/source";
 				INFOPLIST_FILE = "source/xsample-Info.plist";
-				INSTALL_PATH = "/Library/Application Support/Cycling 74/externals";
-				LIBRARY_SEARCH_PATHS = "$(Flext)/build";
+				INSTALL_PATH = "/Library/Application Support/Cycling 74/externals/flext";
+				LIBRARY_SEARCH_PATHS = "$(flext)/build";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -614,6 +610,12 @@
 		};
 		E9974EC607708D0C00206F68 = {
 			fileRef = E9974EC307708CED00206F68;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E9B5873A08E6F228002DA49F = {
+			fileRef = E94AC9610789EE8700AE1770;
 			isa = PBXBuildFile;
 			settings = {
 			};

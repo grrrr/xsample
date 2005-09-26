@@ -13,6 +13,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #pragma warning (disable:4244)
 #endif
 
+extern "C++" {
 
 class xrecord:
 	public xsample
@@ -85,6 +86,8 @@ private:
 
 	FLEXT_CALLBACK_V(m_draw)
 };
+
+}
 
 
 FLEXT_LIB_DSP_V("xrecord~",xrecord)
@@ -491,3 +494,4 @@ void xrecord::m_print()
 	post("sigmode = %s, append = %s, loop = %s, mixmode = %i",sigmode?"yes":"no",appmode?"yes":"no",doloop?"yes":"no",mixmode); 
 	post("");
 }
+
