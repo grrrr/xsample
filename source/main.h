@@ -69,7 +69,9 @@ extern "C++" {
 #endif
     // this is for the UInt32 prototype (thanks to Jamie)
     // \TODO we'd rather not use Carbon but some other framework
+    #ifdef __MACH__
     #include <Carbon/Carbon.h>
+    #endif
 
 	// Initialize a prefetch constant for use with vec_dst(), vec_dstt(), vec_dstst or vec_dststt
 	// Taken from the "AltiVec tutorial" by Ian Ollmann, Ph.D. 
