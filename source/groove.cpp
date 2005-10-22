@@ -94,9 +94,10 @@ protected:
 
 	inline void setposmod(double pos)
 	{
-		double p = pos-znsmin;
-		if(p >= 0) curpos = znsmin+fmod(p,znsmax-znsmin);
-		else curpos = znsmax+fmod(p,znsmax-znsmin);
+        if(pos >= 0) 
+            curpos = znsmin+fmod(pos,znsmax-znsmin);
+        else 
+            curpos = znsmax+fmod(pos,znsmax-znsmin);
 	}
 
     virtual void DoReset();

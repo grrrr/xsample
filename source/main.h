@@ -15,7 +15,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #error You need at least flext version 0.5.0
 #endif
 
-#define XSAMPLE_VERSION "0.3.1pre8"
+#define XSAMPLE_VERSION "0.3.1pre9"
 
 extern "C++" {
 
