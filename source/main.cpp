@@ -49,7 +49,7 @@ void xsample::setup(t_classid c)
 }
 
 xsample::xsample():
-    update(xsc_all),
+    update(xsc_all),wrap(false),
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	unitmode(xsu_ms),	   // Max/MSP defaults to milliseconds
 #else
@@ -168,12 +168,18 @@ void xsample::DoUpdate(unsigned int flags)
 
     if(flags&xsc_range && buf.Ok()) {
 		const int f = buf.Frames();
-		
-        if(curmin < 0) curmin = 0;
-		else if(curmin > f) curmin = f;
-		
-        if(curmax > f) curmax = f;
-		else if(curmax < curmin) curmax = curmin;		
+
+        if(!wrap) {
+            // normalize bounds
+            if(curmin < 0) curmin = 0;
+		    else if(curmin > f) curmin = f;
+    		
+            if(curmax > f) curmax = f;
+		    else if(curmax < curmin) curmax = curmin;
+        }
+        else
+            // don't normalize
+		    if(curmax < curmin) curmax = curmin;
     }
 
     if(flags&xsc_units) {

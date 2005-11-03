@@ -15,7 +15,7 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #error You need at least flext version 0.5.0
 #endif
 
-#define XSAMPLE_VERSION "0.3.1"
+#define XSAMPLE_VERSION "0.3.2pre"
 
 extern "C++" {
 
@@ -191,6 +191,12 @@ protected:
         Refresh(); 
     }
 
+    void m_wrap(bool w)
+    {
+        wrap = w;
+        Update(xsc_pos|xsc_range,true);
+    }
+
 	void m_min(float mn);
 	void m_max(float mx);
 
@@ -201,6 +207,7 @@ protected:
 	long sclmin; // in samples
 	float sclmul;
 	float s2u;  // sample to unit conversion factor
+    bool wrap;
 
 	inline float scale(float smp) const { return (smp-sclmin)*sclmul; }
 	
@@ -265,6 +272,9 @@ private:
 	FLEXT_ATTRGET_E(sclmode,xs_sclmd)
 
 	FLEXT_ATTRGET_F(s2u)
+
+	FLEXT_CALLSET_B(m_wrap)
+	FLEXT_ATTRGET_B(wrap)
 
 protected:
 	FLEXT_CALLGET_F(mg_min)

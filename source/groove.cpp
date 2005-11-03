@@ -341,22 +341,44 @@ void xgroove::s_pos_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
 	if(plen > 0) {
 		register double o = curpos;
 
-		for(int i = 0; i < n; ++i) {	
-			const t_sample spd = speed[i];  // must be first because the vector is reused for output!
+        if(wrap && smin < 0 && smax >= buf.Frames()) {
+		    for(int i = 0; i < n; ++i) {	
+			    const t_sample spd = speed[i];  // must be first because the vector is reused for output!
 
-			// normalize offset
-			if(!(o < smax)) {  // faster than o >= smax
-				o = fmod(o-smin,plen)+smin;
-				lpbang = true;
-			}
-			else if(o < smin) {
-				o = fmod(o-smin,plen)+smax; 
-				lpbang = true;
-			}
+			    // normalize offset
+			    if(!(o < smax)) {  // faster than o >= smax
+				    o = fmod(o-smin,plen)+smin;
+				    lpbang = true;
+			    }
+			    else if(o < smin) {
+				    o = fmod(o-smin,plen)+smax; 
+				    lpbang = true;
+			    }
 
-			pos[i] = o;
-			o += spd;
-		}
+                // TODO normalize to 0...buf.Frames()
+			    pos[i] = o;
+			    o += spd;
+		    }
+        }
+        else {
+		    for(int i = 0; i < n; ++i) {	
+			    const t_sample spd = speed[i];  // must be first because the vector is reused for output!
+
+			    // normalize offset
+			    if(!(o < smax)) {  // faster than o >= smax
+				    o = fmod(o-smin,plen)+smin;
+				    lpbang = true;
+			    }
+			    else if(o < smin) {
+				    o = fmod(o-smin,plen)+smax; 
+				    lpbang = true;
+			    }
+
+			    pos[i] = o;
+			    o += spd;
+		    }
+        }
+
 		// normalize and store current playing position
 		setpos(o);
 
@@ -667,13 +689,15 @@ bool xgroove::do_xzone()
 		long lack = CASTINT<long>(ceil((xzone*2.f-(znsmax-znsmin))/2.f));
 		if(lack > 0) znsmin -= lack,znsmax += lack;
 
-		// check buffer limits and shift bounds if necessary
-		if(znsmin < 0) {
-			znsmax -= znsmin;
-			znsmin = 0;
-		}
-		if(znsmax > frames) 
-            znsmax = frames;
+        if(!wrap) {
+		    // check buffer limits and shift bounds if necessary
+		    if(znsmin < 0) {
+			    znsmax -= znsmin;
+			    znsmin = 0;
+		    }
+		    if(znsmax > frames) 
+                znsmax = frames;
+        }
 	}
 	else if(xfade == xsf_keeplooplen) { 
 		// try to keep loop length
@@ -689,16 +713,18 @@ bool xgroove::do_xzone()
 		znsmin = curmin-hzone;
 		znsmax = curmax+hzone;
 
-		// check buffer limits and shift bounds if necessary
-		// both cases can't happen because of xzone having been limited above
-		if(znsmin < 0) {
-			znsmax -= znsmin;
-			znsmin = 0;
-		}
-		else if(znsmax > frames) {
-			znsmin -= znsmax-frames;
-			znsmax = frames;
-		}
+        if(!wrap) {
+		    // check buffer limits and shift bounds if necessary
+		    // both cases can't happen because of xzone having been limited above
+		    if(znsmin < 0) {
+			    znsmax -= znsmin;
+			    znsmin = 0;
+		    }
+		    else if(znsmax > frames) {
+			    znsmin -= znsmax-frames;
+			    znsmax = frames;
+		    }
+        }
 	}
 	else if(xfade == xsf_keeplooppos) { 
 		// try to keep loop position and length
