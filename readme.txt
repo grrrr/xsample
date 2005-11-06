@@ -16,7 +16,7 @@ Visit https://www.paypal.com/xclick/business=gr%40grrrr.org&item_name=xsample&no
 IMPORTANT INFORMATION for all Max/MSP users:
 
 1) 
-For Mac OSX it is best to put the max-osx/xsample.mxd file into the folder 
+For Mac OSX it is best to put the max-darwin/xsample.mxd file into the folder 
 /Library/Application Support/Cycling '74/externals
 and the file maxmsp/xsample-objectmappings.txt into the folder 
 /Library/Application Support/Cycling '74/init .
