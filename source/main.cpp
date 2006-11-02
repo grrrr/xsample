@@ -1,7 +1,7 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2005 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2006 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 */
@@ -16,7 +16,7 @@ static void xsample_main()
 	flext::post("xsample objects, version " XSAMPLE_VERSION);
     flext::post("");
 	flext::post("  xrecord~, xplay~, xgroove~   ");
-    flext::post("  (C)2001-2005 Thomas Grill    ");
+    flext::post("  (C)2001-2006 Thomas Grill    ");
 #ifdef FLEXT_DEBUG
     flext::post("");
     flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);
@@ -74,7 +74,7 @@ int xsample::ChkBuffer(bool refresh)
 {      
     if(!buf.Ok()) return 0;
     
-    if(buf.Update()) {
+    if(UNLIKELY(buf.Update())) {
 #ifdef FLEXT_DEBUG
         post("%s - buffer update!",thisName());
 #endif
@@ -100,7 +100,7 @@ void xsample::m_set(int argc,const t_atom *argv)
 {
 	const t_symbol *sym = argc >= 1?GetASymbol(argv[0]):NULL;
 	int r = buf.Set(sym);
-	if(sym && r < 0) 
+	if(LIKELY(sym) && UNLIKELY(r < 0)) 
         post("%s - can't find buffer %s",thisName(),GetString(sym));
     Update(xsc_buffer,true);
 }
@@ -109,12 +109,12 @@ void xsample::m_min(float mn)
 {
     int ret = ChkBuffer(true);
 
-	if(ret && s2u) {
+	if(LIKELY(ret) && LIKELY(s2u)) {
 		long cmn = CASTINT<long>(mn/s2u+0.5f);  // conversion to samples
 
-		if(cmn < 0) 
+		if(UNLIKELY(cmn < 0)) 
             curmin = 0;
-		else if(cmn > curmax) 
+		else if(UNLIKELY(cmn > curmax))
             curmin = curmax;
 		else
             curmin = cmn;
@@ -127,12 +127,12 @@ void xsample::m_max(float mx)
 {
     int ret = ChkBuffer(true);
 
-	if(ret && s2u) {
+	if(LIKELY(ret) && LIKELY(s2u)) {
 		long cmx = CASTINT<long>(mx/s2u+0.5f);  // conversion to samples
 
-		if(cmx > buf.Frames()) 
+		if(UNLIKELY(cmx > buf.Frames())) 
             curmax = buf.Frames();
-		else if(cmx < curmin) 
+		else if(UNLIKELY(cmx < curmin)) 
             curmax = curmin;
         else
 		    curmax = cmx;

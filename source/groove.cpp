@@ -1,7 +1,7 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2005 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2006 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 */
@@ -36,11 +36,11 @@ public:
 
 	void m_pos(float pos)
     {
-	    setpos(s2u?pos/s2u:0);
+	    setpos(LIKELY(s2u)?pos/s2u:0);
         Update(xsc_pos,true);
     }
 
-    inline void m_posmod(float pos) { setposmod(pos?pos/s2u:0); } // motivated by Tim Blechmann
+    inline void m_posmod(float pos) { setposmod(LIKELY(pos)?pos/s2u:0); } // motivated by Tim Blechmann
 
 	inline void mg_pos(float &v) const { v = curpos*s2u; }
 
@@ -87,8 +87,8 @@ protected:
 
 	inline void setpos(double pos)
 	{
-		if(pos < znsmin) curpos = znsmin;
-		else if(pos > znsmax) curpos = znsmax;
+		if(UNLIKELY(pos < znsmin)) curpos = znsmin;
+		else if(UNLIKELY(pos > znsmax)) curpos = znsmax;
 		else curpos = pos;
 	}
 
@@ -208,7 +208,7 @@ xgroove::xgroove(int argc,const t_atom *argv):
 		
 #if FLEXT_SYS == FLEXT_SYS_MAX
 		// old-style command line?
-		if(argi == 1 && argc == 2 && CanbeInt(argv[argi])) {
+		if(UNLIKELY(argi == 1 && argc == 2 && CanbeInt(argv[argi]))) {
 			outchns = GetAInt(argv[argi]);
 			argi++;
 			post("%s: old style command line detected - please change to '%s [channels] [buffer]'",thisName(),thisName()); 
@@ -259,13 +259,13 @@ void xgroove::ms_xzone(float xz)
 { 
 	ChkBuffer(true);
 
-	_xzone = (xz < 0 || !s2u)?0:xz/s2u; 
+	_xzone = (UNLIKELY(xz < 0) || UNLIKELY(!s2u))?0:xz/s2u; 
     Update(xsc_fade,true);
 }
 
 void xgroove::ms_xshape(int sh) 
 { 
-    if(sh < 0 || sh > xss_hsine) sh = xss_lin;
+    if(UNLIKELY(sh < 0) || UNLIKELY(sh > xss_hsine)) sh = xss_lin;
 
 	xshape = (xs_shape)sh;
 	switch(xshape) {
@@ -300,14 +300,14 @@ void xgroove::s_pos_once(int n,t_sample *const *invecs,t_sample *const *outvecs)
 
 	const double smin = curmin,smax = curmax,plen = smax-smin;
 
-	if(plen > 0) {
+	if(LIKELY(plen > 0)) {
 		register double o = curpos;
 
 		for(int i = 0; i < n; ++i) {	
 			const t_sample spd = speed[i];  // must be first because the vector is reused for output!
 			
-			if(!(o < smax)) { o = smax; lpbang = true; }
-			else if(o < smin) { o = smin; lpbang = true; }
+			if(UNLIKELY(!(o < smax))) { o = smax; lpbang = true; }
+			else if(UNLIKELY(o < smin)) { o = smin; lpbang = true; }
 			
 			pos[i] = o;
 			o += spd;
@@ -322,7 +322,7 @@ void xgroove::s_pos_once(int n,t_sample *const *invecs,t_sample *const *outvecs)
 	else 
 		s_pos_off(n,invecs,outvecs);
 		
-	if(lpbang) ToOutBang(outchns+3);
+	if(UNLIKELY(lpbang)) ToOutBang(outchns+3);
 }
 
 void xgroove::s_pos_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
@@ -338,19 +338,19 @@ void xgroove::s_pos_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
 
 	const double smin = curmin,smax = curmax,plen = smax-smin;
 
-	if(plen > 0) {
+	if(LIKELY(plen > 0)) {
 		register double o = curpos;
 
-        if(wrap && smin < 0 && smax >= buf.Frames()) {
+        if(wrap && UNLIKELY(smin < 0) && UNLIKELY(smax >= buf.Frames())) {
 		    for(int i = 0; i < n; ++i) {	
 			    const t_sample spd = speed[i];  // must be first because the vector is reused for output!
 
 			    // normalize offset
-			    if(!(o < smax)) {  // faster than o >= smax
+			    if(UNLIKELY(!(o < smax))) {  // faster than o >= smax
 				    o = fmod(o-smin,plen)+smin;
 				    lpbang = true;
 			    }
-			    else if(o < smin) {
+			    else if(UNLIKELY(o < smin)) {
 				    o = fmod(o-smin,plen)+smax; 
 				    lpbang = true;
 			    }
@@ -365,11 +365,11 @@ void xgroove::s_pos_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
 			    const t_sample spd = speed[i];  // must be first because the vector is reused for output!
 
 			    // normalize offset
-			    if(!(o < smax)) {  // faster than o >= smax
+			    if(UNLIKELY(!(o < smax))) {  // faster than o >= smax
 				    o = fmod(o-smin,plen)+smin;
 				    lpbang = true;
 			    }
-			    else if(o < smin) {
+			    else if(UNLIKELY(o < smin)) {
 				    o = fmod(o-smin,plen)+smax; 
 				    lpbang = true;
 			    }
@@ -393,7 +393,7 @@ void xgroove::s_pos_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
 	vec_dss(0);
 #endif
 
-	if(lpbang) ToOutBang(outchns+3);
+	if(UNLIKELY(lpbang)) ToOutBang(outchns+3);
 }
 
 void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvecs)
@@ -414,7 +414,7 @@ void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvec
 	// hack -> set curmin/curmax to loop extremes so that sampling functions (playfun) don't get confused
 	curmin = smin,curmax = smax;
 
-	if(plen > 0) {
+	if(LIKELY(plen > 0)) {
 		bool inzn = false;
 		register double o = curpos;
 
@@ -424,16 +424,16 @@ void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvec
 
  		for(int i = 0; i < n; ++i) {	
 			// normalize offset
-            if(o < smin) {
+            if(UNLIKELY(o < smin)) {
 				o = fmod(o-smin,plen)+smax; 
 				lpbang = true;
 			}
-			else if(!(o < smax)) {
+			else if(UNLIKELY(!(o < smax))) {
 				o = fmod(o-smin,plen)+smin;
 				lpbang = true;
 			}
 
-			if(o < lmin) {
+			if(UNLIKELY(o < lmin)) {
 				register float inp;
 				if(o < lmin2) {
 					// in first half of early cross-fade zone
@@ -456,7 +456,7 @@ void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvec
 				znidx[i] = inp*xf;
 				inzn = true;
 			}
-			else if(!(o < lmax)) {
+			else if(UNLIKELY(!(o < lmax))) {
 				register float inp;
 				if(!(o < lmax2)) {
 					// in second half of late cross-fade zone
@@ -494,7 +494,7 @@ void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvec
 		// rescale position vector
 		arrscale(n,pos,pos);
 
-		if(inzn) {
+		if(UNLIKELY(inzn)) {
 			// only if we have touched the cross-fade zone
 			
 			// calculate samples in loop zone (2nd voice)
@@ -520,7 +520,7 @@ void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvec
 		
 	curmin = cmin,curmax = cmax;
 
-	if(lpbang) ToOutBang(outchns+3);
+	if(UNLIKELY(lpbang)) ToOutBang(outchns+3);
 }
 
 void xgroove::s_pos_bidir(int n,t_sample *const *invecs,t_sample *const *outvecs)
@@ -531,7 +531,7 @@ void xgroove::s_pos_bidir(int n,t_sample *const *invecs,t_sample *const *outvecs
 
 	const int smin = curmin,smax = curmax,plen = smax-smin;
 
-	if(plen > 0) {
+	if(LIKELY(plen > 0)) {
 		register double o = curpos;
 		register float bd = bidir;
 
@@ -540,12 +540,12 @@ void xgroove::s_pos_bidir(int n,t_sample *const *invecs,t_sample *const *outvecs
 
 			// normalize offset
             // \todo at the moment fmod doesn't take bidirectionality into account!!
-			if(!(o < smax)) {
+			if(UNLIKELY(!(o < smax))) {
 				o = smax-fmod(o-smax,plen); // mirror the position at smax
 				bd = -bd;
 				lpbang = true;
 			}
-			else if(o < smin) {
+			else if(UNLIKELY(o < smin)) {
 				o = smin+fmod(smin-o,plen); // mirror the position at smin
 				bd = -bd;
 				lpbang = true;
@@ -565,14 +565,14 @@ void xgroove::s_pos_bidir(int n,t_sample *const *invecs,t_sample *const *outvecs
     else
 		s_pos_off(n,invecs,outvecs);
 		
-	if(lpbang) ToOutBang(outchns+3);
+	if(UNLIKELY(lpbang)) ToOutBang(outchns+3);
 }
 
 void xgroove::CbSignal() 
 { 
     int ret = ChkBuffer(true);
 
-    if(ret) {
+    if(LIKELY(ret)) {
         FLEXT_ASSERT(buf.Valid());
         
         const lock_t l = Lock();
@@ -655,10 +655,10 @@ void xgroove::DoUpdate(unsigned int flags)
 bool xgroove::do_xzone()
 {
 	// \todo do we really need this?
-	if(!s2u) return false; // this can happen if DSP is off 
+	if(UNLIKELY(!s2u)) return false; // this can happen if DSP is off 
 
     const long frames = buf.Frames();
-    if(!frames) return false;
+    if(UNLIKELY(!frames)) return false;
 
 	xzone = _xzone; // make a copy for changing it
 
@@ -756,7 +756,7 @@ bool xgroove::do_xzone()
 void xgroove::m_help()
 {
 	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
-	post("(C) Thomas Grill, 2001-2005");
+	post("(C) Thomas Grill, 2001-2006");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else

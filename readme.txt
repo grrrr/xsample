@@ -1,6 +1,6 @@
 xsample - extended sample objects for Max/MSP and PD (pure data)
 
-Copyright (c)2001-2005 Thomas Grill (gr@grrrr.org)
+Copyright (c)2001-2006 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -101,6 +101,7 @@ Version history:
 - reconsidered all state changes
 - more optimizations for interpolation functions
 - use the new flext build system
+- use branch hints
 
 0.3.0:
 - added resources to MaxMSP build

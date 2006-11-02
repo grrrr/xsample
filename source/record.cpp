@@ -1,7 +1,7 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2005 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2006 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 */
@@ -25,7 +25,7 @@ public:
 	
 	void m_pos(float pos)
     {
-	    curpos = pos?CASTINT<long>(pos/s2u+.5):0;
+	    curpos = LIKELY(pos)?CASTINT<long>(pos/s2u+.5):0;
         Update(xsc_pos);
         Refresh();
     }
@@ -210,11 +210,11 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
 	
 	if(o < curmin) o = curmin;
 
-	if(dorec && curmax > curmin) {
+	if(dorec && LIKELY(curmax > curmin)) {
 		while(n) {
 			long ncur = curmax-o; // at max to buffer or recording end
 
-			if(ncur <= 0) {	// end of buffer
+			if(UNLIKELY(ncur <= 0)) {	// end of buffer
 				if(doloop) { 
 					ncur = curmax-(o = curmin);
 				}
@@ -227,9 +227,9 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
 				lpbang = true;
 			}
 
-			if(!dorec) break;
+			if(UNLIKELY(!dorec)) break;
 
-			if(ncur > n) ncur = n;
+			if(UNLIKELY(ncur > n)) ncur = n;
 			
 			register int i;
 			register t_sample *bf = buf.Data()+o*BCHNS;
@@ -452,7 +452,7 @@ void xrecord::m_help()
 #ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2005");
+	post("(C) Thomas Grill, 2001-2006");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else

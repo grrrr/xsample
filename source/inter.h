@@ -1,7 +1,7 @@
 /* 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2005 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2006 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 */
@@ -26,7 +26,7 @@ TMPLDEF void xinter::st_play1(const t_sample *bdt,const int smin,const int smax,
 	// no interpolation
 	// ----------------
 
-    if(smin == smax) {
+    if(UNLIKELY(smin == smax)) {
         // zero loop length -> assume that smin is a valid sample position...
 
         int ci;
@@ -40,8 +40,8 @@ TMPLDEF void xinter::st_play1(const t_sample *bdt,const int smin,const int smax,
 		    register long oint = CASTINT<long>(*(pos++));
 
             // for xplay oint can be out of bounds -> check
-		    if(oint >= smin)
-			    if(oint < smax) {
+		    if(LIKELY(oint >= smin))
+			    if(LIKELY(oint < smax)) {
 				    // normal
 				    *(sig0++) = bdt[oint*BCHNS];
 			    }
@@ -61,8 +61,8 @@ TMPLDEF void xinter::st_play1(const t_sample *bdt,const int smin,const int smax,
 		    register const t_sample *fp;
 
             // for xplay oint can be out of bounds -> check
-		    if(oint >= smin)
-			    if(oint < smax) {
+		    if(LIKELY(oint >= smin))
+			    if(LIKELY(oint < smax)) {
 				    // normal
 				    fp = bdt+oint*BCHNS;
 			    }
@@ -87,7 +87,7 @@ TMPLDEF void xinter::st_play1(const t_sample *bdt,const int smin,const int smax,
 TMPLDEF void xinter::st_play2(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
 {
 	const int plen = smax-smin;
-	if(plen < 2) {
+	if(UNLIKELY(plen < 2)) {
 		st_play1 TMPLCALL (bdt,smin,smax,n,inchns,outchns,invecs,outvecs,looped);
 		return;
 	}
@@ -111,8 +111,8 @@ TMPLDEF void xinter::st_play2(const t_sample *bdt,const int smin,const int smax,
 			const float frac = o-oint;
 			t_sample fp0,fp1;
 
-		    if(oint >= smin)
-			    if(oint < maxo) {
+		    if(LIKELY(oint >= smin))
+			    if(LIKELY(oint < maxo)) {
 				    // normal interpolation
 			        fp0 = bdt[oint*BCHNS];
 			        fp1 = bdt[(oint+1)*BCHNS];
@@ -148,8 +148,8 @@ TMPLDEF void xinter::st_play2(const t_sample *bdt,const int smin,const int smax,
 			const t_sample *fp0,*fp1;
 			const float frac = o-oint;
 
-		    if(oint >= smin)
-			    if(oint < maxo) {
+		    if(LIKELY(oint >= smin))
+			    if(LIKELY(oint < maxo)) {
 				    // normal interpolation
 			        fp0 = bdt+oint*BCHNS;
 			        fp1 = fp0+BCHNS;
@@ -187,7 +187,7 @@ TMPLDEF void xinter::st_play2(const t_sample *bdt,const int smin,const int smax,
 TMPLDEF void xinter::st_play4(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
 {
 	const int plen = smax-smin; //curlen;
-	if(plen < 4) {
+	if(UNLIKELY(plen < 4)) {
 		if(plen < 2) st_play1 TMPLCALL (bdt,smin,smax,n,inchns,outchns,invecs,outvecs,looped);
 		else st_play2 TMPLCALL (bdt,smin,smax,n,inchns,outchns,invecs,outvecs,looped);
 		return;
@@ -212,8 +212,8 @@ TMPLDEF void xinter::st_play4(const t_sample *bdt,const int smin,const int smax,
 		    const float frac = o-oint;
             register const t_sample *ptr = bdt+oint*BCHNS;
 
-            if(oint > smin) {
-			    if(oint < maxo-2) {
+            if(LIKELY(oint > smin)) {
+			    if(LIKELY(oint < maxo-2)) {
 				    // normal case
 				    fa = ptr[-BCHNS];
 				    fb = ptr[0];
@@ -306,8 +306,8 @@ looped1:
             register const t_sample *ptr = bdt+oint*BCHNS;
 		    register const t_sample *fa,*fb,*fc,*fd;
 
-		    if(oint > smin)
-			    if(oint < maxo-2) {
+		    if(LIKELY(oint > smin))
+			    if(LIKELY(oint < maxo-2)) {
 				    // normal case
     				fb = ptr;
 				    fa = fb-BCHNS;
