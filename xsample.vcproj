@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="xsample"
+	ProjectGUID="{7A2856E0-6DC1-4CD7-8A05-E6BA1DF8CA22}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
