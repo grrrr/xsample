@@ -86,8 +86,15 @@ extern "C++" {
 	}
 #endif
 
-#if FLEXT_CPU == FLEXT_CPU_INTEL && defined(__GNUC__) 
-template<typename I,typename F> inline I CASTINT(F o) { return lrintf(o); }
+#if 0 // FLEXT_CPU == FLEXT_CPU_PPC && defined(__GNUC__)
+#include <ppc_intrinsics.h>
+template<typename I,typename F> 
+inline I CASTINT( F f )
+{
+    int i;
+    __stfiwx(__fctiwz(f),0,&i);
+    return i;
+}
 #elif FLEXT_CPU == FLEXT_CPU_INTEL && defined(_MSC_VER)
 template<typename I,typename F>
 inline I CASTINT(F x) {

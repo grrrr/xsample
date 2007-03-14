@@ -206,7 +206,7 @@ TMPLDEF void xinter::st_play4(const t_sample *bdt,const int smin,const int smax,
     if(OCHNS == 1) {
         t_sample *sig0 = sig[0];
 	    for(int i = 0; i < n; ++i) {	
-		    float o = *(pos++);
+		    float o = pos[i];
 		    register long oint = CASTINT<long>(o);
 		    register t_sample fa,fb,fc,fd;
 		    const float frac = o-oint;
@@ -289,13 +289,13 @@ looped1:
                 }
 		    }
     		
-		    const float f1 = 0.5f*(frac-1.0f);
+		    const float f1 = frac*0.5f-0.5f;
 		    const float f3 = frac*3.0f-1.0f;
     		
 			const float amdf = (fa-fd)*frac;
 			const float cmb = fc-fb;
 			const float bma = fb-fa;
-			*(sig0++) = fb + frac*( cmb - f1 * ( amdf+bma+cmb*f3 ) );
+			sig0[i] = fb + frac*( cmb - f1 * ( amdf+bma+cmb*f3 ) );
 	    }
     }
     else {

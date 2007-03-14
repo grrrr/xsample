@@ -1,7 +1,7 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2006 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2007 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 */
@@ -361,6 +361,9 @@ void xgroove::s_pos_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
 		    }
         }
         else {
+			///////////////////////////////////
+			// Most of the time is spent in here
+			///////////////////////////////////
 		    for(int i = 0; i < n; ++i) {	
 			    const t_sample spd = speed[i];  // must be first because the vector is reused for output!
 
@@ -756,7 +759,7 @@ bool xgroove::do_xzone()
 void xgroove::m_help()
 {
 	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
-	post("(C) Thomas Grill, 2001-2006");
+	post("(C) Thomas Grill, 2001-2007");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else

@@ -1,7 +1,7 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2006 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2007 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 */
@@ -16,7 +16,7 @@ static void xsample_main()
 	flext::post("xsample objects, version " XSAMPLE_VERSION);
     flext::post("");
 	flext::post("  xrecord~, xplay~, xgroove~   ");
-    flext::post("  (C)2001-2006 Thomas Grill    ");
+    flext::post("  (C)2001-2007 Thomas Grill    ");
 #ifdef FLEXT_DEBUG
     flext::post("");
     flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);
