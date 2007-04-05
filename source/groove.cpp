@@ -322,7 +322,10 @@ void xgroove::s_pos_once(int n,t_sample *const *invecs,t_sample *const *outvecs)
 	else 
 		s_pos_off(n,invecs,outvecs);
 		
-	if(UNLIKELY(lpbang)) ToOutBang(outchns+3);
+    if(UNLIKELY(lpbang)) {
+        doplay = false;
+        ToOutBang(outchns+3);
+    }
 }
 
 void xgroove::s_pos_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
