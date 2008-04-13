@@ -1,9 +1,13 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2007 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2008 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
+
+$LastChangedRevision: 39 $
+$LastChangedDate$
+$LastChangedBy$
 */
 
 #include "main.h"
@@ -336,7 +340,7 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
 			else { 
 				// message mode
 				
-				// Altivec optimization for that!
+				// \TODO Altivec optimization for that!
 				switch(mixmode) {
                     case 0: {
 					    for(int ci = 0; ci < ICHNS; ++ci) {	
@@ -452,7 +456,7 @@ void xrecord::m_help()
 #ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2007");
+	post("(C) Thomas Grill, 2001-2008");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else

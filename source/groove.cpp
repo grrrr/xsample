@@ -1,9 +1,13 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2007 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2008 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
+
+$LastChangedRevision: 39 $
+$LastChangedDate$
+$LastChangedBy$
 */
 
 #ifdef _MSC_VER
@@ -11,15 +15,11 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #endif
 
 #include "main.h"
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
 
 #ifdef _MSC_VER
 #pragma warning (disable:4244)
-#endif
-
-#ifndef M_PI
-#define M_PI 3.141592653589793238462643383
 #endif
 
 #define XZONE_TABLE 512
@@ -762,7 +762,7 @@ bool xgroove::do_xzone()
 void xgroove::m_help()
 {
 	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
-	post("(C) Thomas Grill, 2001-2007");
+	post("(C) Thomas Grill, 2001-2008");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else

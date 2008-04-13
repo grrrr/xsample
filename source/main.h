@@ -1,9 +1,13 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2006 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2008 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
+
+$LastChangedRevision: 39 $
+$LastChangedDate$
+$LastChangedBy$
 */
 
 #ifndef __XSAMPLE_H
@@ -91,7 +95,7 @@ extern "C++" {
 template<typename I,typename F> 
 inline I CASTINT( F f )
 {
-    int i;
+    I i;
     __stfiwx(__fctiwz(f),0,&i);
     return i;
 }
@@ -103,8 +107,7 @@ inline I CASTINT(F x) {
 //    assert (x < static_cast <double> (INT_MAX / 2) + 1.0);
     const float round_towards_m_i = -0.5f;
     I i;
-    __asm
-    {
+    __asm {
         fld x
         fadd st,st
         fabs

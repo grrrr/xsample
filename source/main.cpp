@@ -1,9 +1,13 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2007 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2008 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
+
+$LastChangedRevision: 39 $
+$LastChangedDate$
+$LastChangedBy$
 */
 
 #include "main.h"
@@ -16,7 +20,7 @@ static void xsample_main()
 	flext::post("xsample objects, version " XSAMPLE_VERSION);
     flext::post("");
 	flext::post("  xrecord~, xplay~, xgroove~   ");
-    flext::post("  (C)2001-2007 Thomas Grill    ");
+    flext::post("  (C)2001-2008 Thomas Grill    ");
 #ifdef FLEXT_DEBUG
     flext::post("");
     flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);
@@ -49,14 +53,15 @@ void xsample::setup(t_classid c)
 }
 
 xsample::xsample():
-    update(xsc_all),wrap(false),
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	unitmode(xsu_ms),	   // Max/MSP defaults to milliseconds
 #else
 	unitmode(xsu_sample),  // PD defaults to samples
 #endif
 	sclmode(xss_unitsinbuf),
-	curmin(0),curmax(1L<<(sizeof(curmax)*8-2))
+	curmin(0),curmax(1L<<(sizeof(curmax)*8-2)),
+    wrap(false),
+    update(xsc_all)
 {}
 	
 xsample::~xsample() {}
