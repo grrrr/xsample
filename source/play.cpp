@@ -45,7 +45,12 @@ private:
     FLEXT_CALLSET_E(m_loop,xs_loop)
 };
 
+#ifdef XPLAY_STANDALONE
+FLEXT_NEW_DSP_V("xplay~",xplay)
+#else
 FLEXT_LIB_DSP_V("xplay~",xplay)
+#endif
+
 
 void xplay::setup(t_classid c)
 {

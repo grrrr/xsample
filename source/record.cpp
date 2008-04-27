@@ -17,8 +17,6 @@ $LastChangedBy$
 #pragma warning (disable:4244)
 #endif
 
-extern "C++" {
-
 class xrecord:
 	public xsample
 {
@@ -91,10 +89,11 @@ private:
 	FLEXT_CALLBACK_V(m_draw)
 };
 
-}
-
-
+#ifdef XRECORD_STANDALONE
+FLEXT_NEW_DSP_V("xrecord~",xrecord)
+#else
 FLEXT_LIB_DSP_V("xrecord~",xrecord)
+#endif
 
 
 void xrecord::setup(t_classid c)

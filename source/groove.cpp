@@ -145,9 +145,11 @@ private:
 	FLEXT_CALLSET_F(m_max)
 };
 
-
-FLEXT_LIB_DSP_V("xgroove~",xgroove) 
-
+#ifdef XGROOVE_STANDALONE
+FLEXT_NEW_DSP_V("xgroove~",xgroove)
+#else
+FLEXT_LIB_DSP_V("xgroove~",xgroove)
+#endif
 
 t_sample xgroove::fade_lin[XZONE_TABLE+1];
 t_sample xgroove::fade_qsine[XZONE_TABLE+1];

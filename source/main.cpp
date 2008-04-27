@@ -33,8 +33,10 @@ static void xsample_main()
 	FLEXT_DSP_SETUP(xgroove);
 }
 
+#if !defined(XGROOVE_STANDALONE) && !defined(XRECORD_STANDALONE) && !defined(XPLAY_STANDALONE)
 // setup the library
 FLEXT_LIB_SETUP(xsample,xsample_main)
+#endif
 
 // ------------------------------
 
