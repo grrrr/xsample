@@ -157,6 +157,18 @@ t_sample xgroove::fade_hsine[XZONE_TABLE+1];
 
 void xgroove::setup(t_classid c)
 {
+#ifdef XGROOVE_STANDALONE
+	flext::post("-------------------------------");
+	flext::post("  xgroove~, version " XSAMPLE_VERSION);
+    flext::post("");
+    flext::post("  (C)2001-2008 Thomas Grill    ");
+#ifdef FLEXT_DEBUG
+    flext::post("");
+    flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);
+#endif
+	flext::post("-------------------------------");
+#endif
+
 	DefineHelp(c,"xgroove~");
 
 	FLEXT_CADDMETHOD_(c,0,"all",m_all);

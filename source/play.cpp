@@ -54,6 +54,18 @@ FLEXT_LIB_DSP_V("xplay~",xplay)
 
 void xplay::setup(t_classid c)
 {
+#ifdef XPLAY_STANDALONE
+	flext::post("-------------------------------");
+	flext::post("   xplay~, version " XSAMPLE_VERSION);
+    flext::post("");
+    flext::post("  (C)2001-2008 Thomas Grill    ");
+#ifdef FLEXT_DEBUG
+    flext::post("");
+    flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);
+#endif
+	flext::post("-------------------------------");
+#endif
+
 	DefineHelp(c,"xplay~");
 
 	FLEXT_CADDATTR_VAR_E(c,"loop",loopmode,m_loop);

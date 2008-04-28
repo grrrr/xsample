@@ -98,6 +98,18 @@ FLEXT_LIB_DSP_V("xrecord~",xrecord)
 
 void xrecord::setup(t_classid c)
 {
+#ifdef XRECORD_STANDALONE
+	flext::post("-------------------------------");
+	flext::post("  xrecord~, version " XSAMPLE_VERSION);
+    flext::post("");
+    flext::post("  (C)2001-2008 Thomas Grill    ");
+#ifdef FLEXT_DEBUG
+    flext::post("");
+    flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);
+#endif
+	flext::post("-------------------------------");
+#endif
+
 	DefineHelp(c,"xrecord~");
 
 	FLEXT_CADDBANG(c,0,m_start);
