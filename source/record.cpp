@@ -1,7 +1,7 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2008 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2010 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -102,7 +102,7 @@ void xrecord::setup(t_classid c)
 	flext::post("-------------------------------");
 	flext::post("  xrecord~, version " XSAMPLE_VERSION);
     flext::post("");
-    flext::post("  (C)2001-2008 Thomas Grill    ");
+    flext::post("  (C)2001-2010 Thomas Grill    ");
 #ifdef FLEXT_DEBUG
     flext::post("");
     flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);
@@ -247,7 +247,7 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
 			if(UNLIKELY(ncur > n)) ncur = n;
 			
 			register int i;
-			register t_sample *bf = buf.Data()+o*BCHNS;
+			register Element *bf = buf.Data()+o*BCHNS;
 			register float p = scale(o);
 
 			if(sigmode) {
@@ -355,7 +355,7 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
 				switch(mixmode) {
                     case 0: {
 					    for(int ci = 0; ci < ICHNS; ++ci) {	
-						    register t_sample *b = bf+ci;
+						    register Element *b = bf+ci;
 						    register const float *s = sig[ci]+si;
 						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) 
                                 *b = *s;	
@@ -374,7 +374,7 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
                     }
                     case 2: {
 					    for(int ci = 0; ci < ICHNS; ++ci) {	
-						    register t_sample *b = bf+ci;
+						    register Element *b = bf+ci;
 						    register const float *s = sig[ci]+si;
 						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) 
                                 *b += *s;	

@@ -1,7 +1,7 @@
 /* 
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2008 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2010 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -13,13 +13,13 @@ $LastChangedBy$
 #ifndef __INTER_H
 #define __INTER_H
 
-TMPLDEF void xinter::st_play0(const t_sample *,const int ,const int ,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
+TMPLDEF void xinter::st_play0(const Element *,const int ,const int ,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
 {
 	// stopped/invalid buffer -> output zero
 	for(int ci = 0; ci < outchns; ++ci) ZeroSamples(outvecs[ci],n);
 }
 
-TMPLDEF void xinter::st_play1(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
+TMPLDEF void xinter::st_play1(const Element *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
 {
 	SIGCHNS(BCHNS,inchns,OCHNS,outchns);
 
@@ -62,7 +62,7 @@ TMPLDEF void xinter::st_play1(const t_sample *bdt,const int smin,const int smax,
     else {
 	    for(int i = 0,si = 0; i < n; ++i,++si) {	
 		    register long oint = CASTINT<long>(*(pos++));
-		    register const t_sample *fp;
+		    register const Element *fp;
 
             // for xplay oint can be out of bounds -> check
 		    if(LIKELY(oint >= smin))
@@ -88,7 +88,7 @@ TMPLDEF void xinter::st_play1(const t_sample *bdt,const int smin,const int smax,
     }
 }
 
-TMPLDEF void xinter::st_play2(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
+TMPLDEF void xinter::st_play2(const Element *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
 {
 	const int plen = smax-smin;
 	if(UNLIKELY(plen < 2)) {
@@ -126,7 +126,7 @@ TMPLDEF void xinter::st_play2(const t_sample *bdt,const int smin,const int smax,
                     if(looped) {
         				oint = smin+(oint-smin)%plen;
                         fp0 = bdt[oint*BCHNS];
-                        fp1 = oint >= maxo?bdt[smin]:fp0;
+                        fp1 = oint >= maxo?t_sample(bdt[smin]):fp0;
                     }
                     else
     	                fp0 = fp1 = bdt[maxo*BCHNS]; 
@@ -136,7 +136,7 @@ TMPLDEF void xinter::st_play2(const t_sample *bdt,const int smin,const int smax,
                 if(looped) {
         			oint = smax-(smin-oint)%plen;
                     fp0 = bdt[oint*BCHNS]; 
-                    fp1 = oint >= maxo?bdt[smin]:fp0;
+                    fp1 = oint >= maxo?t_sample(bdt[smin]):fp0;
                 }
                 else
 		            fp0 = fp1 = bdt[smin*BCHNS]; 
@@ -149,7 +149,7 @@ TMPLDEF void xinter::st_play2(const t_sample *bdt,const int smin,const int smax,
 	    for(int i = 0,si = 0; i < n; ++i,++si) {	
 		    const float o = *(pos++);
 		    register long oint = CASTINT<long>(o);
-			const t_sample *fp0,*fp1;
+			const Element *fp0,*fp1;
 			const float frac = o-oint;
 
 		    if(LIKELY(oint >= smin))
@@ -188,7 +188,7 @@ TMPLDEF void xinter::st_play2(const t_sample *bdt,const int smin,const int smax,
     }
 }
 
-TMPLDEF void xinter::st_play4(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
+TMPLDEF void xinter::st_play4(const Element *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
 {
 	const int plen = smax-smin; //curlen;
 	if(UNLIKELY(plen < 4)) {
@@ -214,7 +214,7 @@ TMPLDEF void xinter::st_play4(const t_sample *bdt,const int smin,const int smax,
 		    register long oint = CASTINT<long>(o);
 		    register t_sample fa,fb,fc,fd;
 		    const float frac = o-oint;
-            register const t_sample *ptr = bdt+oint*BCHNS;
+            register const Element *ptr = bdt+oint*BCHNS;
 
             if(LIKELY(oint > smin)) {
 			    if(LIKELY(oint < maxo-2)) {
@@ -307,8 +307,8 @@ looped1:
 		    float o = *(pos++);
 		    register long oint = CASTINT<long>(o);
 		    const float frac = o-oint;
-            register const t_sample *ptr = bdt+oint*BCHNS;
-		    register const t_sample *fa,*fb,*fc,*fd;
+            register const Element *ptr = bdt+oint*BCHNS;
+		    register const Element *fa,*fb,*fc,*fd;
 
 		    if(LIKELY(oint > smin))
 			    if(LIKELY(oint < maxo-2)) {

@@ -1,7 +1,7 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2008 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2010 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -122,6 +122,7 @@ inline I CASTINT(F x) {
 template<typename I,typename F> inline I CASTINT(F o) { return static_cast<I>(o); }
 #endif
 
+typedef flext::buffer::Element Element;
 
 class xsample:
 	public flext_dsp
@@ -316,7 +317,7 @@ protected:
 	TMPLDEF static void st_##NAME(thisType *obj,int n,t_sample *const *in,t_sample *const *out)  { obj->NAME TMPLCALL (n,in,out); } \
 	TMPLDEF void NAME(int n,t_sample *const *in,t_sample *const *out)
 
-	#define TMPLSTFUN(NAME) TMPLDEF static void NAME(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs)
+	#define TMPLSTFUN(NAME) TMPLDEF static void NAME(const Element *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
 
@@ -327,7 +328,7 @@ protected:
 	void (*v_##NAME)(thisType *obj,int n,t_sample *const *in,t_sample *const *out) 
 
 	#define DEFSTCALL(NAME) \
-	void (*NAME)(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs)
+	void (*NAME)(const Element *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs)
 
 #else
 	#ifdef TMPLOPT
@@ -346,7 +347,7 @@ protected:
 
 	#define DEFSIGFUN(NAME)	void NAME(int n,t_sample *const *in,t_sample *const *out)
 	#define TMPLSIGFUN(NAME) TMPLDEF void NAME(int n,t_sample *const *in,t_sample *const *out)
-	#define TMPLSTFUN(NAME) TMPLDEF static void NAME(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
+	#define TMPLSTFUN(NAME) TMPLDEF static void NAME(const Element *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
 
 	#define SETSIGFUN(VAR,FUN) v_##VAR = FUN
 
@@ -357,7 +358,7 @@ protected:
 	#define SETSTFUN(VAR,FUN) VAR = FUN
 
 	#define DEFSTCALL(NAME) \
-	void (*NAME)(const t_sample *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
+	void (*NAME)(const Element *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
 #endif
 
 

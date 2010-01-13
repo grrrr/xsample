@@ -1,7 +1,7 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2008 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2010 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -82,7 +82,8 @@ protected:
 	xs_fade xfade;
 	int xshape;
 	t_sample **znbuf;
-	t_sample *znpos,*znmul,*znidx;
+	t_sample *znpos,*znidx;
+	Element *znmul;
 	int pblksz;
 
 	inline void setpos(double pos)
@@ -123,7 +124,7 @@ private:
 	DEFSIGCALL(posfun);
 	DEFSTCALL(zonefun);
 
-	static t_sample fade_lin[],fade_qsine[],fade_hsine[];
+	static Element fade_lin[],fade_qsine[],fade_hsine[];
 
 	FLEXT_CALLBACK_F(m_pos)
 	FLEXT_CALLBACK_F(m_posmod)
@@ -151,9 +152,9 @@ FLEXT_NEW_DSP_V("xgroove~",xgroove)
 FLEXT_LIB_DSP_V("xgroove~",xgroove)
 #endif
 
-t_sample xgroove::fade_lin[XZONE_TABLE+1];
-t_sample xgroove::fade_qsine[XZONE_TABLE+1];
-t_sample xgroove::fade_hsine[XZONE_TABLE+1];
+Element xgroove::fade_lin[XZONE_TABLE+1];
+Element xgroove::fade_qsine[XZONE_TABLE+1];
+Element xgroove::fade_hsine[XZONE_TABLE+1];
 
 void xgroove::setup(t_classid c)
 {
@@ -161,7 +162,7 @@ void xgroove::setup(t_classid c)
 	flext::post("-------------------------------");
 	flext::post("  xgroove~, version " XSAMPLE_VERSION);
     flext::post("");
-    flext::post("  (C)2001-2008 Thomas Grill    ");
+    flext::post("  (C)2001-2010 Thomas Grill    ");
 #ifdef FLEXT_DEBUG
     flext::post("");
     flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);
