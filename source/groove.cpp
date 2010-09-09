@@ -777,7 +777,7 @@ bool xgroove::do_xzone()
 void xgroove::m_help()
 {
 	post("%s - part of xsample objects, version " XSAMPLE_VERSION,thisName());
-	post("(C) Thomas Grill, 2001-2008");
+	post("(C) Thomas Grill, 2001-2010");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else

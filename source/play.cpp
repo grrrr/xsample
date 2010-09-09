@@ -58,7 +58,7 @@ void xplay::setup(t_classid c)
 	flext::post("-------------------------------");
 	flext::post("   xplay~, version " XSAMPLE_VERSION);
     flext::post("");
-    flext::post("  (C)2001-2008 Thomas Grill    ");
+    flext::post("  (C)2001-2010 Thomas Grill    ");
 #ifdef FLEXT_DEBUG
     flext::post("");
     flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);

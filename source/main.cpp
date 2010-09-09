@@ -20,7 +20,7 @@ static void xsample_main()
 	flext::post("xsample objects, version " XSAMPLE_VERSION);
     flext::post("");
 	flext::post("  xrecord~, xplay~, xgroove~   ");
-    flext::post("  (C)2001-2008 Thomas Grill    ");
+    flext::post("  (C)2001-2010 Thomas Grill    ");
 #ifdef FLEXT_DEBUG
     flext::post("");
     flext::post("DEBUG BUILD - " __DATE__ " " __TIME__);

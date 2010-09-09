@@ -77,7 +77,7 @@
 		E9974DFB0770750400206F68 /* MaxAudioAPI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MaxAudioAPI.framework; path = /Library/Frameworks/MaxAudioAPI.framework; sourceTree = "<absolute>"; };
 		E9974E2B07707D1400206F68 /* prefix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = prefix.h; path = source/prefix.h; sourceTree = "<group>"; };
 		E9974E53077083C700206F68 /* xsample.mxo */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = xsample.mxo; sourceTree = BUILT_PRODUCTS_DIR; };
-		E9974E58077084DA00206F68 /* xsample-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = "xsample-Info.plist"; path = "source/xsample-Info.plist"; sourceTree = "<group>"; };
+		E9974E58077084DA00206F68 /* xsample-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; name = "xsample-Info.plist"; path = "source/xsample-Info.plist"; sourceTree = "<group>"; };
 		E9974EAF07708BF700206F68 /* xsample.rsrc */ = {isa = PBXFileReference; lastKnownFileType = archive.rsrc; name = xsample.rsrc; path = source/xsample.rsrc; sourceTree = "<group>"; };
 		E9974EC307708CED00206F68 /* xsample-objectmappings.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "xsample-objectmappings.txt"; path = "maxmsp/xsample-objectmappings.txt"; sourceTree = "<group>"; };
 		E9F6F21D0DC4DB5400244EE5 /* xgroove~.mxo */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "xgroove~.mxo"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -369,6 +369,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_EXTENSION = pd_darwin;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = source/prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -383,7 +384,6 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_STYLE = BUNDLE;
 				MACH_O_TYPE = mh_dylib;
-				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_LDFLAGS = (
 					"-lflext-pd_sd",
 					"-undefined",
@@ -401,6 +401,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_EXTENSION = pd_darwin;
+				GCC_AUTO_VECTORIZATION = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = source/prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -456,6 +457,7 @@
 				ARCHS = "$(inherited)";
 				COPY_PHASE_STRIP = NO;
 				DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = source/prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -472,7 +474,6 @@
 				INSTALL_PATH = "/Library/Application Support/Cycling 74/externals/flext";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_STYLE = DYNAMIC;
-				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_LDFLAGS = "-lflext-max_sd";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = xsample;
@@ -559,8 +560,8 @@
 					_DEBUG,
 					FLEXT_USESIMD,
 				);
-				HEADER_SEARCH_PATHS = "$(flext)/source";
-				LIBRARY_SEARCH_PATHS = "$(flext)/build";
+				HEADER_SEARCH_PATHS = /usr/local/include/flext;
+				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 			};
@@ -582,8 +583,8 @@
 					FLEXT_USESIMD,
 				);
 				GCC_STRICT_ALIASING = YES;
-				HEADER_SEARCH_PATHS = "$(flext)/source";
-				LIBRARY_SEARCH_PATHS = "$(flext)/build";
+				HEADER_SEARCH_PATHS = /usr/local/include/flext;
+				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 			};
@@ -603,6 +604,7 @@
 				ARCHS = "$(inherited)";
 				COPY_PHASE_STRIP = NO;
 				DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = source/prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -620,7 +622,6 @@
 				INSTALL_PATH = "/Library/Application Support/Cycling 74/externals/flext";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_STYLE = DYNAMIC;
-				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_LDFLAGS = "-lflext-max_sd";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = "xgroove~";
@@ -705,6 +706,7 @@
 				ARCHS = "$(inherited)";
 				COPY_PHASE_STRIP = NO;
 				DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = source/prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -722,7 +724,6 @@
 				INSTALL_PATH = "/Library/Application Support/Cycling 74/externals/flext";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_STYLE = DYNAMIC;
-				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_LDFLAGS = "-lflext-max_sd";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = "xrecord~";

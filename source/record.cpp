@@ -467,7 +467,7 @@ void xrecord::m_help()
 #ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2008");
+	post("(C) Thomas Grill, 2001-2010");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
