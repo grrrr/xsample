@@ -398,21 +398,23 @@
 			buildSettings = {
 				ARCHS = "$(inherited)";
 				COPY_PHASE_STRIP = YES;
+				DEPLOYMENT_LOCATION = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				DSTROOT = /;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_EXTENSION = pd_darwin;
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = source/prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FLEXT_SYS=2",
 				);
 				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PD)/src",
+					"/Applications/Pd-0.40-2.app/Contents/Resources/src",
+					/usr/local/include/flext,
 				);
-				INSTALL_PATH = "$(PD)/extra";
+				INSTALL_PATH = /Applications/pdext;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_STYLE = BUNDLE;
 				MACH_O_TYPE = mh_dylib;
@@ -471,7 +473,7 @@
 					"$(maxsdk)/msp-includes",
 				);
 				INFOPLIST_FILE = "source/xsample-Info.plist";
-				INSTALL_PATH = "/Library/Application Support/Cycling 74/externals/flext";
+				INSTALL_PATH = "/Library/Application\\ Support/Cycling\\ '74/externals/flext";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_LDFLAGS = "-lflext-max_sd";
@@ -490,8 +492,9 @@
 		E9A5BC900A33819900AD9F03 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(inherited)";
-				COPY_PHASE_STRIP = YES;
+				ARCHS = "$(NATIVE_ARCH)";
+				COPY_PHASE_STRIP = NO;
+				DEPLOYMENT_LOCATION = NO;
 				FLEXT_SYS = "1 NDEBUG FLEXT_USESIMD";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -500,6 +503,7 @@
 					"$(inherited)",
 					"FLEXT_SYS=1",
 				);
+				GCC_VERSION = 4.2;
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -507,7 +511,7 @@
 					"$(maxsdk)/msp-includes",
 				);
 				INFOPLIST_FILE = "source/xsample-Info.plist";
-				INSTALL_PATH = "/Library/Application Support/Cycling 74/externals/flext";
+				INSTALL_PATH = "/Library/Application Support/Cycling '74/externals/flext";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_LDFLAGS = "-lflext-max_s";
@@ -575,17 +579,23 @@
 					ppc,
 				);
 				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_AUTO_VECTORIZATION = YES;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_FAST_MATH = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = source/prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NDEBUG,
 					FLEXT_USESIMD,
 				);
 				GCC_STRICT_ALIASING = YES;
+				GCC_UNROLL_LOOPS = YES;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				HEADER_SEARCH_PATHS = /usr/local/include/flext;
-				LIBRARY_SEARCH_PATHS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
+				INSTALL_PATH = /Applications/pdext;
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 			};
 			name = Deployment;

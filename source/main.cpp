@@ -79,7 +79,8 @@ bool xsample::Finalize()
 
 int xsample::ChkBuffer(bool refresh) 
 {      
-    if(!buf.Ok()) return 0;
+    if(!buf.Symbol() || !buf.Valid())
+        return 0;
     
     if(UNLIKELY(buf.Update())) {
 #ifdef FLEXT_DEBUG
@@ -88,13 +89,13 @@ int xsample::ChkBuffer(bool refresh)
         Update(xsc_buffer);
         if(refresh) { 
             Refresh();
-            return buf.Ok() && buf.Valid()?1:0;
+            return buf.Ok()?1:0;
         }
         else 
-            return buf.Valid()?1:0;
+            return 1;
     }
     else
-        return buf.Valid()?-1:0;
+        return -1;
 }
 
 /* called after all buffer objects have been created in the patch */
