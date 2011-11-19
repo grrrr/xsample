@@ -11,7 +11,7 @@ $LastChangedBy$
 */
 
 #include "main.h"
-#include <stdio.h>
+#include <cstdio>
 
 #ifdef _MSC_VER
 #pragma warning (disable:4244)

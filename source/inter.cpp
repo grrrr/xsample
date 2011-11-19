@@ -11,7 +11,7 @@ $LastChangedBy$
 */
 
 #include "main.h"
-#include <math.h>
+#include <cmath>
 
 #ifdef _MSC_VER
 #pragma warning (disable:4244)
