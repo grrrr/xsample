@@ -356,7 +356,7 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
                     case 0: {
 					    for(int ci = 0; ci < ICHNS; ++ci) {	
 						    register Element *b = bf+ci;
-						    register const float *s = sig[ci]+si;
+						    register const t_sample *s = sig[ci]+si;
 						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) 
                                 *b = *s;	
 					    }
@@ -375,7 +375,7 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
                     case 2: {
 					    for(int ci = 0; ci < ICHNS; ++ci) {	
 						    register Element *b = bf+ci;
-						    register const float *s = sig[ci]+si;
+						    register const t_sample *s = sig[ci]+si;
 						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) 
                                 *b += *s;	
 					    }
