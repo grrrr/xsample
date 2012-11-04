@@ -245,7 +245,7 @@ TMPLDEF void xinter::st_play4(const Element *bdt,const int smin,const int smax,c
                                 fb = fc = fd;
                             else {
                                 fb = ptr[0];
-                                fc = oint+1 < maxo?ptr[BCHNS]:fd;
+                                fc = oint+1 < maxo?static_cast<t_sample>(ptr[BCHNS]):fd;
                             }
                         }
                     }
@@ -287,7 +287,7 @@ looped1:
                             fb = fc = fa;
                         else {
                             fc = ptr[BCHNS];
-                            fb = oint < smin?fa:ptr[0];
+                            fb = oint < smin?fa:static_cast<t_sample>(ptr[0]);
                         }
                     }
                 }
