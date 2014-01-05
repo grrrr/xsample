@@ -1,7 +1,7 @@
 /*
 xsample - extended sample objects for Max/MSP and pd (pure data)
 
-Copyright (c) 2001-2011 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2014 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -54,6 +54,8 @@ protected:
 	bool dorec,doloop;
     int mixmode;
 	long curpos;  // in samples
+
+	virtual bool CbMethodResort(int inlet,const t_symbol *s,int argc,const t_atom *argv);
 
     virtual void DoReset();
     virtual void DoUpdate(unsigned int flags);
@@ -170,9 +172,6 @@ xrecord::xrecord(int argc,const t_atom *argv):
 	AddOutFloat("Starting point (rounded to frame)"); // min 
 	AddOutFloat("Ending point (rounded to frame)"); // max
 	AddOutBang("Bang on loop end/rollover");  // loop bang
-
-	FLEXT_ADDMETHOD(inchns+1,m_min);
-	FLEXT_ADDMETHOD(inchns+2,m_max);
 }
 
 void xrecord::m_start() 
@@ -192,6 +191,19 @@ void xrecord::m_stop()
     dorec = false; 
     Update(xsc_startstop);
     Refresh();
+}
+
+bool xrecord::CbMethodResort(int inlet,const t_symbol *s,int argc,const t_atom *argv)
+{
+    if(inlet == inchns+1 && s == sym_float && argc == 1) {
+        m_min(GetAFloat(argv[0]));
+        return true;
+    }
+    else if(inlet == inchns+2 && s == sym_float && argc == 1) {
+        m_max(GetAFloat(argv[0]));
+        return true;
+    }
+    return false;
 }
 
 void xrecord::DoReset()
@@ -467,7 +479,7 @@ void xrecord::m_help()
 #ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2011");
+	post("(C) Thomas Grill, 2001-2014");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else
