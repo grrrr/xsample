@@ -77,6 +77,14 @@ extern "C++" {
     #include <Carbon/Carbon.h>
     #endif
 
+   #ifdef __powerpc__
+   #if __LP64__
+      typedef unsigned int UInt32;
+   #else
+      typedef unsigned long UInt32;
+   #endif
+   #endif
+
 	// Initialize a prefetch constant for use with vec_dst(), vec_dstt(), vec_dstst or vec_dststt
 	// Taken from the "AltiVec tutorial" by Ian Ollmann, Ph.D. 
 	inline UInt32 GetPrefetchConstant( int blockSizeInVectors,int blockCount,int blockStride )
