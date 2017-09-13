@@ -22,6 +22,10 @@ $LastChangedBy$
 #pragma warning (disable:4244)
 #endif
 
+#ifdef __powerpc__
+#include <altivec.h>
+#endif
+
 #define XZONE_TABLE 512
 
 
