@@ -1,13 +1,9 @@
 /*
-xsample - extended sample objects for Max/MSP and pd (pure data)
+xsample - extended sample objects for Max and Pure data
 
-Copyright (c) 2001-2014 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2020 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
-
-$LastChangedRevision: 39 $
-$LastChangedDate$
-$LastChangedBy$
 */
 
 #include "main.h"
@@ -479,7 +475,7 @@ void xrecord::m_help()
 #ifdef FLEXT_DEBUG
 	post("compiled on " __DATE__ " " __TIME__);
 #endif
-	post("(C) Thomas Grill, 2001-2014");
+	post("(C) Thomas Grill, 2001-2020");
 #if FLEXT_SYS == FLEXT_SYS_MAX
 	post("Arguments: %s [channels=1] [buffer]",thisName());
 #else

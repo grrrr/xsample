@@ -1,13 +1,9 @@
 /*
-xsample - extended sample objects for Max/MSP and pd (pure data)
+xsample - extended sample objects for Max and Pure data
 
-Copyright (c) 2001-2011 Thomas Grill (gr@grrrr.org)
+Copyright (c) 2001-2020 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
-
-$LastChangedRevision: 39 $
-$LastChangedDate$
-$LastChangedBy$
 */
 
 #ifndef __XSAMPLE_H
@@ -19,7 +15,7 @@ $LastChangedBy$
 #error You need at least flext version 0.5.0
 #endif
 
-#define XSAMPLE_VERSION "0.3.2pre"
+#define XSAMPLE_VERSION "0.3.2"
 
 extern "C++" {
 

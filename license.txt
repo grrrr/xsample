@@ -1,5 +1,5 @@
-xsample - extended sample objects for Max/MSP and pd (pure data)
-Copyright (C) 2001-2005 Thomas Grill
+xsample - extended sample objects for Max and Pure data
+Copyright (C) 2001-2020 Thomas Grill
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License

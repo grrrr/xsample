@@ -313,7 +313,7 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0620;
+				LastUpgradeCheck = 0820;
 			};
 			buildConfigurationList = E9A5BC920A33819900AD9F03 /* Build configuration list for PBXProject "xsample" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -419,7 +419,6 @@
 		E907FC2B1ACB4BBA003B821A /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_X86_VECTOR_INSTRUCTIONS = default;
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = "";
@@ -452,7 +451,6 @@
 		E907FC2C1ACB4BBA003B821A /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_X86_VECTOR_INSTRUCTIONS = default;
 				DEPLOYMENT_LOCATION = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
@@ -484,7 +482,6 @@
 		E907FC2D1ACB4BBA003B821A /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_X86_VECTOR_INSTRUCTIONS = default;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -622,6 +619,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_LDFLAGS = "-lflext-max_sd";
 				OTHER_REZFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = org.grrrr.xsample;
 				PRODUCT_NAME = xsample;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -647,7 +645,7 @@
 					"$(inherited)",
 					"FLEXT_SYS=1",
 				);
-				GCC_VERSION = 4.2;
+				GCC_VERSION = "";
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -660,6 +658,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_LDFLAGS = "-lflext-max_s";
 				OTHER_REZFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = org.grrrr.xsample;
 				PRODUCT_NAME = xsample;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -688,6 +687,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = "";
 				OTHER_REZFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = org.grrrr.xsample;
 				PRODUCT_NAME = xsample;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = (
@@ -702,19 +702,38 @@
 		E9A5BC930A33819900AD9F03 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_FAST_MATH = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					_DEBUG,
 					FLEXT_USE_SIMD,
 				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(flext)/source",
 				);
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 			};
 			name = Development;
@@ -722,10 +741,21 @@
 		E9A5BC940A33819900AD9F03 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_FAST_MATH = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = source/prefix.h;
@@ -736,6 +766,12 @@
 				GCC_STRICT_ALIASING = YES;
 				GCC_UNROLL_LOOPS = YES;
 				GCC_VERSION = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(flext)/source",
@@ -749,7 +785,24 @@
 		E9A5BC950A33819900AD9F03 /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_FAST_MATH = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "$(flext)/source";
 				LIBRARY_SEARCH_PATHS = "$(flext)/build";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
@@ -782,6 +835,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_LDFLAGS = "-lflext-max_sd";
 				OTHER_REZFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.grrrr.xgroove~";
 				PRODUCT_NAME = "xgroove~";
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -819,6 +873,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_LDFLAGS = "-lflext-max_s";
 				OTHER_REZFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.grrrr.xgroove~";
 				PRODUCT_NAME = "xgroove~";
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -847,6 +902,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = "";
 				OTHER_REZFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.grrrr.xgroove~";
 				PRODUCT_NAME = "xgroove~";
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = (
@@ -884,6 +940,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_LDFLAGS = "-lflext-max_sd";
 				OTHER_REZFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.grrrr.xrecord~";
 				PRODUCT_NAME = "xrecord~";
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -921,6 +978,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_LDFLAGS = "-lflext-max_s";
 				OTHER_REZFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.grrrr.xrecord~";
 				PRODUCT_NAME = "xrecord~";
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -949,6 +1007,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = "";
 				OTHER_REZFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.grrrr.xrecord~";
 				PRODUCT_NAME = "xrecord~";
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = (
