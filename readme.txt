@@ -54,8 +54,8 @@ Download and unzip, or git-clone the package.
 Pure data - any platform supporting gcc-compatible compilers
 ------------------------------------------------------------
 
-The pd-lib-builder project (https://github.com/pure-data/pd-lib-builder) is used to compile xsample.
-A git subtree of this project is already present in the xsample folder.
+The pd-lib-builder project (https://github.com/pure-data/pd-lib-builder) is used to compile the project.
+A git subtree of this project is already present.
 
 The compilation is done using the GNU make tool and it will need additional information about the location of the flext source files, and possibly, Pure data, if a specific version should be used.
 
@@ -64,7 +64,6 @@ make CPPFLAGS="-I ../flext/source" PDDIR="../../pure-data"
 
 For OS X, further flags can be needed:
 CFLAGS="-mmacosx-version-min=10.9" LDFLAGS="-mmacosx-version-min=10.9"
-
 
 
 pd/Max - Windows - Microsoft Visual C, Borland C++, MinGW:
