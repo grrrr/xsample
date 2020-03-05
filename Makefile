@@ -1,5 +1,5 @@
 NAME=xsample
-cflags=-I /usr/local/include/flext -DFLEXT_INLINE -DFLEXT_ATTRIBUTES=1
+cflags=-DFLEXT_INLINE -DFLEXT_ATTRIBUTES=1
 
 # source files
 $(NAME).class.sources = $(wildcard source/*.cpp)
