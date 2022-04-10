@@ -223,13 +223,13 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
 	SIGCHNS(BCHNS,buf.Channels(),ICHNS,inchns);
 
 	const t_sample *const *sig = invecs;
-	register int si = 0;
+	int si = 0;
 	const t_sample *on = invecs[inchns];
 	t_sample *pos = outvecs[0];
 
 	bool lpbang = false;
-	register const float pf = sclmul;
-	register long o = curpos;
+	const float pf = sclmul;
+	long o = curpos;
 	
 	if(o < curmin) o = curmin;
 
@@ -254,9 +254,9 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
 
 			if(UNLIKELY(ncur > n)) ncur = n;
 			
-			register int i;
-			register Element *bf = buf.Data()+o*BCHNS;
-			register float p = scale(o);
+			int i;
+			Element *bf = buf.Data()+o*BCHNS;
+			float p = scale(o);
 
 			if(sigmode) {
 				if(appmode) {
@@ -277,7 +277,7 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
                         break;
                     case 1:
 						for(i = 0; i < ncur; ++i,++si) {	
-							register const t_sample g = *(on++);
+							const t_sample g = *(on++);
 							if(!(g < 0)) {
 								for(int ci = 0; ci < ICHNS; ++ci)
 									bf[ci] = bf[ci]*(1.-g)+sig[ci][si]*g;
@@ -323,7 +323,7 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
                         }
                         case 1: {
 						    for(i = 0; i < ncur; ++i,++si) {	
-							    register const t_sample g = *(on++);
+							    const t_sample g = *(on++);
 							    if(!(g < 0)) {
 								    for(int ci = 0; ci < ICHNS; ++ci)
 									    bf[ci] = bf[ci]*(1.-g)+sig[ci][si]*g;
@@ -363,8 +363,8 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
 				switch(mixmode) {
                     case 0: {
 					    for(int ci = 0; ci < ICHNS; ++ci) {	
-						    register Element *b = bf+ci;
-						    register const t_sample *s = sig[ci]+si;
+						    Element *b = bf+ci;
+						    const t_sample *s = sig[ci]+si;
 						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) 
                                 *b = *s;	
 					    }
@@ -373,7 +373,7 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
                     }
                     case 1: {
 					    for(i = 0; i < ncur; ++i,++si) {	
-						    register const t_sample w = *(on++);
+						    const t_sample w = *(on++);
 						    for(int ci = 0; ci < ICHNS; ++ci)
 							    bf[ci] = bf[ci]*(1.-w)+sig[ci][si]*w;
 						    bf += BCHNS;
@@ -382,8 +382,8 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
                     }
                     case 2: {
 					    for(int ci = 0; ci < ICHNS; ++ci) {	
-						    register Element *b = bf+ci;
-						    register const t_sample *s = sig[ci]+si;
+						    Element *b = bf+ci;
+						    const t_sample *s = sig[ci]+si;
 						    for(i = 0; i < ncur; ++i,b += BCHNS,++s) 
                                 *b += *s;	
 					    }
@@ -405,7 +405,7 @@ TMPLDEF void xrecord::s_rec(int n,t_sample *const *invecs,t_sample *const *outve
 	}
 
 	if(n) {
-		register float p = scale(o);
+		float p = scale(o);
 		while(n--) *(pos++) = p;
 	}
 	

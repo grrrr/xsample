@@ -37,7 +37,7 @@ TMPLDEF void xinter::st_play1(const Element *bdt,const int smin,const int smax,c
     else if(OCHNS == 1) {
         t_sample *sig0 = sig[0];
 	    for(int i = 0; i < n; ++i) {	
-		    register long oint = CASTINT<long>(*(pos++));
+		    long oint = CASTINT<long>(*(pos++));
 
             // for xplay oint can be out of bounds -> check
 		    if(LIKELY(oint >= smin))
@@ -57,8 +57,8 @@ TMPLDEF void xinter::st_play1(const Element *bdt,const int smin,const int smax,c
     }
     else {
 	    for(int i = 0,si = 0; i < n; ++i,++si) {	
-		    register long oint = CASTINT<long>(*(pos++));
-		    register const Element *fp;
+		    long oint = CASTINT<long>(*(pos++));
+		    const Element *fp;
 
             // for xplay oint can be out of bounds -> check
 		    if(LIKELY(oint >= smin))
@@ -107,7 +107,7 @@ TMPLDEF void xinter::st_play2(const Element *bdt,const int smin,const int smax,c
         t_sample *sig0 = sig[0];
 	    for(int i = 0; i < n; ++i) {	
 		    const float o = *(pos++);
-		    register long oint = CASTINT<long>(o);
+		    long oint = CASTINT<long>(o);
 			const float frac = o-oint;
 			t_sample fp0,fp1;
 
@@ -144,7 +144,7 @@ TMPLDEF void xinter::st_play2(const Element *bdt,const int smin,const int smax,c
     else {
 	    for(int i = 0,si = 0; i < n; ++i,++si) {	
 		    const float o = *(pos++);
-		    register long oint = CASTINT<long>(o);
+		    long oint = CASTINT<long>(o);
 			const Element *fp0,*fp1;
 			const float frac = o-oint;
 
@@ -207,10 +207,10 @@ TMPLDEF void xinter::st_play4(const Element *bdt,const int smin,const int smax,c
         t_sample *sig0 = sig[0];
 	    for(int i = 0; i < n; ++i) {	
 		    float o = pos[i];
-		    register long oint = CASTINT<long>(o);
-		    register t_sample fa,fb,fc,fd;
+		    long oint = CASTINT<long>(o);
+		    t_sample fa,fb,fc,fd;
 		    const float frac = o-oint;
-            register const Element *ptr = bdt+oint*BCHNS;
+            const Element *ptr = bdt+oint*BCHNS;
 
             if(LIKELY(oint > smin)) {
 			    if(LIKELY(oint < maxo-2)) {
@@ -301,10 +301,10 @@ looped1:
     else {
 	    for(int i = 0,si = 0; i < n; ++i,++si) {	
 		    float o = *(pos++);
-		    register long oint = CASTINT<long>(o);
+		    long oint = CASTINT<long>(o);
 		    const float frac = o-oint;
-            register const Element *ptr = bdt+oint*BCHNS;
-		    register const Element *fa,*fb,*fc,*fd;
+            const Element *ptr = bdt+oint*BCHNS;
+		    const Element *fa,*fb,*fc,*fd;
 
 		    if(LIKELY(oint > smin))
 			    if(LIKELY(oint < maxo-2)) {

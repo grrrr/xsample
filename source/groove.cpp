@@ -316,7 +316,7 @@ void xgroove::s_pos_once(int n,t_sample *const *invecs,t_sample *const *outvecs)
 	const double smin = curmin,smax = curmax,plen = smax-smin;
 
 	if(LIKELY(plen > 0)) {
-		register double o = curpos;
+		double o = curpos;
 
 		for(int i = 0; i < n; ++i) {	
 			const t_sample spd = speed[i];  // must be first because the vector is reused for output!
@@ -357,7 +357,7 @@ void xgroove::s_pos_loop(int n,t_sample *const *invecs,t_sample *const *outvecs)
 	const double smin = curmin,smax = curmax,plen = smax-smin;
 
 	if(LIKELY(plen > 0)) {
-		register double o = curpos;
+		double o = curpos;
 
         if(wrap && UNLIKELY(smin < 0) && UNLIKELY(smax >= buf.Frames())) {
 		    for(int i = 0; i < n; ++i) {	
@@ -437,7 +437,7 @@ void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvec
 
 	if(LIKELY(plen > 0)) {
 		bool inzn = false;
-		register double o = curpos;
+		double o = curpos;
 
 		// calculate inner cross-fade boundaries
 		const double lmin = smin+xz,lmax = smax-xz,lsh = lmax-lmin+xz;
@@ -455,7 +455,7 @@ void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvec
 			}
 
 			if(UNLIKELY(o < lmin)) {
-				register float inp;
+				float inp;
 				if(o < lmin2) {
 					// in first half of early cross-fade zone
 					// this happens only once, then the offset is normalized to the end
@@ -478,7 +478,7 @@ void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvec
 				inzn = true;
 			}
 			else if(UNLIKELY(!(o < lmax))) {
-				register float inp;
+				float inp;
 				if(!(o < lmax2)) {
 					// in second half of late cross-fade zone
 					// this happens only once, then the offset is normalized to the beginning
@@ -553,8 +553,8 @@ void xgroove::s_pos_bidir(int n,t_sample *const *invecs,t_sample *const *outvecs
 	const int smin = curmin,smax = curmax,plen = smax-smin;
 
 	if(LIKELY(plen > 0)) {
-		register double o = curpos;
-		register float bd = bidir;
+		double o = curpos;
+		float bd = bidir;
 
 		for(int i = 0; i < n; ++i) {	
 			const t_sample spd = speed[i];  // must be first because the vector is reused for output!
