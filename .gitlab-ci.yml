@@ -1,14 +1,22 @@
-make_files:
+make_linux:
   stage: build
   script:
     - make CPPFLAGS="-D FLEXT_INLINE -I $HOME/flext/source"
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/*.pd_*
+    expire_in: 1h
+
+make_w64:
+  stage: build
+  script:
     - make CPPFLAGS="-D FLEXT_INLINE -I $HOME/flext/source" PLATFORM=x86_64-w64-mingw32 PDDIR=$HOME/pd-0.52-2-win64
   artifacts:
     paths:
-      - $CI_PROJECT_DIR/*
+      - $CI_PROJECT_DIR/*.dll
     expire_in: 1h
 
 deploy_files:
   stage: deploy
   script:
-    - echo $CI_PROJECT_DIR/*
+    - echo $CI_PROJECT_DIR/*.pd_* $CI_PROJECT_DIR/*.dll
