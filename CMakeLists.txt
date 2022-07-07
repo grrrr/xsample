@@ -2,12 +2,14 @@
 # depends on max-sdk-base to be present
 #
 # mkdir build && cd build
-# cmake .. -Wno-dev
+# cmake .. -Wno-dev FLEXT_DIR=../flext
 # make
 
 cmake_minimum_required(VERSION 3.0)
 
+if (APPLE)
 set(CMAKE_OSX_ARCHITECTURES x86_64 arm64)
+endif ()
 
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 
@@ -22,7 +24,7 @@ include_directories(
 	"${C74_MAX_API_DIR}/c74support/max-includes"
 	"${C74_MAX_API_DIR}/c74support/msp-includes"
 	"${C74_MAX_API_DIR}/c74support/jit-includes"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../flext/source"
+	"${FLEXT_DIR}/source"
 )
 
 add_definitions(
