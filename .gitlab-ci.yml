@@ -1,25 +1,90 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
-make_linux:
+make_pd_linux_x86_64:
   stage: build
   script:
-    - make CPPFLAGS="-D FLEXT_INLINE -I $HOME/flext/source"
+    - make CPPFLAGS="-I $HOME/flext/source" PDDIR=$HOME/pure-data/
   artifacts:
     paths:
-      - $CI_PROJECT_DIR/*.pd_*
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_linux
     expire_in: 1h
 
-make_w64:
+make_pd_linux_rpi3:
   stage: build
   script:
-    - make CPPFLAGS="-D FLEXT_INLINE -I $HOME/flext/source" PLATFORM=x86_64-w64-mingw32 PDDIR=$HOME/pd-0.52-2-win64
+    - make CPPFLAGS="-I $HOME/flext/source" PLATFORM=arm-linux-gnueabihf PDDIR=$HOME/pure-data/
+    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_linux $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_arm7
   artifacts:
     paths:
-      - $CI_PROJECT_DIR/*.dll
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_arm7
     expire_in: 1h
 
-deploy_files:
+make_pd_linux_rpi4_64:
+  stage: build
+  script:
+    - make CPPFLAGS="-I $HOME/flext/source" PLATFORM=aarch64-linux-gnu PDDIR=$HOME/pure-data/
+    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_darwin $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_aarch64
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_aarch64
+    expire_in: 1h
+
+make_pd_win64:
+  stage: build
+  script:
+    - make CPPFLAGS="-I $HOME/flext/source" PLATFORM=x86_64-w64-mingw32 PDDIR=$HOME/pd-win64
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll
+    expire_in: 1h
+
+make_pd_osx:
+  stage: build
+  script:
+    - make CPPFLAGS="-I $HOME/flext/source" CXX=o64-clang++ CC=o64-clang PDDIR=$HOME/pure-data/ CFLAGS="-arch x86_64 -arch arm64" LDFLAGS="-arch x86_64 -arch arm64"
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_darwin
+    expire_in: 1h
+
+make_max_win64:
+  stage: build
+  script:
+    - mkdir build && cd build
+    - cmake .. -Wno-dev -DFLEXT_DIR=$HOME/flext -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_SYSTEM_NAME="Windows"
+    - make
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxe*
+    expire_in: 1h
+
+make_max_osx:
+  stage: build
+  script:
+    - mkdir build && cd build
+    - cmake .. -Wno-dev -DFLEXT_DIR=$HOME/flext -DCMAKE_CXX_COMPILER=o64-clang++ -DCMAKE_C_COMPILER=o64-clang -DCMAKE_SYSTEM_NAME="Darwin"
+    - make
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxo
+    expire_in: 1h
+
+deploy_pd_deken:
   stage: deploy
+  dependencies:
+    - make_pd_linux
+    - make_pd_win64
+    - make_pd_osx
+    - make_pd_rpi3
+    - make_pd_rpi4_64
   script:
-    - echo $CI_PROJECT_DIR/*.pd_* $CI_PROJECT_DIR/*.dll
+    - ls -la $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll
+
+deploy_max_package:
+  stage: deploy
+  dependencies:
+    - make_max_win64
+    - make_max_osx
+  script:
+    - ls -la $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxe* $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxo

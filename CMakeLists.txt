@@ -20,26 +20,26 @@ set(C74_MAX_API_DIR ${CMAKE_CURRENT_SOURCE_DIR}/max-sdk-base)
 
 include(${C74_MAX_API_DIR}/script/max-pretarget.cmake)
 
-include_directories( 
-	"${C74_MAX_API_DIR}/c74support/max-includes"
-	"${C74_MAX_API_DIR}/c74support/msp-includes"
-	"${C74_MAX_API_DIR}/c74support/jit-includes"
-	"${FLEXT_DIR}/source"
+include_directories(
+        "${C74_MAX_API_DIR}/c74support/max-includes"
+        "${C74_MAX_API_DIR}/c74support/msp-includes"
+        "${C74_MAX_API_DIR}/c74support/jit-includes"
+        "${FLEXT_DIR}/source"
 )
 
 add_definitions(
-	-DFLEXT_INLINE=1
-	-DFLEXT_ATTRIBUTES=1
-	-DFLEXT_SYS=1
-	-DMSP64=1
+        -DFLEXT_INLINE=1
+        -DFLEXT_ATTRIBUTES=1
+        -DFLEXT_SYS=1
+        -DMSP64=1
 )
 
 set( SOURCE_FILES ${SOURCES} )
 
-add_library( 
-	${PROJECT_NAME} 
-	MODULE
-	${SOURCE_FILES}
+add_library(
+        ${PROJECT_NAME}
+        MODULE
+        ${SOURCE_FILES}
 )
 
 include(${C74_MAX_API_DIR}/script/max-posttarget.cmake)
