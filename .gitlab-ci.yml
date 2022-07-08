@@ -13,21 +13,19 @@ make_pd_linux_x86_64:
 make_pd_linux_rpi3:
   stage: build
   script:
-    - make CPPFLAGS="-I $HOME/flext/source" PLATFORM=arm-linux-gnueabihf PDDIR=$HOME/pure-data/
-    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_linux $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_arm7
+    - make CPPFLAGS="-I $HOME/flext/source" PLATFORM=arm-linux-gnueabihf PDDIR=$HOME/pure-data/ extension=l_arm
   artifacts:
     paths:
-      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_arm7
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_arm
     expire_in: 1h
 
 make_pd_linux_rpi4_64:
   stage: build
   script:
-    - make CPPFLAGS="-I $HOME/flext/source" PLATFORM=aarch64-linux-gnu PDDIR=$HOME/pure-data/
-    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_darwin $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_aarch64
+    - make CPPFLAGS="-I $HOME/flext/source" PLATFORM=aarch64-linux-gnu PDDIR=$HOME/pure-data/ extension=l_aarch64
   artifacts:
     paths:
-      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_aarch64
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_aarch64
     expire_in: 1h
 
 make_pd_win64:
@@ -42,7 +40,7 @@ make_pd_win64:
 make_pd_osx:
   stage: build
   script:
-    - make CPPFLAGS="-I $HOME/flext/source" CXX=o64-clang++ CC=o64-clang PDDIR=$HOME/pure-data/ CFLAGS="-arch x86_64 -arch arm64" LDFLAGS="-arch x86_64 -arch arm64"
+    - make CPPFLAGS="-I $HOME/flext/source" CXX=o64-clang++ CC=o64-clang PDDIR=$HOME/pure-data/ CFLAGS="-arch x86_64 -arch x86_64h -arch arm64" LDFLAGS="-arch x86_64 -arch x86_64h -arch arm64"
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_darwin
@@ -63,7 +61,7 @@ make_max_osx:
   stage: build
   script:
     - mkdir build && cd build
-    - cmake .. -Wno-dev -DFLEXT_DIR=$HOME/flext -DCMAKE_CXX_COMPILER=o64-clang++ -DCMAKE_C_COMPILER=o64-clang -DCMAKE_SYSTEM_NAME="Darwin"
+    - cmake .. -Wno-dev -DFLEXT_DIR=$HOME/flext -DCMAKE_CXX_COMPILER=o64-clang++ -DCMAKE_C_COMPILER=o64-clang -DCMAKE_SYSTEM_NAME="Darwin"  CFLAGS="-arch x86_64 -arch x86_64h -arch arm64" LDFLAGS="-arch x86_64 -arch x86_64h -arch arm64"
     - make
   artifacts:
     paths:
@@ -73,7 +71,7 @@ make_max_osx:
 deploy_pd_deken:
   stage: deploy
   dependencies:
-    - make_pd_linux
+    - make_pd_linux_x86_64
     - make_pd_win64
     - make_pd_osx
     - make_pd_rpi3
