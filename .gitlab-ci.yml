@@ -74,10 +74,10 @@ deploy_pd_deken:
     - make_pd_linux_x86_64
     - make_pd_win64
     - make_pd_osx
-    - make_pd_rpi3
-    - make_pd_rpi4_64
+    - make_pd_linux_rpi3
+    - make_pd_linux_rpi4_64
   script:
-    - ls -la $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll
+    - ls -la $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll
 
 deploy_max_package:
   stage: deploy
