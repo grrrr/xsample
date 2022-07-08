@@ -7,10 +7,6 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-if (APPLE)
-set(CMAKE_OSX_ARCHITECTURES x86_64 arm64)
-endif ()
-
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 
 # output to current folder
