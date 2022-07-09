@@ -1,3 +1,8 @@
+stages:
+  - build
+  - package
+  - deploy
+
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
@@ -114,7 +119,7 @@ make_max_osx:
     expire_in: 1h
 
 make_pd_f32_deken:
-  stage: build
+  stage: package
   dependencies:
     - make_pd_linux_x86_64_f32
     - make_pd_win64_f32
@@ -131,7 +136,7 @@ make_pd_f32_deken:
     expire_in: 1h
 
 make_pd_f64_deken:
-  stage: build
+  stage: package
   dependencies:
     - make_pd_linux_x86_64_f64
     - make_pd_win64_f64
@@ -148,7 +153,7 @@ make_pd_f64_deken:
     expire_in: 1h
 
 make_max_package:
-  stage: build
+  stage: package
   dependencies:
     - make_max_win64
     - make_max_osx
