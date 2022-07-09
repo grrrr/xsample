@@ -113,8 +113,8 @@ make_max_osx:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxo
     expire_in: 1h
 
-deploy_pd_f32_deken:
-  stage: deploy
+make_pd_f32_deken:
+  stage: build
   dependencies:
     - make_pd_linux_x86_64_f32
     - make_pd_win64_f32
@@ -125,10 +125,13 @@ deploy_pd_f32_deken:
     - mkdir -p build/$CI_PROJECT_NAME
     - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll build/$CI_PROJECT_NAME
     - deken package build/$CI_PROJECT_NAME --version `cat version.txt`
-    - ls -la *.dek
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.dek*
+    expire_in: 1h
 
-deploy_pd_f64_deken:
-  stage: deploy
+make_pd_f64_deken:
+  stage: build
   dependencies:
     - make_pd_linux_x86_64_f64
     - make_pd_win64_f64
@@ -139,24 +142,34 @@ deploy_pd_f64_deken:
     - mkdir -p build/$CI_PROJECT_NAME
     - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll build/$CI_PROJECT_NAME
     - deken package build/$CI_PROJECT_NAME --version `cat version.txt`
-    - ls -la *.dek
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME.dek*
+    expire_in: 1h
 
-deploy_max_package:
-  stage: deploy
+make_max_package:
+  stage: build
   dependencies:
     - make_max_win64
     - make_max_osx
+  variables:
+    - PACKAGE_NAME: $CI_PROJECT_DIR/$CI_PROJECT_NAME-`cat $CI_PROJECT_DIR/version.txt`.zip
   script:
     - for d in externals help init; do mkdir -p build/$CI_PROJECT_NAME/$d; done
     - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxe* $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxo build/$CI_PROJECT_NAME/externals
     - cp readme.txt build/$CI_PROJECT_NAME
     - cp maxmsp/*-objectmappings.txt build/$CI_PROJECT_NAME/init
     - cp maxmsp/*.help build/$CI_PROJECT_NAME/help
+    - cd build && zip -r9 $PACKAGE_NAME $CI_PROJECT_NAME
+  artifacts:
+    paths:
+      - $PACKAGE_NAME
+    expire_in: 1h
     
 deploy_github:
     stage: deploy
     script:
-        - git remote add github https://$GITHUB_ACCESS_TOKEN@github.com/$GITHUB_USERNAME/CI_PROJECT_NAME.git
+        - git remote add github https://$GITHUB_ACCESS_TOKEN@github.com/$GITHUB_USERNAME/$CI_PROJECT_NAME.git
         # we need some extra treatment because the gitlab-runner doesn't check out the full history
         - git push github HEAD:master --tags
         
