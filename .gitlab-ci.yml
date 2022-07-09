@@ -111,7 +111,7 @@ make_max_osx:
   stage: build
   script:
     - mkdir -p build && cd build
-    - cmake .. -Wno-dev -DFLEXT_DIR=$HOME/flext -DCMAKE_CXX_COMPILER=o64-clang++ -DCMAKE_C_COMPILER=o64-clang -DCMAKE_SYSTEM_NAME="Darwin"   -DCMAKE_C_FLAGS="-arch x86_64 -arch x86_64h -arch arm64" -DCMAKE_SHARED_LINKER_FLAGS="-arch x86_64 -arch x86_64h -arch arm64"
+    - cmake .. -Wno-dev -DFLEXT_DIR=$HOME/flext -DCMAKE_CXX_COMPILER=o64-clang++ -DCMAKE_C_COMPILER=o64-clang -DCMAKE_SYSTEM_NAME="Darwin"   -DCMAKE_CXX_FLAGS="-arch x86_64 -arch x86_64h -arch arm64 -Wno-deprecated-declarations" -DCMAKE_SHARED_LINKER_FLAGS="-arch x86_64 -arch x86_64h -arch arm64"
     - make
   artifacts:
     paths:
@@ -128,6 +128,7 @@ package_pd_f32_deken:
     - make_pd_linux_rpi4_64_f32
   script:
     - mkdir -p build/$CI_PROJECT_NAME
+    - cp readme.txt license.txt $CI_PROJECT_DIR/$CI_PROJECT_NAME/pd/*.pd build/$CI_PROJECT_NAME || true
     - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll build/$CI_PROJECT_NAME
     - deken package build/$CI_PROJECT_NAME --version `cat version.txt`
   artifacts:
@@ -145,6 +146,7 @@ package_pd_f64_deken:
     - make_pd_linux_rpi4_64_f64
   script:
     - mkdir -p build/$CI_PROJECT_NAME
+    - cp readme.txt license.txt $CI_PROJECT_DIR/$CI_PROJECT_NAME/pd/*.pd build/$CI_PROJECT_NAME || true
     - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll build/$CI_PROJECT_NAME
     - deken package build/$CI_PROJECT_NAME --version `cat version.txt`
   artifacts:
