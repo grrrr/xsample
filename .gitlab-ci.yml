@@ -132,7 +132,7 @@ make_pd_f32_deken:
     - deken package build/$CI_PROJECT_NAME --version `cat version.txt`
   artifacts:
     paths:
-      - "$CI_PROJECT_DIR/$CI_PROJECT_NAME"*.dek*
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek*
     expire_in: 1h
 
 make_pd_f64_deken:
@@ -149,7 +149,7 @@ make_pd_f64_deken:
     - deken package build/$CI_PROJECT_NAME --version `cat version.txt`
   artifacts:
     paths:
-      - "$CI_PROJECT_DIR/$CI_PROJECT_NAME"*.dek*
+      - $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek*
     expire_in: 1h
 
 make_max_package:
