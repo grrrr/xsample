@@ -118,7 +118,7 @@ make_max_osx:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxo
     expire_in: 1h
 
-make_pd_f32_deken:
+package_pd_f32_deken:
   stage: package
   dependencies:
     - make_pd_linux_x86_64_f32
@@ -133,9 +133,9 @@ make_pd_f32_deken:
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek*
-    expire_in: 1h
+    expire_in: 24h
 
-make_pd_f64_deken:
+package_pd_f64_deken:
   stage: package
   dependencies:
     - make_pd_linux_x86_64_f64
@@ -150,9 +150,9 @@ make_pd_f64_deken:
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek*
-    expire_in: 1h
+    expire_in: 24h
 
-make_max_package:
+package_max:
   stage: package
   dependencies:
     - make_max_win64
@@ -160,19 +160,36 @@ make_max_package:
   script:
     - for d in externals help init; do mkdir -p build/$CI_PROJECT_NAME/$d; done
     - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxe* $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxo build/$CI_PROJECT_NAME/externals
-    - cp readme.txt build/$CI_PROJECT_NAME
-    - cp maxmsp/*-objectmappings.txt build/$CI_PROJECT_NAME/init
-    - cp maxmsp/*.help build/$CI_PROJECT_NAME/help
+    - cp readme.txt license.txt build/$CI_PROJECT_NAME
+    - cp maxmsp/*-objectmappings.txt build/$CI_PROJECT_NAME/init || true
+    - cp maxmsp/*.{max,}help build/$CI_PROJECT_NAME/help || true
     - cd build && zip -r9 "$CI_PROJECT_DIR/$CI_PROJECT_NAME-`cat $CI_PROJECT_DIR/version.txt`.zip" $CI_PROJECT_NAME
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME-*.zip
-    expire_in: 1h
+    expire_in: 24h
     
-deploy_github:
+push_github:
     stage: deploy
     script:
         - git remote add github https://$GITHUB_ACCESS_TOKEN@github.com/$GITHUB_USERNAME/$CI_PROJECT_NAME.git || true
         # we need some extra treatment because the gitlab-runner doesn't check out the full history
         - git push github HEAD:master --tags
+
+upload_deken:
+    stage: deploy
+    dependencies:
+        - package_pd_f32_deken
+        - package_pd_f64_deken
+    script:
+        - deken upload --no-source-error $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek
+
+upload_owncloud:
+    stage: deploy
+    dependencies:
+        - package_pd_f32_deken
+        - package_pd_f64_deken
+        - package_max
+    script:
+        - oc-upload.sh pdmax-packages $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek* $CI_PROJECT_DIR/$CI_PROJECT_NAME-*.zip
 
