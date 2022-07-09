@@ -9,7 +9,7 @@ variables:
 make_pd_linux_x86_64_f32:
   stage: build
   script:
-    - make CPPFLAGS="-I $HOME/flext/source" PDDIR=$HOME/pure-data/
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PDDIR=$HOME/pure-data/
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_linux
@@ -18,7 +18,7 @@ make_pd_linux_x86_64_f32:
 make_pd_linux_x86_64_f64:
   stage: build
   script:
-    - make CPPFLAGS="-I $HOME/flext/source -DPD_FLOATSIZE=64" PDDIR=$HOME/pure-data/
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PDDIR=$HOME/pure-data/
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_linux
@@ -27,7 +27,7 @@ make_pd_linux_x86_64_f64:
 make_pd_linux_rpi3_f32:
   stage: build
   script:
-    - make CPPFLAGS="-I $HOME/flext/source" PLATFORM=arm-linux-gnueabihf PDDIR=$HOME/pure-data/ extension=l_arm
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PLATFORM=arm-linux-gnueabihf PDDIR=$HOME/pure-data/ extension=l_arm
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_arm
@@ -36,7 +36,7 @@ make_pd_linux_rpi3_f32:
 make_pd_linux_rpi3_f64:
   stage: build
   script:
-    - make CPPFLAGS="-I $HOME/flext/source -DPD_FLOATSIZE=64" PLATFORM=arm-linux-gnueabihf PDDIR=$HOME/pure-data/ extension=l_arm
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PLATFORM=arm-linux-gnueabihf PDDIR=$HOME/pure-data/ extension=l_arm
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_arm
@@ -45,7 +45,7 @@ make_pd_linux_rpi3_f64:
 make_pd_linux_rpi4_64_f32:
   stage: build
   script:
-    - make CPPFLAGS="-I $HOME/flext/source" PLATFORM=aarch64-linux-gnu PDDIR=$HOME/pure-data/ extension=l_aarch64
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PLATFORM=aarch64-linux-gnu PDDIR=$HOME/pure-data/ extension=l_aarch64
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_aarch64
@@ -54,7 +54,7 @@ make_pd_linux_rpi4_64_f32:
 make_pd_linux_rpi4_64_f64:
   stage: build
   script:
-    - make CPPFLAGS="-I $HOME/flext/source -DPD_FLOATSIZE=64" PLATFORM=aarch64-linux-gnu PDDIR=$HOME/pure-data/ extension=l_aarch64
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PLATFORM=aarch64-linux-gnu PDDIR=$HOME/pure-data/ extension=l_aarch64
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_aarch64
@@ -63,7 +63,7 @@ make_pd_linux_rpi4_64_f64:
 make_pd_win64_f32:
   stage: build
   script:
-    - make CPPFLAGS="-I $HOME/flext/source" PLATFORM=x86_64-w64-mingw32 PDDIR=$HOME/pd-win64
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PLATFORM=x86_64-w64-mingw32 PDDIR=$HOME/pd-win64
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll
@@ -72,7 +72,7 @@ make_pd_win64_f32:
 make_pd_win64_f64:
   stage: build
   script:
-    - make CPPFLAGS="-I $HOME/flext/source -DPD_FLOATSIZE=64" PLATFORM=x86_64-w64-mingw32 PDDIR=$HOME/pd-win64
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PLATFORM=x86_64-w64-mingw32 PDDIR=$HOME/pd-win64
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll
@@ -81,7 +81,7 @@ make_pd_win64_f64:
 make_pd_osx_f32:
   stage: build
   script:
-    - make CXX=o64-clang++ CC=o64-clang PDDIR="$HOME/pure-data/" CPPFLAGS="-I $HOME/flext/source -arch x86_64 -arch x86_64h -arch arm64" LDFLAGS="-arch x86_64 -arch x86_64h -arch arm64"
+    - make CXX=o64-clang++ CC=o64-clang PDDIR="$HOME/pure-data/" CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -arch x86_64 -arch x86_64h -arch arm64" LDFLAGS="-arch x86_64 -arch x86_64h -arch arm64"
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_darwin
@@ -90,7 +90,7 @@ make_pd_osx_f32:
 make_pd_osx_f64:
   stage: build
   script:
-    - make CXX=o64-clang++ CC=o64-clang PDDIR="$HOME/pure-data/" CPPFLAGS="-I $HOME/flext/source -DPD_FLOATSIZE=64 -arch x86_64 -arch x86_64h -arch arm64" LDFLAGS="-arch x86_64 -arch x86_64h -arch arm64"
+    - make CXX=o64-clang++ CC=o64-clang PDDIR="$HOME/pure-data/" CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64 -arch x86_64 -arch x86_64h -arch arm64" LDFLAGS="-arch x86_64 -arch x86_64h -arch arm64"
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_darwin
@@ -100,7 +100,7 @@ make_max_win64:
   stage: build
   script:
     - mkdir -p build && cd build
-    - cmake .. -Wno-dev -DFLEXT_DIR=$HOME/flext -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_SYSTEM_NAME="Windows"
+    - cmake .. -Wno-dev -DFLEXT_DIR=$CI_PROJECT_DIR/flext -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_SYSTEM_NAME="Windows" -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations"
     - make
   artifacts:
     paths:
@@ -111,7 +111,7 @@ make_max_osx:
   stage: build
   script:
     - mkdir -p build && cd build
-    - cmake .. -Wno-dev -DFLEXT_DIR=$HOME/flext -DCMAKE_CXX_COMPILER=o64-clang++ -DCMAKE_C_COMPILER=o64-clang -DCMAKE_SYSTEM_NAME="Darwin"   -DCMAKE_CXX_FLAGS="-arch x86_64 -arch x86_64h -arch arm64 -Wno-deprecated-declarations" -DCMAKE_SHARED_LINKER_FLAGS="-arch x86_64 -arch x86_64h -arch arm64"
+    - cmake .. -Wno-dev -DFLEXT_DIR=$CI_PROJECT_DIR/flext -DCMAKE_CXX_COMPILER=o64-clang++ -DCMAKE_C_COMPILER=o64-clang -DCMAKE_SYSTEM_NAME="Darwin"   -DCMAKE_CXX_FLAGS="-arch x86_64 -arch x86_64h -arch arm64 -Wno-deprecated-declarations" -DCMAKE_SHARED_LINKER_FLAGS="-arch x86_64 -arch x86_64h -arch arm64"
     - make
   artifacts:
     paths:
@@ -128,7 +128,7 @@ package_pd_f32_deken:
     - make_pd_linux_rpi4_64_f32
   script:
     - mkdir -p build/$CI_PROJECT_NAME
-    - cp readme.txt license.txt $CI_PROJECT_DIR/$CI_PROJECT_NAME/pd/*.pd build/$CI_PROJECT_NAME || true
+    - cp readme.txt license.txt $CI_PROJECT_DIR/pd/*.pd build/$CI_PROJECT_NAME || true
     - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll build/$CI_PROJECT_NAME
     - deken package build/$CI_PROJECT_NAME --version `cat version.txt`
   artifacts:
@@ -146,7 +146,7 @@ package_pd_f64_deken:
     - make_pd_linux_rpi4_64_f64
   script:
     - mkdir -p build/$CI_PROJECT_NAME
-    - cp readme.txt license.txt $CI_PROJECT_DIR/$CI_PROJECT_NAME/pd/*.pd build/$CI_PROJECT_NAME || true
+    - cp readme.txt license.txt $CI_PROJECT_DIR/pd/*.pd build/$CI_PROJECT_NAME || true
     - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll build/$CI_PROJECT_NAME
     - deken package build/$CI_PROJECT_NAME --version `cat version.txt`
   artifacts:
