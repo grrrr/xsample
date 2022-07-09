@@ -153,7 +153,7 @@ make_max_package:
     - make_max_win64
     - make_max_osx
   variables:
-    - PACKAGE_NAME: $CI_PROJECT_DIR/$CI_PROJECT_NAME-`cat $CI_PROJECT_DIR/version.txt`.zip
+    PACKAGE_NAME: "$CI_PROJECT_DIR/$CI_PROJECT_NAME-`cat $CI_PROJECT_DIR/version.txt`.zip"
   script:
     - for d in externals help init; do mkdir -p build/$CI_PROJECT_NAME/$d; done
     - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxe* $CI_PROJECT_DIR/$CI_PROJECT_NAME.mxo build/$CI_PROJECT_NAME/externals
