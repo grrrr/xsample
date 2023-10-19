@@ -235,7 +235,7 @@ xgroove::xgroove(int argc,const t_atom *argv):
 	AddInFloat("Starting point"); // min play pos
 	AddInFloat("Ending point"); // max play pos
 	for(int ci = 0; ci < outchns; ++ci) {
-		char tmp[30];
+		char tmp[32];
 		STD::sprintf(tmp,"Audio signal channel %i",ci+1); 
 		AddOutSignal(tmp); // output
 	}
