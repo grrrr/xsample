@@ -172,26 +172,30 @@ package_max:
     expire_in: 24h
     
 push_github:
-    stage: deploy
-    script:
-        - git remote add github https://$GITHUB_ACCESS_TOKEN@github.com/$GITHUB_USERNAME/$CI_PROJECT_NAME.git || true
-        # we need some extra treatment because the gitlab-runner doesn't check out the full history
-        - git push github HEAD:master --tags
+  stage: deploy
+  script:
+      - git remote add github https://$GITHUB_ACCESS_TOKEN@github.com/$GITHUB_USERNAME/$CI_PROJECT_NAME.git || true
+      # we need some extra treatment because the gitlab-runner doesn't check out the full history
+      - git push github HEAD:master --tags
 
 upload_deken:
-    stage: deploy
-    dependencies:
-        - package_pd_f32_deken
-        - package_pd_f64_deken
-    script:
-        - deken upload --no-source-error $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek
+  only:
+    - tags
+  except:
+    - branches
+  stage: deploy
+  dependencies:
+      - package_pd_f32_deken
+      - package_pd_f64_deken
+  script:
+      - deken upload --no-source-error $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek
 
 upload_owncloud:
-    stage: deploy
-    dependencies:
-        - package_pd_f32_deken
-        - package_pd_f64_deken
-        - package_max
-    script:
-        - oc-upload.sh pdmax-packages $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek* $CI_PROJECT_DIR/$CI_PROJECT_NAME-*.zip
+  stage: deploy
+  dependencies:
+      - package_pd_f32_deken
+      - package_pd_f64_deken
+      - package_max
+  script:
+      - oc-upload.sh pdmax-packages $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek* $CI_PROJECT_DIR/$CI_PROJECT_NAME-*.zip
 
