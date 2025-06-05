@@ -12,6 +12,19 @@ variables:
     - docker
     - default
   image: $CI_REGISTRY/docker/pd_max
+  variables:
+    PDINCLUDEDIR: "/usr/include/pd"
+
+.makewin:
+  extends: .make
+  variables:
+    PDDIR: "/Pd"
+    PDINCLUDEDIR: "$PDDIR/src"
+    PDWIN: "https://msp.ucsd.edu/Software/pd-0.55-2.msw.zip"
+  before_script:
+    - curl -k -O "$PDWIN"
+    - fn="${PDWIN##*/}"; unzip "$fn"; mv "${fn%%.msw*}" $PDDIR
+    - ls $PDDIR/
 
 .package:
   stage: package
@@ -23,7 +36,7 @@ variables:
 make_pd_linux_x86_64_f32:
   extends: .make
   script:
-    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PDDIR=$HOME/pure-data/
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source"
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_linux
@@ -32,61 +45,62 @@ make_pd_linux_x86_64_f32:
 make_pd_linux_x86_64_f64:
   extends: .make
   script:
-    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PDDIR=$HOME/pure-data/
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64"
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_linux
     expire_in: 1h
 
-make_pd_linux_rpi3_f32:
+make_pd_linux_armhf_f32:
   extends: .make
   script:
-    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PLATFORM=arm-linux-gnueabihf PDDIR=$HOME/pure-data/ extension=l_arm
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PLATFORM=arm-linux-gnueabihf extension=l_arm
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_arm
     expire_in: 1h
 
-make_pd_linux_rpi3_f64:
+make_pd_linux_armhf_f64:
   extends: .make
   script:
-    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PLATFORM=arm-linux-gnueabihf PDDIR=$HOME/pure-data/ extension=l_arm
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PLATFORM=arm-linux-gnueabihf extension=l_arm
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_arm
     expire_in: 1h
 
-make_pd_linux_rpi4_64_f32:
+make_pd_linux_arm64_f32:
   extends: .make
   script:
-    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PLATFORM=aarch64-linux-gnu PDDIR=$HOME/pure-data/ extension=l_aarch64
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PLATFORM=aarch64-linux-gnu extension=l_aarch64
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_aarch64
     expire_in: 1h
 
-make_pd_linux_rpi4_64_f64:
+make_pd_linux_arm64_f64:
   extends: .make
   script:
-    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PLATFORM=aarch64-linux-gnu PDDIR=$HOME/pure-data/ extension=l_aarch64
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PLATFORM=aarch64-linux-gnu extension=l_aarch64
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_aarch64
     expire_in: 1h
 
 make_pd_win64_f32:
-  extends: .make
+  extends: .makewin
   script:
-    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PLATFORM=x86_64-w64-mingw32 PDDIR=$HOME/pd-win64
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PLATFORM=x86_64-w64-mingw32
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll
     expire_in: 1h
 
 make_pd_win64_f64:
-  extends: .make
+  extends: .makewin
+  allow_failure: true
   script:
-    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PLATFORM=x86_64-w64-mingw32 PDDIR=$HOME/pd-win64
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PLATFORM=x86_64-w64-mingw32
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll
@@ -95,7 +109,7 @@ make_pd_win64_f64:
 make_pd_osx_f32:
   extends: .make
   script:
-    - make CXX=o64-clang++ CC=o64-clang PDDIR="$HOME/pure-data/" CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -arch x86_64 -arch x86_64h -arch arm64" LDFLAGS="-arch x86_64 -arch x86_64h -arch arm64"
+    - make CXX=o64-clang++ CC=o64-clang CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -arch x86_64 -arch x86_64h -arch arm64" LDFLAGS="-arch x86_64 -arch x86_64h -arch arm64"
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_darwin
@@ -104,7 +118,7 @@ make_pd_osx_f32:
 make_pd_osx_f64:
   extends: .make
   script:
-    - make CXX=o64-clang++ CC=o64-clang PDDIR="$HOME/pure-data/" CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64 -arch x86_64 -arch x86_64h -arch arm64" LDFLAGS="-arch x86_64 -arch x86_64h -arch arm64"
+    - make CXX=o64-clang++ CC=o64-clang CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64 -arch x86_64 -arch x86_64h -arch arm64" LDFLAGS="-arch x86_64 -arch x86_64h -arch arm64"
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_darwin
@@ -138,8 +152,8 @@ package_pd_f32_deken:
     - make_pd_linux_x86_64_f32
     - make_pd_win64_f32
     - make_pd_osx_f32
-    - make_pd_linux_rpi3_f32
-    - make_pd_linux_rpi4_64_f32
+    - make_pd_linux_armhf_f32
+    - make_pd_linux_arm64_f32
   script:
     - mkdir -p build/$CI_PROJECT_NAME
     - cp readme.txt license.txt $CI_PROJECT_DIR/pd/*.pd build/$CI_PROJECT_NAME || true
@@ -158,8 +172,8 @@ package_pd_f64_deken:
     - make_pd_linux_x86_64_f64
     - make_pd_win64_f64
     - make_pd_osx_f64
-    - make_pd_linux_rpi3_f64
-    - make_pd_linux_rpi4_64_f64
+    - make_pd_linux_armhf_f64
+    - make_pd_linux_arm64_f64
   script:
     - mkdir -p build/$CI_PROJECT_NAME
     - cp readme.txt license.txt $CI_PROJECT_DIR/pd/*.pd build/$CI_PROJECT_NAME || true
@@ -219,6 +233,6 @@ upload_owncloud:
       - package_max
   image: $CI_REGISTRY/docker/nc_transfer
   script:
-    - upload "$OC_FILES/$OC_USER/Documents/pdmax_packages/" "$OC_USER" "$OC_PW" "$CI_PROJECT_DIR"/*.pdf "$CI_PROJECT_DIR"/*.docx $CI_PROJECT_DIR/*.txt
+    - upload "$NC_FILES/$NC_USER/Documents/pdmax_packages/" "$NC_USER" "$NC_PW" "$CI_PROJECT_DIR"/*.zip "$CI_PROJECT_DIR"/*.dek
 
 
