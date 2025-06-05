@@ -143,7 +143,9 @@ package_pd_f32_deken:
   script:
     - mkdir -p build/$CI_PROJECT_NAME
     - cp readme.txt license.txt $CI_PROJECT_DIR/pd/*.pd build/$CI_PROJECT_NAME || true
-    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll build/$CI_PROJECT_NAME
+    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* build/$CI_PROJECT_NAME || true
+    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_* build/$CI_PROJECT_NAME || true
+    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll build/$CI_PROJECT_NAME || true
     - deken package build/$CI_PROJECT_NAME --version `cat version.txt`
   artifacts:
     paths:
@@ -161,7 +163,9 @@ package_pd_f64_deken:
   script:
     - mkdir -p build/$CI_PROJECT_NAME
     - cp readme.txt license.txt $CI_PROJECT_DIR/pd/*.pd build/$CI_PROJECT_NAME || true
-    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_* $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll build/$CI_PROJECT_NAME
+    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_* build/$CI_PROJECT_NAME || true
+    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.l_* build/$CI_PROJECT_NAME || true
+    - mv $CI_PROJECT_DIR/$CI_PROJECT_NAME.dll build/$CI_PROJECT_NAME || true
     - deken package build/$CI_PROJECT_NAME --version `cat version.txt`
   artifacts:
     paths:
