@@ -205,11 +205,12 @@ package_max:
     
 push_github:
   stage: deploy
-  tags:
-    - docker
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
   image: $CI_REGISTRY/docker/push_github
+  tags:
+    - docker
+    - default
   script:
     - echo "Pushing to github"
 
@@ -232,6 +233,9 @@ upload_owncloud:
       - package_pd_f64_deken
       - package_max
   image: $CI_REGISTRY/docker/nc_transfer
+  tags:
+    - docker
+    - default
   script:
     - upload "$NC_FILES/$NC_USER/Documents/pdmax_packages/" "$NC_USER" "$NC_PW" "$CI_PROJECT_DIR"/*.zip "$CI_PROJECT_DIR"/*.dek
 
