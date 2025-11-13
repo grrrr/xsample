@@ -36,7 +36,7 @@ variables:
 make_pd_linux_x86_64_f32:
   extends: .make
   script:
-    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source"
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source" PLATFORM=x86_64-linux-gnu
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_linux
@@ -45,7 +45,7 @@ make_pd_linux_x86_64_f32:
 make_pd_linux_x86_64_f64:
   extends: .make
   script:
-    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64"
+    - make CPPFLAGS="-I $CI_PROJECT_DIR/flext/source -DPD_FLOATSIZE=64" PLATFORM=x86_64-linux-gnu
   artifacts:
     paths:
       - $CI_PROJECT_DIR/$CI_PROJECT_NAME.pd_linux
