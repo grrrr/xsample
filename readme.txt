@@ -1,6 +1,6 @@
 xsample - extended sample objects for Max and Pure data
 
-Copyright (c)2001-2020 Thomas Grill (gr@grrrr.org)
+Copyright (c)2001-2025 Thomas Grill (gr@grrrr.org)
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "license.txt," in this distribution.  
 
@@ -101,6 +101,10 @@ Goals/features of the package:
 ----------------------------------------------------------------------------
 
 Version history:
+
+0.3.3:
+- fixed warnings
+- fixed TCL attribute code (through flext version update)
 
 0.3.1:
 - added mixmode=2 to Max/MSP help files
