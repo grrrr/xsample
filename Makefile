@@ -1,7 +1,7 @@
 # Makefile for Pure data pd-lib-builder
 
 NAME=xsample
-cflags=-DFLEXT_INLINE -DFLEXT_ATTRIBUTES=1
+cflags=-DFLEXT_INLINE -DFLEXT_ATTRIBUTES=1 -Wunused-parameter
 
 # source files
 $(NAME).class.sources = $(wildcard source/*.cpp)

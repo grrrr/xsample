@@ -205,7 +205,7 @@ xgroove::xgroove(int argc,const t_atom *argv):
 	curpos(0),bidir(1),
 	_xzone(0),xzone(0),
 	xfade(xsf_keeplooppos),xshape(xss_lin),
-	znpos(NULL),znmul(NULL),znidx(NULL),
+	znpos(NULL),znidx(NULL),znmul(NULL),
 	pblksz(0)
 {
 	int argi = 0;
@@ -236,7 +236,7 @@ xgroove::xgroove(int argc,const t_atom *argv):
 	AddInFloat("Ending point"); // max play pos
 	for(int ci = 0; ci < outchns; ++ci) {
 		char tmp[32];
-		STD::sprintf(tmp,"Audio signal channel %i",ci+1); 
+		STD::snprintf(tmp, sizeof(tmp)-1, "Audio signal channel %i",ci+1); 
 		AddOutSignal(tmp); // output
 	}
 	AddOutSignal("Position currently played"); // position
@@ -296,7 +296,7 @@ void xgroove::ms_xshape(int sh)
 }
 
 
-void xgroove::s_pos_off(int n,t_sample *const *invecs,t_sample *const *outvecs)
+void xgroove::s_pos_off(int n,t_sample *const *,t_sample *const *outvecs)
 {
 	t_sample *pos = outvecs[outchns];
 
@@ -529,10 +529,10 @@ void xgroove::s_pos_loopzn(int n,t_sample *const *invecs,t_sample *const *outvec
 			zonefun(znmul,0,XZONE_TABLE+1,n,1,1,&znpos,&znpos,false);
 
 			// mix voices for all channels
-			for(int o = 0; o < outchns; ++o) {
-				MulSamples(outvecs[o],outvecs[o],znidx,n);
-				MulSamples(znbuf[o],znbuf[o],znpos,n);
-				AddSamples(outvecs[o],outvecs[o],znbuf[o],n);
+			for(int oi = 0; oi < outchns; ++oi) {
+				MulSamples(outvecs[oi],outvecs[oi],znidx,n);
+				MulSamples(znbuf[oi],znbuf[oi],znpos,n);
+				AddSamples(outvecs[oi],outvecs[oi],znbuf[oi],n);
 			}
 		}
 	} 

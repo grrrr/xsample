@@ -158,7 +158,7 @@ xrecord::xrecord(int argc,const t_atom *argv):
 
     for(int ci = 0; ci < inchns; ++ci) {
 		char tmp[40];
-		STD::sprintf(tmp,ci == 0?"Messages/audio channel %i":"Audio channel %i",ci+1);
+		STD::snprintf(tmp, sizeof(tmp)-1, ci == 0?"Messages/audio channel %i":"Audio channel %i",ci+1);
 		AddInSignal(tmp);  // audio signals
 	}
 	AddInSignal("On/Off/Fade/Mix signal (0..1)"); // on/off signal

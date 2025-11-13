@@ -97,7 +97,7 @@ xplay::xplay(int argc,const t_atom *argv)
     AddInSignal("Messages and Signal of playing position");  // pos signal
 	for(int ci = 0; ci < outchns; ++ci) {
 		char tmp[32];
-		STD::sprintf(tmp,"Audio signal channel %i",ci+1); 
+		STD::snprintf(tmp, sizeof(tmp)-1, "Audio signal channel %i",ci+1); 
 		AddOutSignal(tmp);
 	}
 }

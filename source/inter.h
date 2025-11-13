@@ -9,13 +9,13 @@ WARRANTIES, see the file, "license.txt," in this distribution.
 #ifndef __INTER_H
 #define __INTER_H
 
-TMPLDEF void xinter::st_play0(const Element *,const int ,const int ,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
+TMPLDEF void xinter::st_play0(const Element *,const int ,const int ,const int n,const int,const int outchns,t_sample *const *,t_sample *const *outvecs,bool)
 {
 	// stopped/invalid buffer -> output zero
 	for(int ci = 0; ci < outchns; ++ci) ZeroSamples(outvecs[ci],n);
 }
 
-TMPLDEF void xinter::st_play1(const Element *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool looped)
+TMPLDEF void xinter::st_play1(const Element *bdt,const int smin,const int smax,const int n,const int inchns,const int outchns,t_sample *const *invecs,t_sample *const *outvecs,bool)
 {
 	SIGCHNS(BCHNS,inchns,OCHNS,outchns);
 
