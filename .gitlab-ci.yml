@@ -241,6 +241,6 @@ upload_owncloud:
     - docker
     - default
   script:
-    - upload "$NC_FILES/$NC_USER/Documents/pdmax_packages/" "$NC_USER" "$NC_PW" "$CI_PROJECT_DIR"/*.zip "$CI_PROJECT_DIR"/*.dek
+    - upload "$NC_FILES/pdmax_packages/" "$NC_USER" "$NC_PW" "$CI_PROJECT_DIR"/*.zip "$CI_PROJECT_DIR"/*.dek
 
 
