@@ -13,7 +13,7 @@ variables:
     - default
   image: $CI_REGISTRY/docker/pd_max
   variables:
-    PDINCLUDEDIR: "/usr/include/pd"
+    PDINCLUDEDIR: "/usr/local/include/pd"
 
 .makewin:
   extends: .make
