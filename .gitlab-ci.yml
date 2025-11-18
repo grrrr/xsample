@@ -221,17 +221,21 @@ upload_deken:
   except:
     - branches
   dependencies:
-      - package_pd_f32_deken
-      - package_pd_f64_deken
+    - package_pd_f32_deken
+    - package_pd_f64_deken
+  image: $CI_REGISTRY/docker/pd_max
+  tags:
+    - docker
+    - default
   script:
-      - deken upload --no-source-error $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek
+    - deken upload --no-source-error $CI_PROJECT_DIR/$CI_PROJECT_NAME*.dek
 
 upload_owncloud:
   stage: deploy
   dependencies:
-      - package_pd_f32_deken
-      - package_pd_f64_deken
-      - package_max
+    - package_pd_f32_deken
+    - package_pd_f64_deken
+    - package_max
   image: $CI_REGISTRY/docker/nc_transfer
   tags:
     - docker
